@@ -44,6 +44,10 @@ void main(void) {
 }
 `;
 
+const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: number): number => {
+    return outMin + (outMax - outMin) * (x - inMin) / (inMax - inMin);
+}
+
 class Point {
     x: number;
     y: number;
@@ -67,8 +71,11 @@ class Vertex {
 
     static autoRect(position: Point): Vertex {
         return new Vertex(
-            position,
-            [position.x, position.y, 1, 1],
+            new Point(
+                map(position.x, 0, 1, -1, 1),
+                map(position.y, 0, 1, -1, 1)
+            ),
+            [map(position.x, 0, 1, -1, 1), map(position.y, 0, 1, -1, 1), 1, 1],
             position
         );
     }
@@ -77,7 +84,10 @@ class Vertex {
         return new Vertex(
             position,
             [position.x, position.y, 1, 1],
-            new Point(position.x * 0.5 + 1.0, position.y * 0.5 + 1.0)
+            new Point(
+                map(position.x, -1, 1, 0, 1),
+                map(position.y, -1, 1, 0, 1)
+            )
         );
     }
 }
