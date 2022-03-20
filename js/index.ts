@@ -1,5 +1,4 @@
 // TODO
-// generate a plane mesh manually
 // supply vertex indices and weights
 // draw handles
 // select handles
@@ -9,11 +8,11 @@ const vertexShaderSource = `#version 300 es
 
 precision mediump float;
 
-// layout (std140) uniform Matrices {
-//     mat4 projection;
-//     mat4 view;
-//     mat4 model;
-// };
+layout (std140) uniform Matrices {
+    mat4 projection;
+    mat4 view;
+    mat4 model;
+};
 
 layout (location=0) in vec2 in_position;
 layout (location=1) in vec4 in_color;
@@ -23,7 +22,8 @@ out vec4 inout_color;
 out vec2 inout_uv;
 
 void main(void) {
-    vec4 position = vec4(in_position, 1.0, 1.0);
+    vec4 position = projection * view * model * vec4(in_position, 1.0, 1.0);
+    // vec4 position = vec4(in_position, 1.0, 1.0);
     gl_Position = position;
     inout_color = in_color;
     inout_uv = in_uv;
@@ -46,6 +46,44 @@ void main(void) {
 
 const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: number): number => {
     return outMin + (outMax - outMin) * (x - inMin) / (inMax - inMin);
+}
+
+class Matrix {
+    static Identity(): Float32Array {
+        return new Float32Array([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]);
+    }
+
+    static Orthographic(x: number, y: number): Float32Array {
+        const left = x / -2.0;
+        const right = x / 2.0;
+        const bottom = y / -2.0;
+        const top = y / 2.0;
+        const far = -1;
+        const near = 1;
+        return new Float32Array([
+            2.0 / (right - left), 0, 0, 0,
+            0, 2.0 / (top - bottom), 0, 0,
+            0, 0, -2.0 / (far - near), 0,
+            -(right + left) / (right - left),
+            -(top + bottom) / (top - bottom),
+            -(far + near) / (far - near),
+            1.0
+        ]);
+    }
+
+    static Model(x: number, y: number, scale: number): Float32Array {
+        return new Float32Array([
+            scale, 0, 0, 0,
+            0, scale, 0, 0,
+            0, 0, 1, 0,
+            x, y, 0, 1
+        ]);
+    }
 }
 
 class Point {
@@ -104,14 +142,29 @@ const VERTEX_SIZE = 8;
 const MAX_VERTEX_COUNT = 2048;
 
 class Renderer {
-    private gl: WebGLRenderingContext;
+    private gl: WebGL2RenderingContext;
     private vertexCount: number; 
     private bufferedVertices: Float32Array;
 
-    constructor(gl: WebGLRenderingContext) {
+    constructor(gl: WebGL2RenderingContext) {
         this.gl = gl;
         this.vertexCount = 0
         this.bufferedVertices = new Float32Array(VERTEX_SIZE * MAX_VERTEX_COUNT);
+    }
+
+    createMatrixUniformBuffer(width: number, height: number) {
+        const gl = this.gl;
+        const buffer = gl.createBuffer()!;
+        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+        gl.bufferData(gl.UNIFORM_BUFFER, 192, gl.STATIC_DRAW);
+        gl.bufferSubData(gl.UNIFORM_BUFFER, 0, Matrix.Orthographic(width, height), 0);
+        gl.bufferSubData(gl.UNIFORM_BUFFER, 64, Matrix.Identity(), 0);
+        gl.bufferSubData(gl.UNIFORM_BUFFER, 128, Matrix.Model(0, 0, 100), 0);
+        gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
+    }
+
+    setModelMatrix(matrix: Float32Array) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 128, matrix);
     }
 
     createProgram(vert: string, frag: string): WebGLProgram {
@@ -129,6 +182,10 @@ class Renderer {
         gl.attachShader(program, vertShader);
         gl.attachShader(program, fragShader);
         gl.linkProgram(program);
+
+        const index = gl.getUniformBlockIndex(program, "Matrices");
+        gl.uniformBlockBinding(program, index, 0);
+        console.log(gl.UNIFORM_BLOCK_DATA_SIZE);
 
         return program;
     }
@@ -237,6 +294,7 @@ class Renderer {
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
     const renderer = new Renderer(gl);
+    renderer.createMatrixUniformBuffer(window.innerWidth, window.innerHeight);
     
     const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
     gl.useProgram(program);
@@ -246,6 +304,7 @@ class Renderer {
     renderer.uploadVertices()
 
     renderer.drawPrimitive(plane);
+    renderer.setModelMatrix(Matrix.Model(-200, 200, 150));
     renderer.drawPrimitive(circle);
 })()
 
