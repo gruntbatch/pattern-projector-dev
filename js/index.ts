@@ -64,6 +64,22 @@ class Vertex {
         this.weight = weight;
         this.uv = uv;
     }
+
+    static autoRect(position: Point): Vertex {
+        return new Vertex(
+            position,
+            [position.x, position.y, 1, 1],
+            position
+        );
+    }
+
+    static autoCircle(position: Point): Vertex {
+        return new Vertex(
+            position,
+            [position.x, position.y, 1, 1],
+            new Point(position.x * 0.5 + 1.0, position.y * 0.5 + 1.0)
+        );
+    }
 }
 
 class Primitive {
@@ -150,89 +166,44 @@ class Renderer {
     }
 
     createPlane(resolution: number): Primitive {
-        // const edgeVertexCount = resolution + 1;
-        // const totalVertexCount = edgeVertexCount * edgeVertexCount;
-        // const arrayBufferData = new Float32Array(8 * totalVertexCount);
-        // for (let x=0; x<resolution; x++) {
-        //     for (let y=0; y<resolution; y++) {
-        //         const nw = this.createVertex(x / resolution, y / resolution);
-        //         const ne = this.createVertex((x + 1) / resolution, y / resolution);
-        //         const se = this.createVertex((x + 1) / resolution, (y + 1) / resolution);
-        //         const sw = this.createVertex(x / resolution, (y + 1) / resolution);
+        const edgeVertexCount = resolution + 1;
+        const totalVertexCount = (6 * resolution * resolution)
+        const vertices = new Array<Vertex>(totalVertexCount);
 
-        //         this.copyVertexToData(nw, arrayBufferData, 8 * (x + y * edgeVertexCount));
-        //         this.copyVertexToData(sw, arrayBufferData, 8 * (x + (y + 1) * edgeVertexCount));
-        //         this.copyVertexToData(se, arrayBufferData, 8 * ((x + 1) + (y + 1) * edgeVertexCount));
+        for (let x=0; x<resolution; x++) {
+            for (let y=0; y<resolution; y++) {
+                const nw = Vertex.autoRect(new Point(x / resolution, y / resolution));
+                const ne = Vertex.autoRect(new Point((x + 1) / resolution, y / resolution));
+                const se = Vertex.autoRect(new Point((x + 1) / resolution, (y + 1) / resolution));
+                const sw = Vertex.autoRect(new Point(x / resolution, (y + 1) / resolution));
 
-        //         this.copyVertexToData(nw, arrayBufferData, 8 * (x + y * edgeVertexCount));
-        //         this.copyVertexToData(se, arrayBufferData, 8 * ((x + 1) + (y + 1) * edgeVertexCount));
-        //         this.copyVertexToData(ne, arrayBufferData, 8 * ((x + 1) + y * edgeVertexCount));
-        //     }
-        // }
+                const index = 6 * (x + y * resolution);
+                vertices[index] = nw;
+                vertices[index + 1] = sw;
+                vertices[index + 2] = se;
 
-        // const gl = this.gl;
-        // const buffer = this.createAndFillBuffer(gl.ARRAY_BUFFER, arrayBufferData, gl.STATIC_DRAW);
-        // return new Primitive(buffer, gl.TRIANGLES, 0, totalVertexCount);
-        const vertices = new Array<Vertex>(
-            new Vertex(new Point(-1, 1), [1, 0, 0, 1], new Point(0, 1)),
-            new Vertex(new Point(-1, -1), [0, 1, 0, 1], new Point(0, 0)),
-            new Vertex(new Point(1, -1), [0, 0, 1, 1], new Point(1, 0)),
-
-            new Vertex(new Point(-1, 1), [1, 0, 0, 1], new Point(0, 1)),
-            new Vertex(new Point(1, -1), [0, 0, 1, 1], new Point(1, 0)),
-            new Vertex(new Point(1, 1), [0, 1, 0, 1], new Point(1, 1)),
-        );
+                vertices[index + 3] = nw;
+                vertices[index + 4] = se;
+                vertices[index + 5] = ne;
+            }
+        }
         const first = this.vertexCount;
-        const count = 6;
+        const count = totalVertexCount;
         this.copyVerticesToBuffer(vertices);
         return new Primitive(this.gl.TRIANGLES, first, count);
-
-        // const gl = this.gl;
-        // const buffer = this.createAndFillBuffer(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
-        // return new Primitive(buffer, gl.TRIANGLES, 0, 6);
     }
 
     createCircle(resolution: number): Primitive {
-        // const edgeVertexCount = resolution + 1;
-        // const totalVertexCount = resolution + 2;
-        // const bufferData = new Float32Array(8 * totalVertexCount);
-        // for (let i=0; i<edgeVertexCount; i++) {
-        //     const index = 8 * (i + 1);
-
-        //     const x = Math.sin(i / resolution * 2 * Math.PI);
-        //     const y = Math.cos(i / resolution * 2 * Math.PI);
-
-        //     bufferData[index] = x;
-        //     bufferData[index + 1] = y;
-
-        //     bufferData[index + 2] = x;
-        //     bufferData[index + 3] = y;
-        //     bufferData[index + 4] = 1;
-        //     bufferData[index + 5] = 1;
-
-        //     bufferData[index + 6] = x * 0.5 + 1.0;
-        //     bufferData[index + 7] = y * 0.5 + 1.0;
-        // }
-
-        // const gl = this.gl;
-        // const buffer = this.createAndFillBuffer(gl.ARRAY_BUFFER, bufferData, gl.STATIC_DRAW);
-        // return new Primitive(buffer, gl.TRIANGLE_FAN, 0, totalVertexCount);
         const edgeVertexCount = resolution + 1;
         const totalVertexCount = resolution + 2;
         const vertices = new Array<Vertex>(totalVertexCount);
-        vertices[0] = new Vertex(new Point(0, 0), [0, 0, 0, 0], new Point(0.5, 0.5));
+        vertices[0] = Vertex.autoCircle(new Point(0, 0));
         for (let i=0; i<edgeVertexCount; i++) {
             const theta = i / resolution * 2 * Math.PI;
             const x = Math.sin(theta);
             const y = Math.cos(theta);
-            vertices[i + 1] = new Vertex(
-                new Point(x, y),
-                [x, y, 1, 1],
-                new Point(x * 0.5 + 1.0, y * 0.5 + 1.0)
-            );
+            vertices[i + 1] = Vertex.autoCircle(new Point(x, y));
         }
-
-        console.log(vertices);
 
         const first = this.vertexCount;
         const count = totalVertexCount;
@@ -242,8 +213,6 @@ class Renderer {
 
     drawPrimitive(primitive: Primitive) {
         const gl = this.gl;
-        // gl.bindBuffer(gl.ARRAY_BUFFER, primitive.buffer);
-        console.log("drawArrays", primitive.mode, primitive.first, primitive.count);
         gl.drawArrays(primitive.mode, primitive.first, primitive.count);
     }
 }
@@ -254,6 +223,7 @@ class Renderer {
     canvas.height = window.innerHeight;
 
     const gl = canvas.getContext("webgl2")!;
+    gl.disable(gl.DEPTH_TEST);
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
     const renderer = new Renderer(gl);
@@ -261,23 +231,8 @@ class Renderer {
     const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
     gl.useProgram(program);
     
-    const plane = renderer.createPlane(2);
+    const plane = renderer.createPlane(16);
     const circle = renderer.createCircle(32);
-    
-    // const coord = gl.getAttribLocation(program, "c");
-    // gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(coord);
-    // gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
-    // gl.enableVertexAttribArray(0);
-
-    // gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 32, 8);
-    // gl.enableVertexAttribArray(1);
-
-    // gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 32, 24);
-    // gl.enableVertexAttribArray(2);
-
-    gl.disable(gl.DEPTH_TEST);
-    
     renderer.uploadVertices()
 
     renderer.drawPrimitive(plane);
