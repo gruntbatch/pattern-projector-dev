@@ -98,6 +98,10 @@ class Point {
         this.x = x;
         this.y = y;    
     }
+
+    static lerp(a: Point, b: Point, f: number) {
+        return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
+    }
 }
 
 class Vertex {
@@ -351,7 +355,7 @@ class Renderer {
     }
 }
 
-const HANDLE_BIG = 24;
+const HANDLE_BIG = 20;
 const HANDLE_SMALL = 16;
 
 (() => {
@@ -374,20 +378,23 @@ const HANDLE_SMALL = 16;
     renderer.uploadVertices();
 
     let pulsingScale = HANDLE_BIG;
+    let pulsingPosition = new Point(150, 250);
 
     const update = () => {
         requestAnimationFrame(update);
 
         // Determine our pulse and update pulsing variables
         const t = performance.now();
-        const pulse = (((t / 1000) % 1) > 0.5) ? true : false;
+        const pulse = (((t / 1600) % 1) > 0.5) ? true : false;
         const pulsingScaleTarget = (pulse) ? HANDLE_BIG : HANDLE_SMALL;
-        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, 0.1);
+        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, 0.2);
+        const pulsingPositionTarget = (pulse) ? new Point(150, 250) : new Point(250, 150);
+        pulsingPosition = Point.lerp(pulsingPosition, pulsingPositionTarget, 0.2);
 
         renderer.setModelMatrix(Matrix.Model(0, 0, 200));
         renderer.drawPrimitive(plane);
 
-        renderer.setModelMatrix(Matrix.Model(100, 100, pulsingScale));
+        renderer.setModelMatrix(Matrix.Model(pulsingPosition.x, pulsingPosition.y, pulsingScale));
         renderer.drawPrimitive(circle);
     }
 
