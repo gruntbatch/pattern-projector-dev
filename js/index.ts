@@ -152,6 +152,13 @@ class Renderer {
         gl.disable(gl.DEPTH_TEST);
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
+        // Create the matrix uniform buffer
+        // {
+        //     const buffer = gl.createBuffer();
+        //     gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+
+        // }
+
         this.vertexCount = 0
         this.bufferedVertices = new Float32Array(VERTEX_SIZE * MAX_VERTEX_COUNT);
     }
@@ -160,10 +167,15 @@ class Renderer {
         const gl = this.gl;
         const buffer = gl.createBuffer()!;
         gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-        gl.bufferData(gl.UNIFORM_BUFFER, 192, gl.STATIC_DRAW);
-        gl.bufferSubData(gl.UNIFORM_BUFFER, 0, Matrix.Orthographic(width, height), 0);
-        gl.bufferSubData(gl.UNIFORM_BUFFER, 64, Matrix.Identity(), 0);
-        gl.bufferSubData(gl.UNIFORM_BUFFER, 128, Matrix.Model(0, 0, 100), 0);
+        const bufferData = new Float32Array(48);
+        bufferData.set(Matrix.Orthographic(width, height), 0);
+        bufferData.set(Matrix.Identity(), 16);
+        bufferData.set(Matrix.Model(0, 0, 100), 32);
+        gl.bufferData(gl.UNIFORM_BUFFER, bufferData, gl.STATIC_DRAW);
+        // gl.bufferData(gl.UNIFORM_BUFFER, 192, gl.STATIC_DRAW);
+        // gl.bufferSubData(gl.UNIFORM_BUFFER, 0, Matrix.Orthographic(width, height), 0);
+        // gl.bufferSubData(gl.UNIFORM_BUFFER, 64, Matrix.Identity(), 0);
+        // gl.bufferSubData(gl.UNIFORM_BUFFER, 128, Matrix.Model(0, 0, 100), 0);
         gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
     }
 
