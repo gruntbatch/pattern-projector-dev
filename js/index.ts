@@ -39,7 +39,8 @@ in vec2 inout_uv;
 out vec4 out_color;
 
 void main(void) {
-    out_color = vec4(inout_uv, 0, 1);
+    out_color = vec4(inout_color.b, 0, 0, 1);
+    // out_color = vec4(inout_uv, 0, 1);
 }
 `;
 
@@ -117,6 +118,25 @@ class Vertex {
         );
     }
 
+    static autoWeightedRect(position: Point): Vertex {
+        // We're currently normalizing vertex weights here, but I'm not 100% sure that's the correct thing to do.
+        const weights = new Array<number>(
+            Math.min(-position.x + 1, -position.y + 1),
+            Math.min(position.x, -position.y + 1),
+            Math.min(position.x, position.y),
+            Math.min(-position.x + 1, position.y)
+        );
+        const scalar = 1.0 / weights.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+        return new Vertex(
+            new Point(
+                map(position.x, 0, 1, -1, 1),
+                map(position.y, 0, 1, -1, 1)
+            ),
+            weights.map((x) => x * scalar),
+            position
+        );
+    }
+
     static autoCircle(position: Point): Vertex {
         return new Vertex(
             position,
@@ -139,12 +159,12 @@ class Primitive {
 
 const BYTES_PER_FLOAT = 4;
 const FLOATS_PER_VERTEX = 8;
-const MAX_VERTEX_COUNT = 2048;
+const MAX_VERTEX_COUNT = 8192;
 
 class Renderer {
     private gl: WebGL2RenderingContext;
-    private vertexCount: number; 
-    private vertices: Float32Array;
+    vertexCount: number; 
+    vertices: Float32Array;
 
     constructor(gl: WebGL2RenderingContext, width: number, height: number) {
         this.gl = gl;
@@ -248,9 +268,8 @@ class Renderer {
     }
 
     createPlane(resolution: number): Primitive {
-        const edgeVertexCount = resolution + 1;
-        const totalVertexCount = (6 * resolution * resolution)
-        const vertices = new Array<Vertex>(totalVertexCount);
+        const vertexCount = 6 * resolution * resolution;
+        const vertices = new Array<Vertex>(vertexCount);
 
         for (let x=0; x<resolution; x++) {
             for (let y=0; y<resolution; y++) {
@@ -269,8 +288,37 @@ class Renderer {
                 vertices[index + 5] = ne;
             }
         }
+
         const first = this.vertexCount;
-        const count = totalVertexCount;
+        const count = vertexCount;
+        this.copyVerticesToBuffer(vertices);
+        return new Primitive(this.gl.TRIANGLES, first, count);
+    }
+
+    createWeightedPlane(resolution: number): Primitive {
+        const vertexCount = 6 * resolution * resolution;
+        const vertices = new Array<Vertex>(vertexCount);
+
+        for (let x=0; x<resolution; x++) {
+            for (let y=0; y<resolution; y++) {
+                const nw = Vertex.autoWeightedRect(new Point(x / resolution, y / resolution));
+                const ne = Vertex.autoWeightedRect(new Point((x + 1) / resolution, y / resolution));
+                const se = Vertex.autoWeightedRect(new Point((x + 1) / resolution, (y + 1) / resolution));
+                const sw = Vertex.autoWeightedRect(new Point(x / resolution, (y + 1) / resolution));
+
+                const index = 6 * (x + y * resolution);
+                vertices[index] = nw;
+                vertices[index + 1] = sw;
+                vertices[index + 2] = se;
+
+                vertices[index + 3] = nw;
+                vertices[index + 4] = se;
+                vertices[index + 5] = ne;
+            }
+        }
+
+        const first = this.vertexCount;
+        const count = vertexCount;
         this.copyVerticesToBuffer(vertices);
         return new Primitive(this.gl.TRIANGLES, first, count);
     }
@@ -314,12 +362,19 @@ class Renderer {
     const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
     gl.useProgram(program);
     
-    const plane = renderer.createPlane(16);
     const circle = renderer.createCircle(32);
-    renderer.uploadVertices()
+    const plane = renderer.createWeightedPlane(4);
+    renderer.uploadVertices();
 
+    renderer.setModelMatrix(Matrix.Model(0, 0, 200));
     renderer.drawPrimitive(plane);
-    renderer.setModelMatrix(Matrix.Model(-200, 200, 150));
+    renderer.setModelMatrix(Matrix.Model(-200, 200, 16));
+    renderer.drawPrimitive(circle);
+    renderer.setModelMatrix(Matrix.Model(200, 200, 16));
+    renderer.drawPrimitive(circle);
+    renderer.setModelMatrix(Matrix.Model(200, -200, 16));
+    renderer.drawPrimitive(circle);
+    renderer.setModelMatrix(Matrix.Model(-200, -200, 16));
     renderer.drawPrimitive(circle);
 })()
 
