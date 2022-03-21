@@ -23,7 +23,6 @@ out vec2 inout_uv;
 
 void main(void) {
     vec4 position = projection * view * model * vec4(in_position, 1.0, 1.0);
-    // vec4 position = vec4(in_position, 1.0, 1.0);
     gl_Position = position;
     inout_color = in_color;
     inout_uv = in_uv;
@@ -35,12 +34,12 @@ const testFragmentShaderSource = `#version 300 es
 precision mediump float;
 
 in vec4 inout_color;
-in vec4 in_uv;
+in vec2 inout_uv;
 
 out vec4 out_color;
 
 void main(void) {
-    out_color = inout_color;
+    out_color = vec4(inout_uv, 0, 1);
 }
 `;
 
