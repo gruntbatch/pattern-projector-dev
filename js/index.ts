@@ -146,8 +146,12 @@ class Renderer {
     private vertexCount: number; 
     private bufferedVertices: Float32Array;
 
-    constructor(gl: WebGL2RenderingContext) {
+    constructor(gl: WebGL2RenderingContext, width: number, height: number) {
         this.gl = gl;
+        
+        gl.disable(gl.DEPTH_TEST);
+        gl.viewport(0, 0, window.innerWidth, window.innerHeight);
+
         this.vertexCount = 0
         this.bufferedVertices = new Float32Array(VERTEX_SIZE * MAX_VERTEX_COUNT);
     }
@@ -284,15 +288,16 @@ class Renderer {
 }
 
 (() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
     const gl = canvas.getContext("webgl2")!;
-    gl.disable(gl.DEPTH_TEST);
-    gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
-    const renderer = new Renderer(gl);
+    const renderer = new Renderer(gl, width, height);
     renderer.createMatrixUniformBuffer(window.innerWidth, window.innerHeight);
     
     const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
