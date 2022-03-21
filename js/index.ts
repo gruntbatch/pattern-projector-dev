@@ -166,12 +166,39 @@ class Renderer {
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
         }
 
+        // Create vertex buffer
+        {
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.bufferData(
+                gl.ARRAY_BUFFER,
+                BYTES_PER_FLOAT * FLOATS_PER_VERTEX * MAX_VERTEX_COUNT,
+                gl.STATIC_DRAW
+            );
+
+            // Position
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
+            gl.enableVertexAttribArray(0);
+
+            // Color/Weight
+            gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 32, 8);
+            gl.enableVertexAttribArray(1);
+
+            // UV
+            gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 32, 24);
+            gl.enableVertexAttribArray(2);   
+        }
+
         this.vertexCount = 0
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
     }
 
     setModelMatrix(matrix: Float32Array) {
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, BYTES_PER_FLOAT * 32, matrix);
+    }
+
+    uploadVertices() {
+        this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.vertices, 0, FLOATS_PER_VERTEX * this.vertexCount);
     }
 
     createProgram(vert: string, frag: string): WebGLProgram {
@@ -194,23 +221,6 @@ class Renderer {
         gl.uniformBlockBinding(program, index, 0);
 
         return program;
-    }
-
-    uploadVertices(): WebGLBuffer {
-        const gl = this.gl;
-        const buffer = gl.createBuffer()!;
-        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
-
-        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
-        gl.enableVertexAttribArray(0);
-
-        gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 32, 8);
-        gl.enableVertexAttribArray(1);
-
-        gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 32, 24);
-        gl.enableVertexAttribArray(2);        
-        return buffer;
     }
 
     private createVertex(x: number, y: number): Float32Array {
