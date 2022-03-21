@@ -153,30 +153,20 @@ class Renderer {
         gl.viewport(0, 0, window.innerWidth, window.innerHeight);
 
         // Create the matrix uniform buffer
-        // {
-        //     const buffer = gl.createBuffer();
-        //     gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+        {
+            const buffer = gl.createBuffer();
+            gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
+            gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
 
-        // }
+            const data = new Float32Array(48);
+            data.set(Matrix.Orthographic(width, height), 0);
+            data.set(Matrix.Identity(), 16);
+            data.set(Matrix.Model(0, 0, 1), 32);
+            gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
+        }
 
         this.vertexCount = 0
         this.bufferedVertices = new Float32Array(VERTEX_SIZE * MAX_VERTEX_COUNT);
-    }
-
-    createMatrixUniformBuffer(width: number, height: number) {
-        const gl = this.gl;
-        const buffer = gl.createBuffer()!;
-        gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-        const bufferData = new Float32Array(48);
-        bufferData.set(Matrix.Orthographic(width, height), 0);
-        bufferData.set(Matrix.Identity(), 16);
-        bufferData.set(Matrix.Model(0, 0, 100), 32);
-        gl.bufferData(gl.UNIFORM_BUFFER, bufferData, gl.STATIC_DRAW);
-        // gl.bufferData(gl.UNIFORM_BUFFER, 192, gl.STATIC_DRAW);
-        // gl.bufferSubData(gl.UNIFORM_BUFFER, 0, Matrix.Orthographic(width, height), 0);
-        // gl.bufferSubData(gl.UNIFORM_BUFFER, 64, Matrix.Identity(), 0);
-        // gl.bufferSubData(gl.UNIFORM_BUFFER, 128, Matrix.Model(0, 0, 100), 0);
-        gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
     }
 
     setModelMatrix(matrix: Float32Array) {
@@ -310,7 +300,6 @@ class Renderer {
     const gl = canvas.getContext("webgl2")!;
 
     const renderer = new Renderer(gl, width, height);
-    renderer.createMatrixUniformBuffer(window.innerWidth, window.innerHeight);
     
     const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
     gl.useProgram(program);
