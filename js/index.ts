@@ -138,13 +138,14 @@ class Primitive {
     }
 }
 
-const VERTEX_SIZE = 8;
+const BYTES_PER_FLOAT = 4;
+const FLOATS_PER_VERTEX = 8;
 const MAX_VERTEX_COUNT = 2048;
 
 class Renderer {
     private gl: WebGL2RenderingContext;
     private vertexCount: number; 
-    private bufferedVertices: Float32Array;
+    private vertices: Float32Array;
 
     constructor(gl: WebGL2RenderingContext, width: number, height: number) {
         this.gl = gl;
@@ -166,11 +167,11 @@ class Renderer {
         }
 
         this.vertexCount = 0
-        this.bufferedVertices = new Float32Array(VERTEX_SIZE * MAX_VERTEX_COUNT);
+        this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
     }
 
     setModelMatrix(matrix: Float32Array) {
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 128, matrix);
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, BYTES_PER_FLOAT * 32, matrix);
     }
 
     createProgram(vert: string, frag: string): WebGLProgram {
@@ -199,7 +200,7 @@ class Renderer {
         const gl = this.gl;
         const buffer = gl.createBuffer()!;
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.bufferedVertices, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
 
         gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
         gl.enableVertexAttribArray(0);
@@ -223,17 +224,17 @@ class Renderer {
     private copyVerticesToBuffer(vertices: Array<Vertex>) {
         for (let i=0; i<vertices.length; i++, this.vertexCount++) {
             const vertex = vertices[i];
-            const index = this.vertexCount * VERTEX_SIZE;
-            this.bufferedVertices[index] = vertex.position.x;
-            this.bufferedVertices[index + 1] = vertex.position.y;
+            const index = this.vertexCount * FLOATS_PER_VERTEX;
+            this.vertices[index] = vertex.position.x;
+            this.vertices[index + 1] = vertex.position.y;
 
-            this.bufferedVertices[index + 2] = vertex.weight[0];
-            this.bufferedVertices[index + 3] = vertex.weight[1];
-            this.bufferedVertices[index + 4] = vertex.weight[2];
-            this.bufferedVertices[index + 5] = vertex.weight[3];
+            this.vertices[index + 2] = vertex.weight[0];
+            this.vertices[index + 3] = vertex.weight[1];
+            this.vertices[index + 4] = vertex.weight[2];
+            this.vertices[index + 5] = vertex.weight[3];
             
-            this.bufferedVertices[index + 6] = vertex.uv.x;
-            this.bufferedVertices[index + 7] = vertex.uv.y;
+            this.vertices[index + 6] = vertex.uv.x;
+            this.vertices[index + 7] = vertex.uv.y;
         }
     }
 
