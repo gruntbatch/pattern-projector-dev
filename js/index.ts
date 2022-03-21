@@ -185,7 +185,6 @@ class Renderer {
 
         const index = gl.getUniformBlockIndex(program, "Matrices");
         gl.uniformBlockBinding(program, index, 0);
-        console.log(gl.UNIFORM_BLOCK_DATA_SIZE);
 
         return program;
     }
