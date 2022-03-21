@@ -1,5 +1,5 @@
 // TODO
-// supply vertex indices and weights
+// wiggle a handle over time
 // draw handles
 // select handles
 // move handles
@@ -43,6 +43,10 @@ void main(void) {
     // out_color = vec4(inout_uv, 0, 1);
 }
 `;
+
+const lerp = (a: number, b: number, f: number): number => {
+    return a + f * (b - a);
+}
 
 const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: number): number => {
     return outMin + (outMax - outMin) * (x - inMin) / (inMax - inMin);
@@ -347,6 +351,9 @@ class Renderer {
     }
 }
 
+const HANDLE_BIG = 24;
+const HANDLE_SMALL = 16;
+
 (() => {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -366,15 +373,24 @@ class Renderer {
     const plane = renderer.createWeightedPlane(4);
     renderer.uploadVertices();
 
-    renderer.setModelMatrix(Matrix.Model(0, 0, 200));
-    renderer.drawPrimitive(plane);
-    renderer.setModelMatrix(Matrix.Model(-200, 200, 16));
-    renderer.drawPrimitive(circle);
-    renderer.setModelMatrix(Matrix.Model(200, 200, 16));
-    renderer.drawPrimitive(circle);
-    renderer.setModelMatrix(Matrix.Model(200, -200, 16));
-    renderer.drawPrimitive(circle);
-    renderer.setModelMatrix(Matrix.Model(-200, -200, 16));
-    renderer.drawPrimitive(circle);
-})()
+    let pulsingScale = HANDLE_BIG;
+
+    const update = () => {
+        requestAnimationFrame(update);
+
+        // Determine our pulse and update pulsing variables
+        const t = performance.now();
+        const pulse = (((t / 1000) % 1) > 0.5) ? true : false;
+        const pulsingScaleTarget = (pulse) ? HANDLE_BIG : HANDLE_SMALL;
+        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, 0.1);
+
+        renderer.setModelMatrix(Matrix.Model(0, 0, 200));
+        renderer.drawPrimitive(plane);
+
+        renderer.setModelMatrix(Matrix.Model(100, 100, pulsingScale));
+        renderer.drawPrimitive(circle);
+    }
+
+    update();
+})();
 
