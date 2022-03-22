@@ -1,6 +1,4 @@
 // TODO
-// draw handles
-// select handles
 // move handles
 // scale controls
 // position controls
@@ -482,12 +480,24 @@ const LERP_FACTOR = 0.2;
         new Point(-DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION)
     );
 
-    let mousePosition = new Point(0, 0);
-    document.onmousemove = (event) => {
-        mousePosition = new Point(
+    // let mousePosition = new Point(0, 0);
+    // document.onmousemove = (event) => {
+    //     mousePosition = new Point(
+    //         event.pageX - (width / 2),
+    //         (height - event.pageY) - (height / 2)
+    //     );
+    // }
+
+    let currentHandle = 0;
+    canvas.onmousedown = (event) => {
+        const mousePosition = new Point(
             event.pageX - (width / 2),
-            (height - event.pageY) - (height / 2)
+            (height / 2) - event.pageY
         );
+        const nearestHandle = findNearestPoint(mousePosition, handlePositions);
+        if (Point.distanceSquared(mousePosition, handlePositions[nearestHandle]) < (HANDLE_BIG * HANDLE_BIG)) {
+            currentHandle = nearestHandle;
+        }
     }
 
     const update = () => {
@@ -509,10 +519,12 @@ const LERP_FACTOR = 0.2;
         renderer.setModelMatrix(Matrix.model(Point.zero(), 1));
         renderer.drawPrimitive(weightedPlane);
 
-        const nearestHandle = findNearestPoint(mousePosition, handlePositions);
+        // const nearestHandle = findNearestPoint(mousePosition, handlePositions);
+
+
         gl.useProgram(handleProgram);
         for (let i=0; i<4; i++) {
-            if (i == nearestHandle) {
+            if (i == currentHandle) {
                 renderer.setModelMatrix(Matrix.model(handlePositions[i], pulsingScale));
                 gl.uniform4fv(handleColorUniformIndex, [1, 1, 0, 1]);
             } else {
