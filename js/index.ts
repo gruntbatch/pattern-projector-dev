@@ -51,14 +51,6 @@ out vec4 inout_color;
 out vec2 inout_uv;
 
 void main(void) {
-    // vec4 position = projection * view * model * vec4(in_position, 1.0, 1.0);
-    // for (int i=0; i<4; i++) {
-        // position = position * (in_bones[i] * in_weights[i]);
-    // }
-    // position *= in_bones[0] * in_weights.x;
-    // position *= in_bones[1] * in_weights.y;
-    // position *= in_bones[2] * in_weights.z;
-    // position *= in_bones[3] * in_weights.w;
     vec4 position = vec4(0.0);
     for (int i=0; i<4; i++) {
         vec4 vertex_position = vec4(in_position, 1.0, 1.0);
@@ -71,7 +63,6 @@ void main(void) {
 `;
 
 const vertexShaderSource = `#version 300 es
-
 precision mediump float;
 
 layout (std140) uniform Matrices {
@@ -96,7 +87,6 @@ void main(void) {
 `;
 
 const testFragmentShaderSource = `#version 300 es
-
 precision mediump float;
 
 in vec4 inout_color;
@@ -119,7 +109,7 @@ const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: nu
 }
 
 class Matrix {
-    static Identity(): Float32Array {
+    static identity(): Float32Array {
         return new Float32Array([
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -128,16 +118,16 @@ class Matrix {
         ]);
     }
 
-    static Model(x: number, y: number, scale: number): Float32Array {
+    static model(position: Point, scale: number): Float32Array {
         return new Float32Array([
             scale, 0, 0, 0,
             0, scale, 0, 0,
             0, 0, 1, 0,
-            x, y, 0, 1
+            position.x, position.y, 0, 1
         ]);
     }
 
-    static Orthographic(x: number, y: number): Float32Array {
+    static orthographic(x: number, y: number): Float32Array {
         const left = x / -2.0;
         const right = x / 2.0;
         const bottom = y / -2.0;
@@ -155,8 +145,8 @@ class Matrix {
         ]);
     }
 
-    static Translation(x: number, y: number): Float32Array {
-        return Matrix.Model(x, y, 1);
+    static translation(position: Point): Float32Array {
+        return Matrix.model(position, 1);
     }
 }
 
@@ -172,6 +162,10 @@ class Point {
     static lerp(a: Point, b: Point, f: number) {
         return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
     }
+
+    static zero() {
+        return new Point(0, 0);
+    }
 }
 
 class Vertex {
@@ -183,6 +177,17 @@ class Vertex {
         this.position = position;
         this.weight = weight;
         this.uv = uv;
+    }
+
+    static autoCircle(position: Point): Vertex {
+        return new Vertex(
+            position,
+            [position.x, position.y, 1, 1],
+            new Point(
+                map(position.x, -1, 1, 0, 1),
+                map(position.y, -1, 1, 0, 1)
+            )
+        );
     }
 
     static autoRect(position: Point): Vertex {
@@ -212,17 +217,6 @@ class Vertex {
             ),
             weights.map((x) => x * scalar),
             position
-        );
-    }
-
-    static autoCircle(position: Point): Vertex {
-        return new Vertex(
-            position,
-            [position.x, position.y, 1, 1],
-            new Point(
-                map(position.x, -1, 1, 0, 1),
-                map(position.y, -1, 1, 0, 1)
-            )
         );
     }
 }
@@ -257,9 +251,9 @@ class Renderer {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
 
             const data = new Float32Array(48);
-            data.set(Matrix.Orthographic(width, height), 0);
-            data.set(Matrix.Identity(), 16);
-            data.set(Matrix.Model(0, 0, 1), 32);
+            data.set(Matrix.orthographic(width, height), 0);
+            data.set(Matrix.identity(), 16);
+            data.set(Matrix.model(Point.zero(), 1), 32);
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
         }
 
@@ -439,32 +433,26 @@ const HANDLE_SMALL = 16;
     const gl = canvas.getContext("webgl2")!;
 
     const renderer = new Renderer(gl, width, height);
-    
-    // const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
-    // gl.useProgram(program);
+
     const patternProgram = renderer.createProgram(patternVertexShaderSource, testFragmentShaderSource);
     const patternBonesUniformIndex = gl.getUniformLocation(patternProgram, "in_bones");
     gl.useProgram(patternProgram);
-    gl.uniformMatrix4fv(
-        patternBonesUniformIndex,
-        false,
-        new Float32Array(64),
-        0, 64
-    );
+    gl.uniformMatrix4fv(patternBonesUniformIndex, false, new Float32Array(64), 0, 64);
 
-    // const patternProgram = renderer.createProgram(patternVertexShaderSource, testFragmentShaderSource);
     const handleProgram = renderer.createProgram(handleVertexShaderSource, handleFragmentShaderSource);
     const handleColorUniformIndex = gl.getUniformLocation(handleProgram, "in_color");
     gl.useProgram(handleProgram);
     gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
     
     const circle = renderer.createCircle(32);
-    const plane = renderer.createPlane(4);
     const weightedPlane = renderer.createWeightedPlane(4);
     renderer.uploadVertices();
 
     let pulsingScale = HANDLE_BIG;
-    let pulsingPosition = new Point(150, 250);
+    let pulsingPosition0 = new Point(200, 200);
+    let pulsingPosition1 = new Point(200, 200);
+    let pulsingPosition2 = new Point(200, 200);
+    let pulsingPosition3 = new Point(200, 200);
 
     const update = () => {
         requestAnimationFrame(update);
@@ -474,26 +462,27 @@ const HANDLE_SMALL = 16;
         const pulse = (((t / 1600) % 1) > 0.5) ? true : false;
         const pulsingScaleTarget = (pulse) ? HANDLE_BIG : HANDLE_SMALL;
         pulsingScale = lerp(pulsingScale, pulsingScaleTarget, 0.2);
-        const pulsingPositionTarget = (pulse) ? new Point(150, 250) : new Point(250, 150);
-        pulsingPosition = Point.lerp(pulsingPosition, pulsingPositionTarget, 0.2);
+        const pulsingPositionTarget0 = (pulse) ? new Point(-150, -250) : new Point(-250, -150);
+        const pulsingPositionTarget1 = (pulse) ? new Point(200, -250) : new Point(200, -150);
+        const pulsingPositionTarget2 = (pulse) ? new Point(200, 200) : new Point(250, 250);
+        const pulsingPositionTarget3 = (pulse) ? new Point(-150, 200) : new Point(-250, 200);
+        pulsingPosition0 = Point.lerp(pulsingPosition0, pulsingPositionTarget0, 0.2);
+        pulsingPosition1 = Point.lerp(pulsingPosition1, pulsingPositionTarget1, 0.2);
+        pulsingPosition2 = Point.lerp(pulsingPosition2, pulsingPositionTarget2, 0.2);
+        pulsingPosition3 = Point.lerp(pulsingPosition3, pulsingPositionTarget3, 0.2);
 
         gl.useProgram(patternProgram);
         const bones = new Float32Array(64);
-        bones.set(Matrix.Translation(-200, -200), 0);
-        bones.set(Matrix.Translation(200, -200), 16);
-        bones.set(Matrix.Translation(pulsingPosition.x, pulsingPosition.y), 32);
-        bones.set(Matrix.Translation(-200, 200), 48);
+        bones.set(Matrix.translation(pulsingPosition0), 0);
+        bones.set(Matrix.translation(pulsingPosition1), 16);
+        bones.set(Matrix.translation(pulsingPosition2), 32);
+        bones.set(Matrix.translation(pulsingPosition3), 48);
         gl.uniformMatrix4fv(patternBonesUniformIndex, false, bones, 0, 64);
-        renderer.setModelMatrix(Matrix.Model(0, 0, 1));
+        renderer.setModelMatrix(Matrix.model(Point.zero(), 1));
         renderer.drawPrimitive(weightedPlane);
 
-
-        // gl.useProgram(handleProgram);
-        // renderer.setModelMatrix(Matrix.Model(0, 0, 200));
-        // renderer.drawPrimitive(weightedPlane);
-
         gl.useProgram(handleProgram);
-        renderer.setModelMatrix(Matrix.Model(pulsingPosition.x, pulsingPosition.y, pulsingScale));
+        renderer.setModelMatrix(Matrix.model(pulsingPosition0, pulsingScale));
         renderer.drawPrimitive(circle);
     }
 
