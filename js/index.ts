@@ -1,8 +1,10 @@
 // TODO
-// wiggle a handle over time
 // draw handles
 // select handles
 // move handles
+// scale controls
+// position controls
+// handle controls
 
 const handleVertexShaderSource = `#version 300 es
 precision mediump float;
@@ -165,6 +167,12 @@ class Point {
 
     static zero() {
         return new Point(0, 0);
+    }
+
+    static distanceSquared(a: Point, b: Point) {
+        const x = a.x - b.x;
+        const y = a.y - b.y;
+        return x * x + y * y;
     }
 }
 
@@ -421,6 +429,23 @@ class Renderer {
 
 const HANDLE_BIG = 20;
 const HANDLE_SMALL = 16;
+const DEFAULT_HANDLE_POSITION = 200;
+
+const findNearestPoint = (position: Point, options: Array<Point>): number => {
+    let closestDistance: number = Infinity;
+    let closestIndex: number = 0;
+    for (let i=0; i<options.length; i++) {
+        const current = options[i];
+        const distance = Point.distanceSquared(current, position);
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = i;
+        }
+    }
+    return closestIndex;
+}
+
+const LERP_FACTOR = 0.2;
 
 (() => {
     const width = window.innerWidth;
@@ -449,10 +474,21 @@ const HANDLE_SMALL = 16;
     renderer.uploadVertices();
 
     let pulsingScale = HANDLE_BIG;
-    let pulsingPosition0 = new Point(200, 200);
-    let pulsingPosition1 = new Point(200, 200);
-    let pulsingPosition2 = new Point(200, 200);
-    let pulsingPosition3 = new Point(200, 200);
+
+    let handlePositions = new Array<Point>(
+        new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point(DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point(DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION),
+        new Point(-DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION)
+    );
+
+    let mousePosition = new Point(0, 0);
+    document.onmousemove = (event) => {
+        mousePosition = new Point(
+            event.pageX - (width / 2),
+            (height - event.pageY) - (height / 2)
+        );
+    }
 
     const update = () => {
         requestAnimationFrame(update);
@@ -461,31 +497,32 @@ const HANDLE_SMALL = 16;
         const t = performance.now();
         const pulse = (((t / 1600) % 1) > 0.5) ? true : false;
         const pulsingScaleTarget = (pulse) ? HANDLE_BIG : HANDLE_SMALL;
-        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, 0.2);
-        const pulsingPositionTarget0 = (pulse) ? new Point(-150, -250) : new Point(-250, -150);
-        const pulsingPositionTarget1 = (pulse) ? new Point(200, -250) : new Point(200, -150);
-        const pulsingPositionTarget2 = (pulse) ? new Point(200, 200) : new Point(250, 250);
-        const pulsingPositionTarget3 = (pulse) ? new Point(-150, 200) : new Point(-250, 200);
-        pulsingPosition0 = Point.lerp(pulsingPosition0, pulsingPositionTarget0, 0.2);
-        pulsingPosition1 = Point.lerp(pulsingPosition1, pulsingPositionTarget1, 0.2);
-        pulsingPosition2 = Point.lerp(pulsingPosition2, pulsingPositionTarget2, 0.2);
-        pulsingPosition3 = Point.lerp(pulsingPosition3, pulsingPositionTarget3, 0.2);
+        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, LERP_FACTOR);
 
         gl.useProgram(patternProgram);
         const bones = new Float32Array(64);
-        bones.set(Matrix.translation(pulsingPosition0), 0);
-        bones.set(Matrix.translation(pulsingPosition1), 16);
-        bones.set(Matrix.translation(pulsingPosition2), 32);
-        bones.set(Matrix.translation(pulsingPosition3), 48);
+        bones.set(Matrix.translation(handlePositions[0]), 0);
+        bones.set(Matrix.translation(handlePositions[1]), 16);
+        bones.set(Matrix.translation(handlePositions[2]), 32);
+        bones.set(Matrix.translation(handlePositions[3]), 48);
         gl.uniformMatrix4fv(patternBonesUniformIndex, false, bones, 0, 64);
         renderer.setModelMatrix(Matrix.model(Point.zero(), 1));
         renderer.drawPrimitive(weightedPlane);
 
+        const nearestHandle = findNearestPoint(mousePosition, handlePositions);
         gl.useProgram(handleProgram);
-        renderer.setModelMatrix(Matrix.model(pulsingPosition0, pulsingScale));
-        renderer.drawPrimitive(circle);
+        for (let i=0; i<4; i++) {
+            if (i == nearestHandle) {
+                renderer.setModelMatrix(Matrix.model(handlePositions[i], pulsingScale));
+                gl.uniform4fv(handleColorUniformIndex, [1, 1, 0, 1]);
+            } else {
+                renderer.setModelMatrix(Matrix.model(handlePositions[i], HANDLE_SMALL));
+                gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
+            }
+            renderer.drawPrimitive(circle);
+        }
+
     }
 
     update();
 })();
-
