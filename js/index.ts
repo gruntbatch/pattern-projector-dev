@@ -32,6 +32,44 @@ void main(void) {
 }
 `;
 
+const patternVertexShaderSource = `#version 300 es
+precision mediump float;
+
+layout (std140) uniform Matrices {
+    mat4 projection;
+    mat4 view;
+    mat4 model;
+};
+
+uniform mat4 in_bones[4];
+
+layout (location=0) in vec2 in_position;
+layout (location=1) in vec4 in_weights;
+layout (location=2) in vec2 in_uv;
+
+out vec4 inout_color;
+out vec2 inout_uv;
+
+void main(void) {
+    // vec4 position = projection * view * model * vec4(in_position, 1.0, 1.0);
+    // for (int i=0; i<4; i++) {
+        // position = position * (in_bones[i] * in_weights[i]);
+    // }
+    // position *= in_bones[0] * in_weights.x;
+    // position *= in_bones[1] * in_weights.y;
+    // position *= in_bones[2] * in_weights.z;
+    // position *= in_bones[3] * in_weights.w;
+    vec4 position = vec4(0.0);
+    for (int i=0; i<4; i++) {
+        vec4 vertex_position = vec4(in_position, 1.0, 1.0);
+        position += (in_bones[i] * vertex_position) * in_weights[i];
+    }
+    gl_Position = projection * view * model * position;
+    inout_color = in_weights;
+    inout_uv = in_uv;
+}
+`;
+
 const vertexShaderSource = `#version 300 es
 
 precision mediump float;
@@ -90,6 +128,15 @@ class Matrix {
         ]);
     }
 
+    static Model(x: number, y: number, scale: number): Float32Array {
+        return new Float32Array([
+            scale, 0, 0, 0,
+            0, scale, 0, 0,
+            0, 0, 1, 0,
+            x, y, 0, 1
+        ]);
+    }
+
     static Orthographic(x: number, y: number): Float32Array {
         const left = x / -2.0;
         const right = x / 2.0;
@@ -108,13 +155,8 @@ class Matrix {
         ]);
     }
 
-    static Model(x: number, y: number, scale: number): Float32Array {
-        return new Float32Array([
-            scale, 0, 0, 0,
-            0, scale, 0, 0,
-            0, 0, 1, 0,
-            x, y, 0, 1
-        ]);
+    static Translation(x: number, y: number): Float32Array {
+        return Matrix.Model(x, y, 1);
     }
 }
 
@@ -398,11 +440,27 @@ const HANDLE_SMALL = 16;
 
     const renderer = new Renderer(gl, width, height);
     
-    const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
-    gl.useProgram(program);
+    // const program = renderer.createProgram(vertexShaderSource, testFragmentShaderSource);
+    // gl.useProgram(program);
+    const patternProgram = renderer.createProgram(patternVertexShaderSource, testFragmentShaderSource);
+    const patternBonesUniformIndex = gl.getUniformLocation(patternProgram, "in_bones");
+    gl.useProgram(patternProgram);
+    gl.uniformMatrix4fv(
+        patternBonesUniformIndex,
+        false,
+        new Float32Array(64),
+        0, 64
+    );
+
+    // const patternProgram = renderer.createProgram(patternVertexShaderSource, testFragmentShaderSource);
+    const handleProgram = renderer.createProgram(handleVertexShaderSource, handleFragmentShaderSource);
+    const handleColorUniformIndex = gl.getUniformLocation(handleProgram, "in_color");
+    gl.useProgram(handleProgram);
+    gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
     
     const circle = renderer.createCircle(32);
-    const plane = renderer.createWeightedPlane(4);
+    const plane = renderer.createPlane(4);
+    const weightedPlane = renderer.createWeightedPlane(4);
     renderer.uploadVertices();
 
     let pulsingScale = HANDLE_BIG;
@@ -419,9 +477,22 @@ const HANDLE_SMALL = 16;
         const pulsingPositionTarget = (pulse) ? new Point(150, 250) : new Point(250, 150);
         pulsingPosition = Point.lerp(pulsingPosition, pulsingPositionTarget, 0.2);
 
-        renderer.setModelMatrix(Matrix.Model(0, 0, 200));
-        renderer.drawPrimitive(plane);
+        gl.useProgram(patternProgram);
+        const bones = new Float32Array(64);
+        bones.set(Matrix.Translation(-200, -200), 0);
+        bones.set(Matrix.Translation(200, -200), 16);
+        bones.set(Matrix.Translation(pulsingPosition.x, pulsingPosition.y), 32);
+        bones.set(Matrix.Translation(-200, 200), 48);
+        gl.uniformMatrix4fv(patternBonesUniformIndex, false, bones, 0, 64);
+        renderer.setModelMatrix(Matrix.Model(0, 0, 1));
+        renderer.drawPrimitive(weightedPlane);
 
+
+        // gl.useProgram(handleProgram);
+        // renderer.setModelMatrix(Matrix.Model(0, 0, 200));
+        // renderer.drawPrimitive(weightedPlane);
+
+        gl.useProgram(handleProgram);
         renderer.setModelMatrix(Matrix.Model(pulsingPosition.x, pulsingPosition.y, pulsingScale));
         renderer.drawPrimitive(circle);
     }
