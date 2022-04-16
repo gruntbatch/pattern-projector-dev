@@ -159,15 +159,23 @@ class Point {
         this.y = y;    
     }
 
-    static lerp(a: Point, b: Point, f: number) {
+    static add(a: Point, b: Point): Point {
+        return new Point(a.x + b.x, a.y + b.y);
+    }
+
+    static sub(a: Point, b: Point): Point {
+        return new Point(a.x - b.x, a.y - b.y);
+    }
+
+    static lerp(a: Point, b: Point, f: number): Point {
         return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
     }
 
-    static zero() {
+    static zero(): Point {
         return new Point(0, 0);
     }
 
-    static distanceSquared(a: Point, b: Point) {
+    static distanceSquared(a: Point, b: Point): number {
         const x = a.x - b.x;
         const y = a.y - b.y;
         return x * x + y * y;
@@ -480,15 +488,15 @@ const LERP_FACTOR = 0.2;
         new Point(-DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION)
     );
 
-    // let mousePosition = new Point(0, 0);
-    // document.onmousemove = (event) => {
-    //     mousePosition = new Point(
-    //         event.pageX - (width / 2),
-    //         (height - event.pageY) - (height / 2)
-    //     );
-    // }
-
+    // Determine _what_ we are mousedowning on
+    // based on that
+    // drag the selected handle
+    // drag certain widgets
+    // toggle certain widgets
     let currentHandle = 0;
+    let currentHandlePosition = handlePositions[currentHandle];
+    let isDraggingCurrentHandle = false;
+    let mouseDownPosition = new Point(0, 0);
     canvas.onmousedown = (event) => {
         const mousePosition = new Point(
             event.pageX - (width / 2),
@@ -496,7 +504,31 @@ const LERP_FACTOR = 0.2;
         );
         const nearestHandle = findNearestPoint(mousePosition, handlePositions);
         if (Point.distanceSquared(mousePosition, handlePositions[nearestHandle]) < (HANDLE_BIG * HANDLE_BIG)) {
-            currentHandle = nearestHandle;
+            if (nearestHandle == currentHandle) {
+                mouseDownPosition = mousePosition;
+                isDraggingCurrentHandle = true;
+            } else {
+                currentHandle = nearestHandle;
+                currentHandlePosition = handlePositions[currentHandle];
+                console.log("SETTING POSITION", currentHandlePosition);
+            }
+        }
+    }
+
+    canvas.onmouseup = (event) => {
+        isDraggingCurrentHandle = false;
+    }
+
+    canvas.onmousemove = (event) => {
+        if (isDraggingCurrentHandle) {
+            const mousePosition = new Point(
+                event.pageX - (width / 2),
+                (height / 2) - event.pageY
+            );
+
+            const mouseMovement = Point.sub(mousePosition, mouseDownPosition);
+
+            handlePositions[currentHandle] = Point.add(currentHandlePosition, mouseMovement);
         }
     }
 
