@@ -2,103 +2,12 @@
 // move handles
 // scale controls
 // position controls
-// handle controls
+// handle controls 
 
-const handleVertexShaderSource = `#version 300 es
-precision mediump float;
-
-layout (std140) uniform Matrices {
-    mat4 projection;
-    mat4 view;
-    mat4 model;
-};
-
-layout (location=0) in vec2 in_position;
-
-void main(void) {
-    gl_Position = projection * view * model * vec4(in_position, 1.0, 1.0);
-}
-`;
-
-const handleFragmentShaderSource = `#version 300 es
-precision mediump float;
-
-uniform vec4 in_color;
-
-out vec4 out_color;
-
-void main(void) {
-    out_color = in_color;
-}
-`;
-
-const patternVertexShaderSource = `#version 300 es
-precision mediump float;
-
-layout (std140) uniform Matrices {
-    mat4 projection;
-    mat4 view;
-    mat4 model;
-};
-
-uniform mat4 in_bones[4];
-
-layout (location=0) in vec2 in_position;
-layout (location=1) in vec4 in_weights;
-layout (location=2) in vec2 in_uv;
-
-out vec4 inout_color;
-out vec2 inout_uv;
-
-void main(void) {
-    vec4 position = vec4(0.0);
-    for (int i=0; i<4; i++) {
-        vec4 vertex_position = vec4(in_position, 1.0, 1.0);
-        position += (in_bones[i] * vertex_position) * in_weights[i];
-    }
-    gl_Position = projection * view * model * position;
-    inout_color = in_weights;
-    inout_uv = in_uv;
-}
-`;
-
-const vertexShaderSource = `#version 300 es
-precision mediump float;
-
-layout (std140) uniform Matrices {
-    mat4 projection;
-    mat4 view;
-    mat4 model;
-};
-
-layout (location=0) in vec2 in_position;
-layout (location=1) in vec4 in_color;
-layout (location=2) in vec2 in_uv;
-
-out vec4 inout_color;
-out vec2 inout_uv;
-
-void main(void) {
-    vec4 position = projection * view * model * vec4(in_position, 1.0, 1.0);
-    gl_Position = position;
-    inout_color = in_color;
-    inout_uv = in_uv;
-}
-`;
-
-const testFragmentShaderSource = `#version 300 es
-precision mediump float;
-
-in vec4 inout_color;
-in vec2 inout_uv;
-
-out vec4 out_color;
-
-void main(void) {
-    out_color = vec4(inout_color.b, 0, 0, 1);
-    // out_color = vec4(inout_uv, 0, 1);
-}
-`;
+const handleVertexShaderSource = `#include("src/handle.vert")`
+const handleFragmentShaderSource = `#include("src/handle.frag")`;
+const patternVertexShaderSource = `#include("src/pattern.vert")`;
+const rulerFragmentShaderSource = `#include("src/ruler.frag")`;
 
 const lerp = (a: number, b: number, f: number): number => {
     return a + f * (b - a);
@@ -465,7 +374,7 @@ const LERP_FACTOR = 0.2;
 
     const renderer = new Renderer(gl, width, height);
 
-    const patternProgram = renderer.createProgram(patternVertexShaderSource, testFragmentShaderSource);
+    const patternProgram = renderer.createProgram(patternVertexShaderSource, rulerFragmentShaderSource);
     const patternBonesUniformIndex = gl.getUniformLocation(patternProgram, "in_bones");
     gl.useProgram(patternProgram);
     gl.uniformMatrix4fv(patternBonesUniformIndex, false, new Float32Array(64), 0, 64);
@@ -510,7 +419,6 @@ const LERP_FACTOR = 0.2;
             } else {
                 currentHandle = nearestHandle;
                 currentHandlePosition = handlePositions[currentHandle];
-                console.log("SETTING POSITION", currentHandlePosition);
             }
         }
     }
@@ -530,6 +438,11 @@ const LERP_FACTOR = 0.2;
 
             handlePositions[currentHandle] = Point.add(currentHandlePosition, mouseMovement);
         }
+    }
+
+    let rulerScale = 1.0;
+    canvas.onwheel = (event) => {
+        rulerScale += event.deltaY * 0.01;
     }
 
     const update = () => {

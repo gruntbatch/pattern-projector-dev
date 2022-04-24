@@ -24,12 +24,12 @@ def watch(dependencies):
     import os
     import time
     
-    timestamps = [os.stat(d).st_mtime for d in dependencies]
+    dts = {d: os.stat(d).st_mtime for d in dependencies}
 
     while True:
         time.sleep(1)
 
-        for d, ts in zip(dependencies, timestamps):
+        for d, ts in dts.items():
             if os.stat(d).st_mtime != ts:
                 return
 
