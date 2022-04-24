@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Take from https://gist.github.com/opyate/6e5fcabc6f41474d248613c027373856
+# Taken from https://gist.github.com/opyate/6e5fcabc6f41474d248613c027373856
 # Inspired by  https://stackoverflow.com/a/25708957/51280
 from http.server import SimpleHTTPRequestHandler
 import socketserver
