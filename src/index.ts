@@ -93,23 +93,23 @@ class Matrix {
 
 class Vertex {
     position: Point;
-    weight: number[];
     uv: Point;
+    weight: number[];
 
-    constructor(position: Point, weight: number[], uv: Point) {
+    constructor(position: Point, uv: Point, weight: number[]) {
         this.position = position;
-        this.weight = weight;
         this.uv = uv;
+        this.weight = weight;
     }
 
     static autoCircle(position: Point): Vertex {
         return new Vertex(
             position,
-            [position.x, position.y, 1, 1],
             new Point(
                 map(position.x, -1, 1, 0, 1),
                 map(position.y, -1, 1, 0, 1)
-            )
+                ),
+            [position.x, position.y, 1, 1],
         );
     }
 
@@ -119,8 +119,8 @@ class Vertex {
                 map(position.x, 0, 1, -1, 1),
                 map(position.y, 0, 1, -1, 1)
             ),
-            [map(position.x, 0, 1, -1, 1), map(position.y, 0, 1, -1, 1), 1, 1],
-            position
+            position,
+            [map(position.x, 0, 1, -1, 1), map(position.y, 0, 1, -1, 1), 1, 1]
         );
     }
 
@@ -138,8 +138,8 @@ class Vertex {
                 map(position.x, 0, 1, -1, 1),
                 map(position.y, 0, 1, -1, 1)
             ),
-            weights.map((x) => x * scalar),
-            position
+            position,
+            weights.map((x) => x * scalar)
         );
     }
 }
@@ -194,13 +194,13 @@ class Renderer {
             gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
             gl.enableVertexAttribArray(0);
 
-            // Color/Weight
-            gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 32, 8);
-            gl.enableVertexAttribArray(1);
-
             // UV
-            gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 32, 24);
-            gl.enableVertexAttribArray(2);   
+            gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 32, 8);
+            gl.enableVertexAttribArray(1);  
+
+            // Color/Weight
+            gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 32, 16);
+            gl.enableVertexAttribArray(2); 
         }
 
         this.vertexCount = 0
@@ -249,16 +249,16 @@ class Renderer {
         for (let i=0; i<vertices.length; i++, this.vertexCount++) {
             const vertex = vertices[i];
             const index = this.vertexCount * FLOATS_PER_VERTEX;
-            this.vertices[index] = vertex.position.x;
+            this.vertices[index    ] = vertex.position.x;
             this.vertices[index + 1] = vertex.position.y;
-
-            this.vertices[index + 2] = vertex.weight[0];
-            this.vertices[index + 3] = vertex.weight[1];
-            this.vertices[index + 4] = vertex.weight[2];
-            this.vertices[index + 5] = vertex.weight[3];
             
-            this.vertices[index + 6] = vertex.uv.x;
-            this.vertices[index + 7] = vertex.uv.y;
+            this.vertices[index + 2] = vertex.uv.x;
+            this.vertices[index + 3] = vertex.uv.y;
+
+            this.vertices[index + 4] = vertex.weight[0];
+            this.vertices[index + 5] = vertex.weight[1];
+            this.vertices[index + 6] = vertex.weight[2];
+            this.vertices[index + 7] = vertex.weight[3];
         }
     }
 
