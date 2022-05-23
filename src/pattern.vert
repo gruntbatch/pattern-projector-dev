@@ -18,12 +18,7 @@ out vec4 inout_color;
 out vec2 inout_uv;
 
 void main(void) {
-    vec4 position = vec4(0.0);
-    for (int i=0; i<4; i++) {
-        vec4 vertex_position = vec4(in_position, 1.0, 1.0);
-        position += (in_bones[i] * vertex_position) * in_weights[i];
-    }
-    gl_Position = projection * view * model * position;
+    gl_Position = projection * view * model * vec4(in_position, 1, 1);
     inout_color = in_color;
     inout_uv = in_uv;
 }

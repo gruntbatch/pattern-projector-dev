@@ -382,9 +382,7 @@ const LERP_FACTOR = 0.2;
     const renderer = new Renderer(gl, width, height);
 
     const patternProgram = renderer.createProgram(patternVertexShaderSource, rulerFragmentShaderSource);
-    const patternBonesUniformIndex = gl.getUniformLocation(patternProgram, "in_bones");
     gl.useProgram(patternProgram);
-    gl.uniformMatrix4fv(patternBonesUniformIndex, false, new Float32Array(64), 0, 64);
 
     const handleProgram = renderer.createProgram(handleVertexShaderSource, handleFragmentShaderSource);
     const handleColorUniformIndex = gl.getUniformLocation(handleProgram, "in_color");
@@ -462,13 +460,7 @@ const LERP_FACTOR = 0.2;
         pulsingScale = lerp(pulsingScale, pulsingScaleTarget, LERP_FACTOR);
 
         gl.useProgram(patternProgram);
-        const bones = new Float32Array(64);
-        bones.set(Matrix.translation(handlePositions[0]).v, 0);
-        bones.set(Matrix.translation(handlePositions[1]).v, 16);
-        bones.set(Matrix.translation(handlePositions[2]).v, 32);
-        bones.set(Matrix.translation(handlePositions[3]).v, 48);
-        gl.uniformMatrix4fv(patternBonesUniformIndex, false, bones, 0, 64);
-        renderer.setModelMatrix(Matrix.model(Point.zero(), 1).v);
+        renderer.setModelMatrix(Matrix.model(Point.zero(), 200).v);
         renderer.drawPrimitive(weightedPlane);
 
         // const nearestHandle = findNearestPoint(mousePosition, handlePositions);
