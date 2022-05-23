@@ -419,8 +419,8 @@ const LERP_FACTOR = 0.2;
                 isDraggingCurrentHandle = true;
             } else {
                 currentHandle = nearestHandle;
-                currentHandlePosition = handlePositions[currentHandle];
             }
+            currentHandlePosition = handlePositions[currentHandle];
         }
     }
 
