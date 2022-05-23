@@ -57,8 +57,14 @@ class Point {
 }
 
 class Matrix {
-    static identity(): Float32Array {
-        return new Float32Array([
+    v: Float32Array;
+
+    constructor(v: number[]) {
+        this.v = new Float32Array(v);
+    }
+
+    static identity(): Matrix {
+        return new Matrix([
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
@@ -66,8 +72,8 @@ class Matrix {
         ]);
     }
 
-    static model(position: Point, scale: number): Float32Array {
-        return new Float32Array([
+    static model(position: Point, scale: number): Matrix {
+        return new Matrix([
             scale, 0, 0, 0,
             0, scale, 0, 0,
             0, 0, 1, 0,
@@ -93,7 +99,7 @@ class Matrix {
         ]);
     }
 
-    static translation(position: Point): Float32Array {
+    static translation(position: Point): Matrix {
         return Matrix.model(position, 1);
     }
 }
@@ -143,8 +149,8 @@ class Renderer {
 
             const data = new Float32Array(48);
             data.set(Matrix.orthographic(width, height), 0);
-            data.set(Matrix.identity(), 16);
-            data.set(Matrix.model(Point.zero(), 1), 32);
+            data.set(Matrix.identity().v, 16);
+            data.set(Matrix.model(Point.zero(), 1).v, 32);
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
         }
 
@@ -457,12 +463,12 @@ const LERP_FACTOR = 0.2;
 
         gl.useProgram(patternProgram);
         const bones = new Float32Array(64);
-        bones.set(Matrix.translation(handlePositions[0]), 0);
-        bones.set(Matrix.translation(handlePositions[1]), 16);
-        bones.set(Matrix.translation(handlePositions[2]), 32);
-        bones.set(Matrix.translation(handlePositions[3]), 48);
+        bones.set(Matrix.translation(handlePositions[0]).v, 0);
+        bones.set(Matrix.translation(handlePositions[1]).v, 16);
+        bones.set(Matrix.translation(handlePositions[2]).v, 32);
+        bones.set(Matrix.translation(handlePositions[3]).v, 48);
         gl.uniformMatrix4fv(patternBonesUniformIndex, false, bones, 0, 64);
-        renderer.setModelMatrix(Matrix.model(Point.zero(), 1));
+        renderer.setModelMatrix(Matrix.model(Point.zero(), 1).v);
         renderer.drawPrimitive(weightedPlane);
 
         // const nearestHandle = findNearestPoint(mousePosition, handlePositions);
@@ -471,10 +477,10 @@ const LERP_FACTOR = 0.2;
         gl.useProgram(handleProgram);
         for (let i=0; i<4; i++) {
             if (i == currentHandle) {
-                renderer.setModelMatrix(Matrix.model(handlePositions[i], pulsingScale));
+                renderer.setModelMatrix(Matrix.model(handlePositions[i], pulsingScale).v);
                 gl.uniform4fv(handleColorUniformIndex, [1, 1, 0, 1]);
             } else {
-                renderer.setModelMatrix(Matrix.model(handlePositions[i], HANDLE_SMALL));
+                renderer.setModelMatrix(Matrix.model(handlePositions[i], HANDLE_SMALL).v);
                 gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
             }
             renderer.drawPrimitive(circle);
