@@ -17,6 +17,38 @@ const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: nu
     return outMin + (outMax - outMin) * (x - inMin) / (inMax - inMin);
 }
 
+class Point {
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;    
+    }
+
+    static add(a: Point, b: Point): Point {
+        return new Point(a.x + b.x, a.y + b.y);
+    }
+
+    static sub(a: Point, b: Point): Point {
+        return new Point(a.x - b.x, a.y - b.y);
+    }
+
+    static lerp(a: Point, b: Point, f: number): Point {
+        return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
+    }
+
+    static zero(): Point {
+        return new Point(0, 0);
+    }
+
+    static distanceSquared(a: Point, b: Point): number {
+        const x = a.x - b.x;
+        const y = a.y - b.y;
+        return x * x + y * y;
+    }
+}
+
 class Matrix {
     static identity(): Float32Array {
         return new Float32Array([
@@ -56,38 +88,6 @@ class Matrix {
 
     static translation(position: Point): Float32Array {
         return Matrix.model(position, 1);
-    }
-}
-
-class Point {
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;    
-    }
-
-    static add(a: Point, b: Point): Point {
-        return new Point(a.x + b.x, a.y + b.y);
-    }
-
-    static sub(a: Point, b: Point): Point {
-        return new Point(a.x - b.x, a.y - b.y);
-    }
-
-    static lerp(a: Point, b: Point, f: number): Point {
-        return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
-    }
-
-    static zero(): Point {
-        return new Point(0, 0);
-    }
-
-    static distanceSquared(a: Point, b: Point): number {
-        const x = a.x - b.x;
-        const y = a.y - b.y;
-        return x * x + y * y;
     }
 }
 
@@ -262,19 +262,25 @@ class Renderer {
         }
     }
 
-    createPlane(resolution: number): Primitive {
+    private createPlaneUsingFunction(resolution: number, func: (position: Point) => Vertex) {
         const vertexCount = 6 * resolution * resolution;
         const vertices = new Array<Vertex>(vertexCount);
 
         for (let x=0; x<resolution; x++) {
             for (let y=0; y<resolution; y++) {
-                const nw = Vertex.autoRect(new Point(x / resolution, y / resolution));
-                const ne = Vertex.autoRect(new Point((x + 1) / resolution, y / resolution));
-                const se = Vertex.autoRect(new Point((x + 1) / resolution, (y + 1) / resolution));
-                const sw = Vertex.autoRect(new Point(x / resolution, (y + 1) / resolution));
+                const xres = x / resolution;
+                const x1res = (x + 1) / resolution;
+                const yres = y / resolution;
+                const y1res = (y + 1) / resolution;
+
+                const nw = func(new Point(xres, yres));
+                const ne = func(new Point(x1res, yres));
+                const se = func(new Point(x1res, y1res));
+                const sw = func(new Point(xres, y1res));
 
                 const index = 6 * (x + y * resolution);
-                vertices[index] = nw;
+
+                vertices[index    ] = nw;
                 vertices[index + 1] = sw;
                 vertices[index + 2] = se;
 
@@ -290,32 +296,12 @@ class Renderer {
         return new Primitive(this.gl.TRIANGLES, first, count);
     }
 
+    createPlane(resolution: number): Primitive {
+        return this.createPlaneUsingFunction(resolution, Vertex.autoRect);
+    }
+
     createWeightedPlane(resolution: number): Primitive {
-        const vertexCount = 6 * resolution * resolution;
-        const vertices = new Array<Vertex>(vertexCount);
-
-        for (let x=0; x<resolution; x++) {
-            for (let y=0; y<resolution; y++) {
-                const nw = Vertex.autoWeightedRect(new Point(x / resolution, y / resolution));
-                const ne = Vertex.autoWeightedRect(new Point((x + 1) / resolution, y / resolution));
-                const se = Vertex.autoWeightedRect(new Point((x + 1) / resolution, (y + 1) / resolution));
-                const sw = Vertex.autoWeightedRect(new Point(x / resolution, (y + 1) / resolution));
-
-                const index = 6 * (x + y * resolution);
-                vertices[index] = nw;
-                vertices[index + 1] = sw;
-                vertices[index + 2] = se;
-
-                vertices[index + 3] = nw;
-                vertices[index + 4] = se;
-                vertices[index + 5] = ne;
-            }
-        }
-
-        const first = this.vertexCount;
-        const count = vertexCount;
-        this.copyVerticesToBuffer(vertices);
-        return new Primitive(this.gl.TRIANGLES, first, count);
+        return this.createPlaneUsingFunction(resolution, Vertex.autoWeightedRect);
     }
 
     createCircle(resolution: number): Primitive {
