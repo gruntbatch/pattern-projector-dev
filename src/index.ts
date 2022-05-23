@@ -38,6 +38,13 @@ class Point {
         return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
     }
 
+    static map(x: Point, inMin: number, inMax: number, outMin: number, outMax: number): Point {
+        return new Point(
+            map(x.x, inMin, inMax, outMin, outMax),
+            map(x.y, inMin, inMax, outMin, outMax)
+        );
+    }
+
     static zero(): Point {
         return new Point(0, 0);
     }
@@ -100,47 +107,6 @@ class Vertex {
         this.position = position;
         this.uv = uv;
         this.weight = weight;
-    }
-
-    static autoCircle(position: Point): Vertex {
-        return new Vertex(
-            position,
-            new Point(
-                map(position.x, -1, 1, 0, 1),
-                map(position.y, -1, 1, 0, 1)
-                ),
-            [position.x, position.y, 1, 1],
-        );
-    }
-
-    static autoRect(position: Point): Vertex {
-        return new Vertex(
-            new Point(
-                map(position.x, 0, 1, -1, 1),
-                map(position.y, 0, 1, -1, 1)
-            ),
-            position,
-            [map(position.x, 0, 1, -1, 1), map(position.y, 0, 1, -1, 1), 1, 1]
-        );
-    }
-
-    static autoWeightedRect(position: Point): Vertex {
-        // We're currently normalizing vertex weights here, but I'm not 100% sure that's the correct thing to do.
-        const weights = new Array<number>(
-            Math.min(-position.x + 1, -position.y + 1),
-            Math.min(position.x, -position.y + 1),
-            Math.min(position.x, position.y),
-            Math.min(-position.x + 1, position.y)
-        );
-        const scalar = 1.0 / weights.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
-        return new Vertex(
-            new Point(
-                map(position.x, 0, 1, -1, 1),
-                map(position.y, 0, 1, -1, 1)
-            ),
-            position,
-            weights.map((x) => x * scalar)
-        );
     }
 }
 
@@ -297,23 +263,49 @@ class Renderer {
     }
 
     createPlane(resolution: number): Primitive {
-        return this.createPlaneUsingFunction(resolution, Vertex.autoRect);
+        return this.createPlaneUsingFunction(resolution, (position: Point): Vertex => {
+            const mappedPosition = Point.map(position, 0, 1, -1, 1);
+            return new Vertex(
+                mappedPosition,
+                position,
+                [mappedPosition.x, mappedPosition.y, 1, 1]
+            );
+        });
     }
 
     createWeightedPlane(resolution: number): Primitive {
-        return this.createPlaneUsingFunction(resolution, Vertex.autoWeightedRect);
+        return this.createPlaneUsingFunction(resolution, (position: Point): Vertex => {
+            // We're currently normalizing vertex weights here, but I'm not 100% sure that's the correct thing to do.
+            const weights = new Array<number>(
+                Math.min(-position.x + 1, -position.y + 1),
+                Math.min(position.x, -position.y + 1),
+                Math.min(position.x, position.y),
+                Math.min(-position.x + 1, position.y)
+            );
+            const scalar = 1.0 / weights.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+            return new Vertex(
+                Point.map(position, 0, 1, -1, 1),
+                position,
+                weights.map((x) => x * scalar)
+            );
+        });
     }
 
     createCircle(resolution: number): Primitive {
         const edgeVertexCount = resolution + 1;
         const totalVertexCount = resolution + 2;
         const vertices = new Array<Vertex>(totalVertexCount);
-        vertices[0] = Vertex.autoCircle(new Point(0, 0));
+
+        vertices[0] = new Vertex(new Point(0, 0), new Point(0.5, 0.5), [0, 0, 1, 1]);
+
         for (let i=0; i<edgeVertexCount; i++) {
             const theta = i / resolution * 2 * Math.PI;
-            const x = Math.sin(theta);
-            const y = Math.cos(theta);
-            vertices[i + 1] = Vertex.autoCircle(new Point(x, y));
+            const position = new Point(Math.sin(theta), Math.cos(theta));
+            vertices[i + 1] = new Vertex(
+                position,
+                Point.map(position, -1, 1, 0, 1),
+                [position.x, position.y, 1, 1]
+            );
         }
 
         const first = this.vertexCount;
