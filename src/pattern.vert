@@ -11,7 +11,8 @@ uniform mat4 in_bones[4];
 
 layout (location=0) in vec2 in_position;
 layout (location=1) in vec2 in_uv;
-layout (location=2) in vec4 in_weights;
+layout (location=2) in vec4 in_color;
+layout (location=3) in vec4 in_weights;
 
 out vec4 inout_color;
 out vec2 inout_uv;
@@ -23,6 +24,6 @@ void main(void) {
         position += (in_bones[i] * vertex_position) * in_weights[i];
     }
     gl_Position = projection * view * model * position;
-    inout_color = in_weights;
+    inout_color = in_color;
     inout_uv = in_uv;
 }

@@ -101,11 +101,13 @@ class Matrix {
 class Vertex {
     position: Point;
     uv: Point;
+    color: number[];
     weight: number[];
 
-    constructor(position: Point, uv: Point, weight: number[]) {
+    constructor(position: Point, uv: Point, color: number[], weight: number[]) {
         this.position = position;
         this.uv = uv;
+        this.color = color;
         this.weight = weight;
     }
 }
@@ -119,7 +121,7 @@ class Primitive {
 }
 
 const BYTES_PER_FLOAT = 4;
-const FLOATS_PER_VERTEX = 8;
+const FLOATS_PER_VERTEX = 12;
 const MAX_VERTEX_COUNT = 8192;
 
 class Renderer {
@@ -157,16 +159,20 @@ class Renderer {
             );
 
             // Position
-            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 32, 0);
+            gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 48, 0);
             gl.enableVertexAttribArray(0);
 
             // UV
-            gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 32, 8);
+            gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 48, 8);
             gl.enableVertexAttribArray(1);  
 
-            // Color/Weight
-            gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 32, 16);
+            // Color
+            gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 48, 16);
             gl.enableVertexAttribArray(2); 
+
+            // Weight
+            gl.vertexAttribPointer(3, 4, gl.FLOAT, false, 48, 32);
+            gl.enableVertexAttribArray(3);
         }
 
         this.vertexCount = 0
@@ -215,16 +221,21 @@ class Renderer {
         for (let i=0; i<vertices.length; i++, this.vertexCount++) {
             const vertex = vertices[i];
             const index = this.vertexCount * FLOATS_PER_VERTEX;
-            this.vertices[index    ] = vertex.position.x;
-            this.vertices[index + 1] = vertex.position.y;
+            this.vertices[index     ] = vertex.position.x;
+            this.vertices[index +  1] = vertex.position.y;
             
-            this.vertices[index + 2] = vertex.uv.x;
-            this.vertices[index + 3] = vertex.uv.y;
+            this.vertices[index +  2] = vertex.uv.x;
+            this.vertices[index +  3] = vertex.uv.y;
 
-            this.vertices[index + 4] = vertex.weight[0];
-            this.vertices[index + 5] = vertex.weight[1];
-            this.vertices[index + 6] = vertex.weight[2];
-            this.vertices[index + 7] = vertex.weight[3];
+            this.vertices[index +  4] = vertex.color[0];
+            this.vertices[index +  5] = vertex.color[1];
+            this.vertices[index +  6] = vertex.color[2];
+            this.vertices[index +  7] = vertex.color[3];
+
+            this.vertices[index +  8] = vertex.weight[0];
+            this.vertices[index +  9] = vertex.weight[1];
+            this.vertices[index + 10] = vertex.weight[2];
+            this.vertices[index + 11] = vertex.weight[3];
         }
     }
 
@@ -262,12 +273,17 @@ class Renderer {
         return new Primitive(this.gl.TRIANGLES, first, count);
     }
 
+    private randomColor(): number[] {
+        return [Math.random(), Math.random(), Math.random(), 1];
+    }
+
     createPlane(resolution: number): Primitive {
         return this.createPlaneUsingFunction(resolution, (position: Point): Vertex => {
             const mappedPosition = Point.map(position, 0, 1, -1, 1);
             return new Vertex(
                 mappedPosition,
                 position,
+                this.randomColor(),
                 [mappedPosition.x, mappedPosition.y, 1, 1]
             );
         });
@@ -286,6 +302,7 @@ class Renderer {
             return new Vertex(
                 Point.map(position, 0, 1, -1, 1),
                 position,
+                this.randomColor(),
                 weights.map((x) => x * scalar)
             );
         });
@@ -296,7 +313,12 @@ class Renderer {
         const totalVertexCount = resolution + 2;
         const vertices = new Array<Vertex>(totalVertexCount);
 
-        vertices[0] = new Vertex(new Point(0, 0), new Point(0.5, 0.5), [0, 0, 1, 1]);
+        vertices[0] = new Vertex(
+            new Point(0, 0),
+            new Point(0.5, 0.5),
+            this.randomColor(),
+            [0, 0, 1, 1]
+        );
 
         for (let i=0; i<edgeVertexCount; i++) {
             const theta = i / resolution * 2 * Math.PI;
@@ -304,6 +326,7 @@ class Renderer {
             vertices[i + 1] = new Vertex(
                 position,
                 Point.map(position, -1, 1, 0, 1),
+                this.randomColor(),
                 [position.x, position.y, 1, 1]
             );
         }
