@@ -436,7 +436,7 @@ function remToPixels(rem: number): number {
         for (let i=0; i<4; i++) {
             const handlePosition = Point.add(
                 renderer.canvasToWindowPoint(handlePositions[i]),
-                new Point(-20, -20)
+                new Point(-remToPixels(1), -remToPixels(1))
             );
             handles[i].style.left = handlePosition.x + "px";
             handles[i].style.top = handlePosition.y + "px";
@@ -469,7 +469,7 @@ function remToPixels(rem: number): number {
 
     window.onmousedown = (e: MouseEvent) => {
         let mousePosition = renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY));
-        let best = renderer.windowToCanvasScalar(400); // 20px squared
+        let best = renderer.windowToCanvasScalar(remToPixels(1)); // 1rem squared
         currentHandle = -1;
         for (let i=0; i<4; i++) {
             let dx = mousePosition.x - handlePositions[i].x;
