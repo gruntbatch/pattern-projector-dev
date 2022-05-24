@@ -29,6 +29,10 @@ class Point {
             map(x.y, inMin, inMax, outMin, outMax)
         );
     }
+
+    static scale(p: Point, s: number): Point {
+        return new Point(p.x * s, p.y * s);
+    }
 }
 
 class Vector3 {
