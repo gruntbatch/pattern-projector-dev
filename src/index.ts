@@ -1,3 +1,8 @@
+// TODO
+// [x] Form planes in a 0 .. 1 space
+// Update on window resize
+// Make canvas resolution independent
+
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
 const rulerVert = `#include("src/ruler.vert")`;
@@ -327,29 +332,15 @@ class Renderer {
         return [Math.random(), Math.random(), Math.random(), 1];
     }
 
-    // createPlane(resolution: number): Primitive {
-    //     return this.newPlaneUsingFunction(resolution, (position: Point): Vertex => {
-    //         const mappedPosition = Point.map(position, 0, 1, -1, 1);
-    //         return new Vertex(
-    //             mappedPosition,
-    //             position,
-    //             this.randomColor(),
-    //             [mappedPosition.x, mappedPosition.y, 1, 1]
-    //         );
-    //     });
-    // }
-
     newPlane(width: number, height: number, resolution: number): Plane {
         return this.newPlaneUsingFunction(width, height, resolution, (position: Point): Vertex => {
-            const mappedPosition = Point.map(position, 0, 1, -1, 1);
             return new Vertex(
-                mappedPosition,
+                position,
                 position,
                 this.randomColor(),
-                [mappedPosition.x, mappedPosition.y, 1, 1]
+                [position.x, position.y, 1, 1]
             );
         });
-        // return new Plane(width, height, null);
     }
 
     drawPrimitive(primitive: Primitive) {
@@ -406,7 +397,7 @@ class Renderer {
                    0,    0, 1,    0,
                 _[2], _[5], 0, _[8],
             ])
-            renderer.setModelMatrix(Matrix4.model(new Point(0, 0), 2));
+            renderer.setModelMatrix(Matrix4.model(new Point(0, 0), 1));
             renderer.setViewMatrix(t2);
             renderer.drawPrimitive(rulerPlane.primitive);
         }
