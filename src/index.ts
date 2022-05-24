@@ -1,41 +1,16 @@
-// TODO
-// move handles
-// scale controls
-// position controls
-// handle controls 
-
-const handleVertexShaderSource = `#include("src/handle.vert")`
-const handleFragmentShaderSource = `#include("src/handle.frag")`;
-const patternVertexShaderSource = `#include("src/pattern.vert")`;
-const rulerFragmentShaderSource = `#include("src/ruler.frag")`;
-
-const lerp = (a: number, b: number, f: number): number => {
-    return a + f * (b - a);
-}
+const handleVert = `#include("src/handle.vert")`
+const handleFrag = `#include("src/handle.frag")`;
+const rulerVert = `#include("src/ruler.vert")`;
+const rulerFrag = `#include("src/ruler.frag")`;
 
 const map = (x: number, inMin: number, inMax: number, outMin: number, outMax: number): number => {
     return outMin + (outMax - outMin) * (x - inMin) / (inMax - inMin);
 }
 
 class Point {
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number) {
+    constructor(public x: number, public y: number) {
         this.x = x;
-        this.y = y;    
-    }
-
-    static add(a: Point, b: Point): Point {
-        return new Point(a.x + b.x, a.y + b.y);
-    }
-
-    static sub(a: Point, b: Point): Point {
-        return new Point(a.x - b.x, a.y - b.y);
-    }
-
-    static lerp(a: Point, b: Point, f: number): Point {
-        return new Point(lerp(a.x, b.x, f), lerp(a.y, b.y, f));
+        this.y = y;
     }
 
     static map(x: Point, inMin: number, inMax: number, outMin: number, outMax: number): Point {
@@ -44,110 +19,60 @@ class Point {
             map(x.y, inMin, inMax, outMin, outMax)
         );
     }
-
-    static zero(): Point {
-        return new Point(0, 0);
-    }
-
-    static distanceSquared(a: Point, b: Point): number {
-        const x = a.x - b.x;
-        const y = a.y - b.y;
-        return x * x + y * y;
-    }
 }
 
 class Vector3 {
-    x: number;
-    y: number;
-    z: number;
-
-    constructor(x: number, y: number, z: number) {
+    constructor(public x: number, public y: number, public z: number) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
-
-    static fromPoint(p: Point) {
-        return new Vector3(p.x, p.y, 1);
-    }
 }
 
 class Matrix3 {
-    v: Float32Array;
-
-    constructor(v: number[]) {
-        this.v = new Float32Array(v);
+    constructor(public _: Array<number>) {
+        this._ = _;
     }
 
     static adjugate(m: Matrix3): Matrix3 {
-        const v = m.v;
+        const _ = m._;
         return new Matrix3([
-            v[4] * v[8] - v[5] * v[7], v[2] * v[7] - v[1] * v[8], v[1] * v[5] - v[2] * v[4],
-            v[5] * v[6] - v[3] * v[8], v[0] * v[8] - v[2] * v[6], v[2] * v[3] - v[0] * v[5],
-            v[3] * v[7] - v[4] * v[6], v[1] * v[6] - v[0] * v[7], v[0] * v[4] - v[1] * v[3]
-        ]);
+            _[4] * _[8] - _[5] * _[7], _[2] * _[7] - _[1] * _[8], _[1] * _[5] - _[2] * _[4],
+            _[5] * _[6] - _[3] * _[8], _[0] * _[8] - _[2] * _[6], _[2] * _[3] - _[0] * _[5],
+            _[3] * _[7] - _[4] * _[6], _[1] * _[6] - _[0] * _[7], _[0] * _[4] - _[1] * _[3]
+        ])
     }
 
     static mul(a: Matrix3, b: Matrix3): Matrix3 {
-        let v = new Array<number>(9);
+        let c = new Matrix3(new Array<number>(9));
+        
         for (let i=0; i<3; i++) {
             for (let j=0; j<3; j++) {
                 let sum = 0;
                 for (let k=0; k<3; k++) {
-                    sum += a.v[3 * i + k] * b.v[3 * k + j];
+                    sum += a._[3 * i + k] * b._[3 * k + j];
                 }
-                v[3 * i + j] = sum;
+                c._[3 * i + j] = sum;
             }
         }
-        return new Matrix3(v);
+
+        return c;
     }
 
     static mulVector3(m: Matrix3, v: Vector3): Vector3 {
         return new Vector3(
-            m.v[0] * v.x + m.v[1] * v.y + m.v[2] * v.z,
-            m.v[3] * v.x + m.v[4] * v.y + m.v[5] * v.z,
-            m.v[6] * v.x + m.v[7] * v.y + m.v[8] * v.z
-        );
-    }
-
-    private static basisToPoints(p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 {
-        let m = new Matrix3([
-            p1.x, p2.x, p3.x,
-            p1.y, p2.y, p3.y,
-            1, 1, 1
-        ]);
-        let p = Matrix3.mulVector3(Matrix3.adjugate(m), Vector3.fromPoint(p4));
-        return Matrix3.mul(m, new Matrix3([
-            p.x, 0, 0,
-            0, p.y, 0,
-            0, 0, p.z
-        ]));
-    }
-
-    static generalProjection2(offset: Point, p1: Point, p2: Point, p3: Point, p4: Point)
-    {
-        let s = this.basisToPoints(new Point(0, 0), new Point(offset.x, 0), new Point(0, offset.y), offset);
-        let d = this.basisToPoints(p1, p2, p3, p4);
-        console.log(d);
-        return this.mul(d, this.adjugate(s));
+            m._[0] * v.x + m._[1] * v.y + m._[2] * v.z,
+            m._[3] * v.x + m._[4] * v.y + m._[5] * v.z,
+            m._[6] * v.x + m._[7] * v.y + m._[8] * v.z
+        )
     }
 }
 
 class Matrix4 {
-    v: Float32Array;
+    public _: Float32Array;
 
-    constructor(v: number[]) {
-        this.v = new Float32Array(v);
-    }
-
-    static fromMatrix3(m: Matrix3): Matrix4 {
-        const v = m.v;
-        return new Matrix4([
-            v[0], v[1], v[2], 0,
-            v[3], v[4], v[5], 0,
-            v[6], v[7], v[8], 0,
-            0, 0, 0, 1
-        ])
+    constructor(_: Array<number>) {
+        this._ = new Float32Array(_);
     }
 
     static identity(): Matrix4 {
@@ -173,8 +98,8 @@ class Matrix4 {
         const right = x / 2.0;
         const bottom = y / -2.0;
         const top = y / 2.0;
-        const far = -1;
-        const near = 1;
+        const far = -1000;
+        const near = 1000;
         return new Matrix4([
             2.0 / (right - left), 0, 0, 0,
             0, 2.0 / (top - bottom), 0, 0,
@@ -189,19 +114,42 @@ class Matrix4 {
     static translation(position: Point): Matrix4 {
         return Matrix4.model(position, 1);
     }
+
 }
 
 class Vertex {
-    position: Point;
-    uv: Point;
-    color: number[];
-    weight: number[];
-
-    constructor(position: Point, uv: Point, color: number[], weight: number[]) {
+    constructor(public position: Point, public uv: Point, public color: number[], public weight: number[]) {
         this.position = position;
         this.uv = uv;
         this.color = color;
         this.weight = weight;
+    }
+}
+
+class Plane {
+    constructor(public width: number, public height: number, public primitive: Primitive) {
+        this.width = width;
+        this.height = height;
+        this.primitive = primitive;
+    }
+
+    computeProjection(p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 {
+        const basisToPoints = (p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 => {
+            const m = new Matrix3([
+                p1.x, p2.x, p3.x,
+                p1.y, p2.y, p3.y,
+                1, 1, 1
+            ]);
+            const v = Matrix3.mulVector3(Matrix3.adjugate(m), new Vector3(p4.x, p4.y, 1));
+            return Matrix3.mul(m, new Matrix3([
+                v.x, 0, 0,
+                0, v.y, 0,
+                0, 0, v.z
+            ]));
+        }
+        const s = basisToPoints(new Point(0, 0), new Point(this.width, 0), new Point(0, this.height), new Point(this.width, this.height));
+        const d = basisToPoints(p1, p2, p3, p4);
+        return Matrix3.mul(d, Matrix3.adjugate(s));
     }
 }
 
@@ -213,20 +161,20 @@ class Primitive {
     }
 }
 
-const BYTES_PER_FLOAT = 4;
 const FLOATS_PER_VERTEX = 12;
 const MAX_VERTEX_COUNT = 8192;
 
 class Renderer {
-    private gl: WebGL2RenderingContext;
-    vertexCount: number; 
+    vertexCount: number;
     vertices: Float32Array;
 
-    constructor(gl: WebGL2RenderingContext, width: number, height: number) {
+    constructor(private gl: WebGL2RenderingContext, width: number, height: number) {
         this.gl = gl;
-        
+
+        // gl.clearColor(1, 0, 0, 1);
+        // gl.clear(gl.COLOR_BUFFER_BIT);
         gl.disable(gl.DEPTH_TEST);
-        gl.viewport(0, 0, window.innerWidth, window.innerHeight);
+        gl.viewport(0, 0, width, height);
 
         // Create the matrix uniform buffer
         {
@@ -235,9 +183,9 @@ class Renderer {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
 
             const data = new Float32Array(48);
-            data.set(Matrix4.orthographic(width, height).v, 0);
-            data.set(Matrix4.identity().v, 16);
-            data.set(Matrix4.model(Point.zero(), 1).v, 32);
+            data.set(Matrix4.orthographic(width, height)._, 0);
+            data.set(Matrix4.identity()._, 16);
+            data.set(Matrix4.model(new Point(0, 0), 1)._, 32);
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
         }
 
@@ -247,7 +195,7 @@ class Renderer {
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.bufferData(
                 gl.ARRAY_BUFFER,
-                BYTES_PER_FLOAT * FLOATS_PER_VERTEX * MAX_VERTEX_COUNT,
+                4 * FLOATS_PER_VERTEX * MAX_VERTEX_COUNT,
                 gl.STATIC_DRAW
             );
 
@@ -272,12 +220,16 @@ class Renderer {
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
     }
 
-    setModelMatrix(matrix: Matrix4) {
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, BYTES_PER_FLOAT * 32, matrix.v);
+    setProjectionMatrix(matrix: Matrix4) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, matrix._);
     }
 
-    setProjectionMatrix(matrix: Matrix4) {
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, matrix.v);
+    setViewMatrix(matrix: Matrix4) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 4 * 16, matrix._);
+    }
+
+    setModelMatrix(matrix: Matrix4) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 4 * 32, matrix._);
     }
 
     uploadVertices() {
@@ -306,12 +258,8 @@ class Renderer {
         return program;
     }
 
-    private createVertex(x: number, y: number): Float32Array {
-        return new Float32Array([
-            x, y,
-            x, y, 1, 1,
-            x, y
-        ]);
+    useProgram(program: WebGLProgram) {
+        this.gl.useProgram(program);
     }
 
     private copyVerticesToBuffer(vertices: Array<Vertex>) {
@@ -336,16 +284,16 @@ class Renderer {
         }
     }
 
-    private createPlaneUsingFunction(resolution: number, func: (position: Point) => Vertex) {
+    private newPlaneUsingFunction(width: number, height: number, resolution: number, func: (position: Point) => Vertex): Plane {
         const vertexCount = 6 * resolution * resolution;
         const vertices = new Array<Vertex>(vertexCount);
 
         for (let x=0; x<resolution; x++) {
             for (let y=0; y<resolution; y++) {
-                const xres = x / resolution;
-                const x1res = (x + 1) / resolution;
-                const yres = y / resolution;
-                const y1res = (y + 1) / resolution;
+                const xres = (x / resolution);
+                const x1res = ((x + 1) / resolution);
+                const yres = (y / resolution);
+                const y1res = ((y + 1) / resolution);
 
                 const nw = func(new Point(xres, yres));
                 const ne = func(new Point(x1res, yres));
@@ -367,15 +315,32 @@ class Renderer {
         const first = this.vertexCount;
         const count = vertexCount;
         this.copyVerticesToBuffer(vertices);
-        return new Primitive(this.gl.TRIANGLES, first, count);
+        // return new Primitive(this.gl.TRIANGLES, first, count);
+        return new Plane(
+            width,
+            height,
+            new Primitive(this.gl.TRIANGLES, first, count)
+        );
     }
 
     private randomColor(): number[] {
         return [Math.random(), Math.random(), Math.random(), 1];
     }
 
-    createPlane(resolution: number): Primitive {
-        return this.createPlaneUsingFunction(resolution, (position: Point): Vertex => {
+    // createPlane(resolution: number): Primitive {
+    //     return this.newPlaneUsingFunction(resolution, (position: Point): Vertex => {
+    //         const mappedPosition = Point.map(position, 0, 1, -1, 1);
+    //         return new Vertex(
+    //             mappedPosition,
+    //             position,
+    //             this.randomColor(),
+    //             [mappedPosition.x, mappedPosition.y, 1, 1]
+    //         );
+    //     });
+    // }
+
+    newPlane(width: number, height: number, resolution: number): Plane {
+        return this.newPlaneUsingFunction(width, height, resolution, (position: Point): Vertex => {
             const mappedPosition = Point.map(position, 0, 1, -1, 1);
             return new Vertex(
                 mappedPosition,
@@ -384,81 +349,13 @@ class Renderer {
                 [mappedPosition.x, mappedPosition.y, 1, 1]
             );
         });
-    }
-
-    createWeightedPlane(resolution: number): Primitive {
-        return this.createPlaneUsingFunction(resolution, (position: Point): Vertex => {
-            // We're currently normalizing vertex weights here, but I'm not 100% sure that's the correct thing to do.
-            const weights = new Array<number>(
-                Math.min(-position.x + 1, -position.y + 1),
-                Math.min(position.x, -position.y + 1),
-                Math.min(position.x, position.y),
-                Math.min(-position.x + 1, position.y)
-            );
-            const scalar = 1.0 / weights.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
-            return new Vertex(
-                Point.map(position, 0, 1, -1, 1),
-                position,
-                this.randomColor(),
-                weights.map((x) => x * scalar)
-            );
-        });
-    }
-
-    createCircle(resolution: number): Primitive {
-        const edgeVertexCount = resolution + 1;
-        const totalVertexCount = resolution + 2;
-        const vertices = new Array<Vertex>(totalVertexCount);
-
-        vertices[0] = new Vertex(
-            new Point(0, 0),
-            new Point(0.5, 0.5),
-            this.randomColor(),
-            [0, 0, 1, 1]
-        );
-
-        for (let i=0; i<edgeVertexCount; i++) {
-            const theta = i / resolution * 2 * Math.PI;
-            const position = new Point(Math.sin(theta), Math.cos(theta));
-            vertices[i + 1] = new Vertex(
-                position,
-                Point.map(position, -1, 1, 0, 1),
-                this.randomColor(),
-                [position.x, position.y, 1, 1]
-            );
-        }
-
-        const first = this.vertexCount;
-        const count = totalVertexCount;
-        this.copyVerticesToBuffer(vertices);
-        return new Primitive(this.gl.TRIANGLE_FAN, first, count);
+        // return new Plane(width, height, null);
     }
 
     drawPrimitive(primitive: Primitive) {
-        const gl = this.gl;
-        gl.drawArrays(primitive.mode, primitive.first, primitive.count);
+        this.gl.drawArrays(primitive.mode, primitive.first, primitive.count);
     }
 }
-
-const HANDLE_BIG = 20;
-const HANDLE_SMALL = 16;
-const DEFAULT_HANDLE_POSITION = 200;
-
-const findNearestPoint = (position: Point, options: Array<Point>): number => {
-    let closestDistance: number = Infinity;
-    let closestIndex: number = 0;
-    for (let i=0; i<options.length; i++) {
-        const current = options[i];
-        const distance = Point.distanceSquared(current, position);
-        if (distance < closestDistance) {
-            closestDistance = distance;
-            closestIndex = i;
-        }
-    }
-    return closestIndex;
-}
-
-const LERP_FACTOR = 0.2;
 
 (() => {
     const width = window.innerWidth;
@@ -472,125 +369,76 @@ const LERP_FACTOR = 0.2;
 
     const renderer = new Renderer(gl, width, height);
 
-    const patternProgram = renderer.createProgram(patternVertexShaderSource, rulerFragmentShaderSource);
-    gl.useProgram(patternProgram);
+    const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
+    renderer.useProgram(rulerProgram);
 
-    const handleProgram = renderer.createProgram(handleVertexShaderSource, handleFragmentShaderSource);
-    const handleColorUniformIndex = gl.getUniformLocation(handleProgram, "in_color");
-    gl.useProgram(handleProgram);
-    gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
-    
-    const circle = renderer.createCircle(32);
-    const weightedPlane = renderer.createWeightedPlane(4);
+    const rulerPlane = renderer.newPlane(1, 1, 2);
     renderer.uploadVertices();
 
-    let pulsingScale = HANDLE_BIG;
+    renderer.setModelMatrix(Matrix4.model(new Point(200, 200), 200));
+    renderer.drawPrimitive(rulerPlane.primitive);
 
-    let handlePositions = new Array<Point>(
-        new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
-        new Point(DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
-        new Point(DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION),
-        new Point(-DEFAULT_HANDLE_POSITION, DEFAULT_HANDLE_POSITION)
+    let handles = new Array<Point>(
+        new Point(-100, -100),
+        new Point(100, -100),
+        new Point(-100, 100),
+        new Point(100, 100)
     );
-
-    // Determine _what_ we are mousedowning on
-    // based on that
-    // drag the selected handle
-    // drag certain widgets
-    // toggle certain widgets
-    let currentHandle = 0;
-    let currentHandlePosition = handlePositions[currentHandle];
-    let isDraggingCurrentHandle = false;
-    let mouseDownPosition = new Point(0, 0);
-    canvas.onmousedown = (event) => {
-        const mousePosition = new Point(
-            event.pageX - (width / 2),
-            (height / 2) - event.pageY
-        );
-        const nearestHandle = findNearestPoint(mousePosition, handlePositions);
-        if (Point.distanceSquared(mousePosition, handlePositions[nearestHandle]) < (HANDLE_BIG * HANDLE_BIG)) {
-            if (nearestHandle == currentHandle) {
-                mouseDownPosition = mousePosition;
-                isDraggingCurrentHandle = true;
-            } else {
-                currentHandle = nearestHandle;
-            }
-            currentHandlePosition = handlePositions[currentHandle];
-        }
-    }
-
-    canvas.onmouseup = (event) => {
-        isDraggingCurrentHandle = false;
-    }
-
-    canvas.onmousemove = (event) => {
-        if (isDraggingCurrentHandle) {
-            const mousePosition = new Point(
-                event.pageX - (width / 2),
-                (height / 2) - event.pageY
-            );
-
-            const mouseMovement = Point.sub(mousePosition, mouseDownPosition);
-
-            handlePositions[currentHandle] = Point.add(currentHandlePosition, mouseMovement);
-        }
-    }
-
-    let rulerScale = 1.0;
-    canvas.onwheel = (event) => {
-        rulerScale += event.deltaY * 0.01;
-    }
+    let currentHandle = -1;
 
     const update = () => {
-        requestAnimationFrame(update);
-
-        // Determine our pulse and update pulsing variables
-        const t = performance.now();
-        const pulse = (((t / 1600) % 1) > 0.5) ? true : false;
-        const pulsingScaleTarget = (pulse) ? HANDLE_BIG : HANDLE_SMALL;
-        pulsingScale = lerp(pulsingScale, pulsingScaleTarget, LERP_FACTOR);
-
-        gl.useProgram(patternProgram);
-        // renderer.setModelMatrix(Matrix4.model(Point.zero(), 200));
-
-
         {
-            // console.log(Matrix4.orthographic(width, height));
-            let s = Matrix3.generalProjection2(new Point(width, height), handlePositions[0], handlePositions[1], handlePositions[2], handlePositions[3]);
-            // console.log(s);
-            let v = s.v;
+            const w = rulerPlane.width;
+            const h = rulerPlane.height;
+            const t = rulerPlane.computeProjection(handles[0], handles[1], handles[2], handles[3]);
+            const _ = t._;
             for (let i=0; i<9; i++) {
-                v[i] = v[i] / v[8];
+                _[i] = _[i] / _[8];
             }
-            let t = new Matrix4([
-                v[0], v[3], 0, v[6],
-                v[1], v[4], 0, v[7],
-                0, 0, 1, 0,
-                v[2], v[5], 0, v[8]
-            ]);
-            console.log(t);
-            renderer.setModelMatrix(Matrix4.identity());
-            renderer.setProjectionMatrix(t);
+            const t2 = new Matrix4([
+                _[0], _[3], 0, _[6],
+                _[1], _[4], 0, _[7],
+                   0,    0, 1,    0,
+                _[2], _[5], 0, _[8],
+            ])
+            console.log(t2);
+            renderer.setModelMatrix(Matrix4.model(new Point(0, 0), 2));
+            renderer.setViewMatrix(t2);
+            renderer.drawPrimitive(rulerPlane.primitive);
         }
-        
-        renderer.drawPrimitive(weightedPlane);
-
-        // const nearestHandle = findNearestPoint(mousePosition, handlePositions);
-
-
-        gl.useProgram(handleProgram);
-        for (let i=0; i<4; i++) {
-            if (i == currentHandle) {
-                renderer.setModelMatrix(Matrix4.model(handlePositions[i], pulsingScale));
-                gl.uniform4fv(handleColorUniformIndex, [1, 1, 0, 1]);
-            } else {
-                renderer.setModelMatrix(Matrix4.model(handlePositions[i], HANDLE_SMALL));
-                gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
-            }
-            renderer.drawPrimitive(circle);
-        }
-
     }
 
     update();
-})();
+
+    const move = (e: MouseEvent) => {
+        if (currentHandle < 0) {
+            return;
+        }
+        handles[currentHandle] = new Point(e.pageX - (width / 2), (height / 2) - e.pageY);
+        update();
+    }
+
+    window.onmousedown = (e: MouseEvent) => {
+        console.log("!!!");
+        let x = e.pageX - (width / 2);
+        let y = (height / 2) - e.pageY;
+        console.log(x, y);
+        let best = 400; // 20px squared
+        currentHandle = -1;
+        for (let i=0; i<4; i++) {
+            console.log(handles[i].x, handles[i].y);
+            let dx = x - handles[i].x;
+            let dy = y - handles[i].y;
+            let distanceSquared = dx * dx + dy * dy;
+            if (best > distanceSquared) {
+                best = distanceSquared;
+                currentHandle = i;
+            }
+        }
+        move(e);
+    }
+    window.onmouseup = () => {
+        currentHandle = -1;
+    }
+    window.onmousemove = move;
+})()
