@@ -2,7 +2,7 @@
 // [x] Form planes in a 0 .. 1 space
 // [x] Prevent handles jumping on mouse clicks
 // [x] Update on window resize
-// Make canvas resolution independent
+// [x] Make canvas resolution independent
 
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
@@ -17,6 +17,10 @@ class Point {
     constructor(public x: number, public y: number) {
         this.x = x;
         this.y = y;
+    }
+
+    static add(a: Point, b: Point): Point {
+        return new Point(a.x + b.x, a.y + b.y);
     }
 
     static map(x: Point, inMin: number, inMax: number, outMin: number, outMax: number): Point {
@@ -173,8 +177,9 @@ const MAX_VERTEX_COUNT = 8192;
 class Renderer {
     vertexCount: number;
     vertices: Float32Array;
+    orthographicScale: number;
 
-    constructor(private gl: WebGL2RenderingContext) {
+    constructor(private gl: WebGL2RenderingContext, orthographicScale: number) {
         this.gl = gl;
 
         // Create the matrix uniform buffer
@@ -221,6 +226,8 @@ class Renderer {
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
 
         gl.disable(gl.DEPTH_TEST);
+
+        this.orthographicScale = orthographicScale;
     }
 
     setProjectionMatrix(matrix: Matrix4) {
@@ -236,8 +243,10 @@ class Renderer {
     }
 
     resizeCanvas(width: number, height: number) {
+        // width /= this.orthographicScale;
+        // height /= this.orthographicScale;
         this.gl.viewport(0, 0, width, height);
-        this.setProjectionMatrix(Matrix4.orthographic(width, height));
+        this.setProjectionMatrix(Matrix4.orthographic(width / this.orthographicScale, height / this.orthographicScale));
     }
 
     uploadVertices() {
@@ -349,6 +358,30 @@ class Renderer {
     drawPrimitive(primitive: Primitive) {
         this.gl.drawArrays(primitive.mode, primitive.first, primitive.count);
     }
+
+    canvasToWindowPoint(p: Point): Point {
+        return new Point(
+            (p.x * this.orthographicScale) + (window.innerWidth / 2),
+            (window.innerHeight / 2) - (p.y * this.orthographicScale)
+        );
+    }
+
+    windowToCanvasPoint(p: Point): Point {
+        return new Point(
+            (p.x - (window.innerWidth / 2)) / this.orthographicScale,
+            ((window.innerHeight / 2) - p.y) / this.orthographicScale
+        );
+    }
+
+    windowToCanvasScalar(s: number): number {
+        return s / this.orthographicScale;
+    }
+}
+
+const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+function remToPixels(rem: number): number {
+    return rem * REM_TO_PIXELS;
 }
 
 (() => {
@@ -356,12 +389,9 @@ class Renderer {
     let height = window.innerHeight;
 
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
-    canvas.width = width;
-    canvas.height = height;
-
     const gl = canvas.getContext("webgl2")!;
 
-    const renderer = new Renderer(gl);
+    const renderer = new Renderer(gl, 100);
 
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     renderer.useProgram(rulerProgram);
@@ -369,20 +399,16 @@ class Renderer {
     const rulerPlane = renderer.newPlane(1, 1, 2);
     renderer.uploadVertices();
 
-    renderer.setModelMatrix(Matrix4.model(new Point(200, 200), 200));
-    renderer.drawPrimitive(rulerPlane.primitive);
-
     let handles = new Array<HTMLElement>(4);
     for (let i=0; i<4; i++) {
         handles[i] = document.getElementById("handle" + i);
     }
 
-    const defaultHandlePosition = ((width < height) ? width : height) / 4;
     let handlePositions = new Array<Point>(
-        new Point(-defaultHandlePosition, -defaultHandlePosition),
-        new Point(defaultHandlePosition, -defaultHandlePosition),
-        new Point(-defaultHandlePosition, defaultHandlePosition),
-        new Point(defaultHandlePosition, defaultHandlePosition)
+        new Point(-2, -2),
+        new Point( 2, -2),
+        new Point(-2,  2),
+        new Point( 2,  2)
     );
     let currentHandle = -1;
     let mouseOffset = new Point(0, 0);
@@ -408,8 +434,12 @@ class Renderer {
         }
 
         for (let i=0; i<4; i++) {
-            handles[i].style.left = (handlePositions[i].x + (width / 2) - 20) + "px";
-            handles[i].style.top = (height / 2) - (handlePositions[i].y + 20) + "px";
+            const handlePosition = Point.add(
+                renderer.canvasToWindowPoint(handlePositions[i]),
+                new Point(-20, -20)
+            );
+            handles[i].style.left = handlePosition.x + "px";
+            handles[i].style.top = handlePosition.y + "px";
         }
     }
 
@@ -430,21 +460,20 @@ class Renderer {
         if (currentHandle < 0) {
             return;
         }
-        handlePositions[currentHandle] = new Point(
-            mouseOffset.x + e.pageX - (width / 2),
-            mouseOffset.y + (height / 2) - e.pageY
+        handlePositions[currentHandle] = Point.add(
+            mouseOffset,
+            renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY))
         );
         update();
     }
 
     window.onmousedown = (e: MouseEvent) => {
-        let x = e.pageX - (width / 2);
-        let y = (height / 2) - e.pageY;
-        let best = 400; // 20px squared
+        let mousePosition = renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY));
+        let best = renderer.windowToCanvasScalar(400); // 20px squared
         currentHandle = -1;
         for (let i=0; i<4; i++) {
-            let dx = x - handlePositions[i].x;
-            let dy = y - handlePositions[i].y;
+            let dx = mousePosition.x - handlePositions[i].x;
+            let dy = mousePosition.y - handlePositions[i].y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
                 mouseOffset = new Point(-dx, -dy);
