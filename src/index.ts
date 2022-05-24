@@ -1,8 +1,8 @@
 // TODO
-// [x] Form planes in a 0 .. 1 space
-// [x] Prevent handles jumping on mouse clicks
-// [x] Update on window resize
-// [x] Make canvas resolution independent
+// Ruler zooming
+// Handle sensitivity
+// Handle appearance
+// Light/dark mode
 
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
@@ -396,7 +396,7 @@ function remToPixels(rem: number): number {
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     renderer.useProgram(rulerProgram);
 
-    const rulerPlane = renderer.newPlane(1, 1, 2);
+    const rulerPlane = renderer.newPlane(1, 1, 5);
     renderer.uploadVertices();
 
     let handles = new Array<HTMLElement>(4);
@@ -428,7 +428,7 @@ function remToPixels(rem: number): number {
                    0,    0, 1,    0,
                 _[2], _[5], 0, _[8],
             ])
-            renderer.setModelMatrix(Matrix4.model(new Point(0, 0), 1));
+            renderer.setModelMatrix(Matrix4.model(new Point(-2, -2), 5));
             renderer.setViewMatrix(t2);
             renderer.drawPrimitive(rulerPlane.primitive);
         }

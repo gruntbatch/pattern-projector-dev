@@ -12,7 +12,7 @@ float grid(vec2 uv, float res) {
 }
 
 void main(void) {
-    vec2 uv = inout_uv * 128.0;
+    vec2 uv = inout_uv * 500.0;
     float x = grid(uv, 0.1);
     vec3 color = inout_color.xyz;
     out_color = vec4(color * x, 1);
