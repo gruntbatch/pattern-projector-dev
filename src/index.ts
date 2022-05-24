@@ -1,5 +1,6 @@
 // TODO
 // [x] Form planes in a 0 .. 1 space
+// [x] Prevent handles jumping on mouse clicks
 // Update on window resize
 // Make canvas resolution independent
 
@@ -381,6 +382,7 @@ class Renderer {
         new Point(100, 100)
     );
     let currentHandle = -1;
+    let mouseOffset = new Point(0, 0);
 
     const update = () => {
         {
@@ -414,7 +416,10 @@ class Renderer {
         if (currentHandle < 0) {
             return;
         }
-        handlePositions[currentHandle] = new Point(e.pageX - (width / 2), (height / 2) - e.pageY);
+        handlePositions[currentHandle] = new Point(
+            mouseOffset.x + e.pageX - (width / 2),
+            mouseOffset.y + (height / 2) - e.pageY
+        );
         update();
     }
 
@@ -428,6 +433,7 @@ class Renderer {
             let dy = y - handlePositions[i].y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
+                mouseOffset = new Point(-dx, -dy);
                 best = distanceSquared;
                 currentHandle = i;
             }
