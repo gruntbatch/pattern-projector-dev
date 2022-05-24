@@ -378,7 +378,12 @@ class Renderer {
     renderer.setModelMatrix(Matrix4.model(new Point(200, 200), 200));
     renderer.drawPrimitive(rulerPlane.primitive);
 
-    let handles = new Array<Point>(
+    let handles = new Array<HTMLElement>(4);
+    for (let i=0; i<4; i++) {
+        handles[i] = document.getElementById("handle" + i);
+    }
+
+    let handlePositions = new Array<Point>(
         new Point(-100, -100),
         new Point(100, -100),
         new Point(-100, 100),
@@ -390,7 +395,7 @@ class Renderer {
         {
             const w = rulerPlane.width;
             const h = rulerPlane.height;
-            const t = rulerPlane.computeProjection(handles[0], handles[1], handles[2], handles[3]);
+            const t = rulerPlane.computeProjection(handlePositions[0], handlePositions[1], handlePositions[2], handlePositions[3]);
             const _ = t._;
             for (let i=0; i<9; i++) {
                 _[i] = _[i] / _[8];
@@ -401,10 +406,14 @@ class Renderer {
                    0,    0, 1,    0,
                 _[2], _[5], 0, _[8],
             ])
-            console.log(t2);
             renderer.setModelMatrix(Matrix4.model(new Point(0, 0), 2));
             renderer.setViewMatrix(t2);
             renderer.drawPrimitive(rulerPlane.primitive);
+        }
+
+        for (let i=0; i<4; i++) {
+            handles[i].style.left = (handlePositions[i].x + (width / 2) - 20) + "px";
+            handles[i].style.top = (height / 2) - (handlePositions[i].y + 20) + "px";
         }
     }
 
@@ -414,21 +423,18 @@ class Renderer {
         if (currentHandle < 0) {
             return;
         }
-        handles[currentHandle] = new Point(e.pageX - (width / 2), (height / 2) - e.pageY);
+        handlePositions[currentHandle] = new Point(e.pageX - (width / 2), (height / 2) - e.pageY);
         update();
     }
 
     window.onmousedown = (e: MouseEvent) => {
-        console.log("!!!");
         let x = e.pageX - (width / 2);
         let y = (height / 2) - e.pageY;
-        console.log(x, y);
         let best = 400; // 20px squared
         currentHandle = -1;
         for (let i=0; i<4; i++) {
-            console.log(handles[i].x, handles[i].y);
-            let dx = x - handles[i].x;
-            let dy = y - handles[i].y;
+            let dx = x - handlePositions[i].x;
+            let dy = y - handlePositions[i].y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
                 best = distanceSquared;
