@@ -1,7 +1,7 @@
 // TODO
 // [x] Form planes in a 0 .. 1 space
 // [x] Prevent handles jumping on mouse clicks
-// Update on window resize
+// [x] Update on window resize
 // Make canvas resolution independent
 
 const handleVert = `#include("src/handle.vert")`
@@ -174,13 +174,8 @@ class Renderer {
     vertexCount: number;
     vertices: Float32Array;
 
-    constructor(private gl: WebGL2RenderingContext, width: number, height: number) {
+    constructor(private gl: WebGL2RenderingContext) {
         this.gl = gl;
-
-        // gl.clearColor(1, 0, 0, 1);
-        // gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.disable(gl.DEPTH_TEST);
-        gl.viewport(0, 0, width, height);
 
         // Create the matrix uniform buffer
         {
@@ -189,7 +184,7 @@ class Renderer {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
 
             const data = new Float32Array(48);
-            data.set(Matrix4.orthographic(width, height)._, 0);
+            data.set(Matrix4.identity()._, 0);
             data.set(Matrix4.identity()._, 16);
             data.set(Matrix4.model(new Point(0, 0), 1)._, 32);
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
@@ -224,6 +219,8 @@ class Renderer {
 
         this.vertexCount = 0
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
+
+        gl.disable(gl.DEPTH_TEST);
     }
 
     setProjectionMatrix(matrix: Matrix4) {
@@ -236,6 +233,11 @@ class Renderer {
 
     setModelMatrix(matrix: Matrix4) {
         this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 4 * 32, matrix._);
+    }
+
+    resizeCanvas(width: number, height: number) {
+        this.gl.viewport(0, 0, width, height);
+        this.setProjectionMatrix(Matrix4.orthographic(width, height));
     }
 
     uploadVertices() {
@@ -350,8 +352,8 @@ class Renderer {
 }
 
 (() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
     canvas.width = width;
@@ -359,7 +361,7 @@ class Renderer {
 
     const gl = canvas.getContext("webgl2")!;
 
-    const renderer = new Renderer(gl, width, height);
+    const renderer = new Renderer(gl);
 
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     renderer.useProgram(rulerProgram);
@@ -375,11 +377,12 @@ class Renderer {
         handles[i] = document.getElementById("handle" + i);
     }
 
+    const defaultHandlePosition = ((width < height) ? width : height) / 4;
     let handlePositions = new Array<Point>(
-        new Point(-100, -100),
-        new Point(100, -100),
-        new Point(-100, 100),
-        new Point(100, 100)
+        new Point(-defaultHandlePosition, -defaultHandlePosition),
+        new Point(defaultHandlePosition, -defaultHandlePosition),
+        new Point(-defaultHandlePosition, defaultHandlePosition),
+        new Point(defaultHandlePosition, defaultHandlePosition)
     );
     let currentHandle = -1;
     let mouseOffset = new Point(0, 0);
@@ -411,6 +414,17 @@ class Renderer {
     }
 
     update();
+
+    const resize = () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        renderer.resizeCanvas(width, height);
+        update();
+    }
+
+    resize();
 
     const move = (e: MouseEvent) => {
         if (currentHandle < 0) {
@@ -444,4 +458,5 @@ class Renderer {
         currentHandle = -1;
     }
     window.onmousemove = move;
+    window.onresize = resize;
 })()
