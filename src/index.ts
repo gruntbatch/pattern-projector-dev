@@ -1,8 +1,7 @@
 // TODO
+// [x] Handle sensitivity
 // Ruler zooming
-// Handle sensitivity
 // Handle appearance
-// Light/dark mode
 
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
@@ -32,6 +31,10 @@ class Point {
 
     static scale(p: Point, s: number): Point {
         return new Point(p.x * s, p.y * s);
+    }
+
+    static sub(a: Point, b: Point): Point {
+        return new Point(a.x - b.x, a.y - b.y);
     }
 }
 
@@ -415,7 +418,9 @@ function remToPixels(rem: number): number {
         new Point( 2,  2)
     );
     let currentHandle = -1;
-    let mouseOffset = new Point(0, 0);
+    let initialHandlePosition = new Point(0, 0);
+    let initialMousePosition = new Point(0, 0);
+    let sensitivity = 0.1;
 
     const update = () => {
         {
@@ -464,25 +469,34 @@ function remToPixels(rem: number): number {
         if (currentHandle < 0) {
             return;
         }
+
         handlePositions[currentHandle] = Point.add(
-            mouseOffset,
-            renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY))
+            initialHandlePosition,
+            Point.scale(
+                Point.sub(
+                    renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY)),
+                    renderer.windowToCanvasPoint(initialMousePosition)
+                ),
+                sensitivity
+            )
         );
         update();
     }
 
     window.onmousedown = (e: MouseEvent) => {
-        let mousePosition = renderer.windowToCanvasPoint(new Point(e.pageX, e.pageY));
+        const mousePosition = new Point(e.pageX, e.pageY);
+        const canvasPosition = renderer.windowToCanvasPoint(mousePosition);
         let best = renderer.windowToCanvasScalar(remToPixels(1)); // 1rem squared
         currentHandle = -1;
         for (let i=0; i<4; i++) {
-            let dx = mousePosition.x - handlePositions[i].x;
-            let dy = mousePosition.y - handlePositions[i].y;
+            let dx = canvasPosition.x - handlePositions[i].x;
+            let dy = canvasPosition.y - handlePositions[i].y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
-                mouseOffset = new Point(-dx, -dy);
                 best = distanceSquared;
                 currentHandle = i;
+                initialHandlePosition = handlePositions[currentHandle];
+                initialMousePosition = mousePosition;
             }
         }
         move(e);
