@@ -10,18 +10,21 @@
 <body>
     <div id="menu" class="flex column">
         <div id="mode-selector" class="bubble flex rounded h2">
-            <a>Ruler</a>
-            <a>Pattern</a>
-            <a>=</a>
+            <a id="ruler-tab">Ruler</a>
+            <a id="pattern-tab">Pattern</a>
+            <a id="view-tab">View</a>
         </div>
-        <div id="sensitivity" class="bubble flex rounded h2">
-            <p>Drag here to adjust sensitivity</p>
-            <p>1.00</p>
+        <div id="ruler-panel">
+            <div id="sensitivity" class="bubble flex rounded h2">
+                <p>Drag here to adjust sensitivity</p>
+                <p>1.00</p>
+            </div>
+            <div id="scale" class="bubble flex rounded h2">
+                <p>Drag to adjust scale</p>
+                <p>1.00</p>
+            </div>
         </div>
-        <div id="scale" class="bubble flex rounded h2">
-            <p>Drag to adjust scale</p>
-            <p>1.00</p>
-        </div>
+        <div id="pattern-panel"></div>
     </div>
     <div id="handle0" class="handle rounded h2 w2"></div>
     <div id="handle1" class="handle rounded h2 w2"></div>

@@ -385,6 +385,84 @@ class Renderer {
     }
 }
 
+enum MenuMode {
+    Pattern,
+    Ruler,
+    View,   
+};
+
+class Interface {
+    menuMode: MenuMode;
+
+    panel: HTMLElement;
+    rulerTab: HTMLElement;
+    rulerPanel: HTMLElement;
+    
+    patternTab: HTMLElement;
+    patternPanel: HTMLElement;
+    
+    viewTab: HTMLElement;
+
+    handles: Array<HTMLElement>;
+
+    constructor () {
+        this.menuMode = MenuMode.Ruler;
+
+        this.patternTab = document.getElementById("pattern-tab");
+        this.patternTab.onclick = () => {
+            this.menuMode = MenuMode.Pattern;
+            this.updateMenuVisibility();
+        }
+        this.patternPanel = document.getElementById("pattern-panel");
+
+        this.rulerTab = document.getElementById("ruler-tab");
+        this.rulerTab.onclick = () => {
+            this.menuMode = MenuMode.Ruler;
+            this.updateMenuVisibility();
+        }
+        this.rulerPanel = document.getElementById("ruler-panel");
+        
+        this.viewTab = document.getElementById("view-tab");
+        this.viewTab.onclick = () => {
+            this.menuMode = MenuMode.View;
+            this.updateMenuVisibility();
+        };
+
+        this.updateMenuVisibility();
+    }
+
+    updateMenuVisibility() {
+        switch(this.menuMode) {
+            case MenuMode.Pattern:
+                this.patternTab.classList.add("selected");
+                this.rulerTab.classList.remove("selected");
+                this.viewTab.classList.remove("selected");
+
+                this.rulerPanel.classList.add("display-none");
+                this.patternPanel.classList.remove("display-none");
+                break;
+
+            case MenuMode.Ruler:
+                this.patternTab.classList.remove("selected");
+                this.rulerTab.classList.add("selected");
+                this.viewTab.classList.remove("selected");
+
+                this.rulerPanel.classList.remove("display-none");
+                this.patternPanel.classList.add("display-none");
+                break;
+
+            case MenuMode.View:
+                this.rulerTab.classList.remove("selected");
+                this.patternTab.classList.remove("selected");
+                this.viewTab.classList.add("selected");
+
+                this.rulerPanel.classList.add("display-none");
+                this.patternPanel.classList.add("display-none");
+                break;
+        }
+    }
+}
+
 const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
 function remToPixels(rem: number): number {
@@ -397,6 +475,7 @@ function remToPixels(rem: number): number {
 
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
+    const interface = new Interface();
 
     const renderer = new Renderer(gl, 100);
 
@@ -483,7 +562,7 @@ function remToPixels(rem: number): number {
         update();
     }
 
-    window.onmousedown = (e: MouseEvent) => {
+    canvas.onmousedown = (e: MouseEvent) => {
         const mousePosition = new Point(e.pageX, e.pageY);
         const canvasPosition = renderer.windowToCanvasPoint(mousePosition);
         let best = renderer.windowToCanvasScalar(remToPixels(1)); // 1rem squared
@@ -501,9 +580,9 @@ function remToPixels(rem: number): number {
         }
         move(e);
     }
-    window.onmouseup = () => {
+    canvas.onmouseup = () => {
         currentHandle = -1;
     }
-    window.onmousemove = move;
+    canvas.onmousemove = move;
     window.onresize = resize;
 })()

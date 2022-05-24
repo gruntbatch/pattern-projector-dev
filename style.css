@@ -15,6 +15,19 @@ body {
     border-radius: 2rem;
     background-color: rgba(255, 255, 255, 0.5);
     padding: 1rem;
+    width: 24rem;
+}
+
+#menu >:not(:first-of-type) {
+    margin-top: 1rem;
+}
+
+#mode-selector > .selected {
+    text-decoration: underline;
+}
+
+.display-none {
+    display: none;
 }
 
 .bubble {
@@ -25,12 +38,8 @@ body {
     align-items: center;
 }
 
-.bubble:not(:last-of-type) {
-    margin-bottom: 1rem;
-}
-
-.bubble :not(:last-child) {
-    margin-right: 1rem;
+.bubble:not(:first-of-type) {
+    margin-top: 1rem;
 }
 
 #sensitivity {
