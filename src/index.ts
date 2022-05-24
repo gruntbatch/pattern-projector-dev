@@ -56,15 +56,102 @@ class Point {
     }
 }
 
-class Matrix {
+class Vector3 {
+    x: number;
+    y: number;
+    z: number;
+
+    constructor(x: number, y: number, z: number) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    static fromPoint(p: Point) {
+        return new Vector3(p.x, p.y, 1);
+    }
+}
+
+class Matrix3 {
     v: Float32Array;
 
     constructor(v: number[]) {
         this.v = new Float32Array(v);
     }
 
-    static identity(): Matrix {
-        return new Matrix([
+    static adjugate(m: Matrix3): Matrix3 {
+        const v = m.v;
+        return new Matrix3([
+            v[4] * v[8] - v[5] * v[7], v[2] * v[7] - v[1] * v[8], v[1] * v[5] - v[2] * v[4],
+            v[5] * v[6] - v[3] * v[8], v[0] * v[8] - v[2] * v[6], v[2] * v[3] - v[0] * v[5],
+            v[3] * v[7] - v[4] * v[6], v[1] * v[6] - v[0] * v[7], v[0] * v[4] - v[1] * v[3]
+        ]);
+    }
+
+    static mul(a: Matrix3, b: Matrix3): Matrix3 {
+        let v = new Array<number>(9);
+        for (let i=0; i<3; i++) {
+            for (let j=0; j<3; j++) {
+                let sum = 0;
+                for (let k=0; k<3; k++) {
+                    sum += a.v[3 * i + k] * b.v[3 * k + j];
+                }
+                v[3 * i + j] = sum;
+            }
+        }
+        return new Matrix3(v);
+    }
+
+    static mulVector3(m: Matrix3, v: Vector3): Vector3 {
+        return new Vector3(
+            m.v[0] * v.x + m.v[1] * v.y + m.v[2] * v.z,
+            m.v[3] * v.x + m.v[4] * v.y + m.v[5] * v.z,
+            m.v[6] * v.x + m.v[7] * v.y + m.v[8] * v.z
+        );
+    }
+
+    private static basisToPoints(p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 {
+        let m = new Matrix3([
+            p1.x, p2.x, p3.x,
+            p1.y, p2.y, p3.y,
+            1, 1, 1
+        ]);
+        let p = Matrix3.mulVector3(Matrix3.adjugate(m), Vector3.fromPoint(p4));
+        return Matrix3.mul(m, new Matrix3([
+            p.x, 0, 0,
+            0, p.y, 0,
+            0, 0, p.z
+        ]));
+    }
+
+    static generalProjection2(offset: Point, p1: Point, p2: Point, p3: Point, p4: Point)
+    {
+        let s = this.basisToPoints(new Point(0, 0), new Point(offset.x, 0), new Point(0, offset.y), offset);
+        let d = this.basisToPoints(p1, p2, p3, p4);
+        console.log(d);
+        return this.mul(d, this.adjugate(s));
+    }
+}
+
+class Matrix4 {
+    v: Float32Array;
+
+    constructor(v: number[]) {
+        this.v = new Float32Array(v);
+    }
+
+    static fromMatrix3(m: Matrix3): Matrix4 {
+        const v = m.v;
+        return new Matrix4([
+            v[0], v[1], v[2], 0,
+            v[3], v[4], v[5], 0,
+            v[6], v[7], v[8], 0,
+            0, 0, 0, 1
+        ])
+    }
+
+    static identity(): Matrix4 {
+        return new Matrix4([
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
@@ -72,8 +159,8 @@ class Matrix {
         ]);
     }
 
-    static model(position: Point, scale: number): Matrix {
-        return new Matrix([
+    static model(position: Point, scale: number): Matrix4 {
+        return new Matrix4([
             scale, 0, 0, 0,
             0, scale, 0, 0,
             0, 0, 1, 0,
@@ -81,14 +168,14 @@ class Matrix {
         ]);
     }
 
-    static orthographic(x: number, y: number): Float32Array {
+    static orthographic(x: number, y: number): Matrix4 {
         const left = x / -2.0;
         const right = x / 2.0;
         const bottom = y / -2.0;
         const top = y / 2.0;
         const far = -1;
         const near = 1;
-        return new Float32Array([
+        return new Matrix4([
             2.0 / (right - left), 0, 0, 0,
             0, 2.0 / (top - bottom), 0, 0,
             0, 0, -2.0 / (far - near), 0,
@@ -99,8 +186,8 @@ class Matrix {
         ]);
     }
 
-    static translation(position: Point): Matrix {
-        return Matrix.model(position, 1);
+    static translation(position: Point): Matrix4 {
+        return Matrix4.model(position, 1);
     }
 }
 
@@ -148,9 +235,9 @@ class Renderer {
             gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, buffer);
 
             const data = new Float32Array(48);
-            data.set(Matrix.orthographic(width, height), 0);
-            data.set(Matrix.identity().v, 16);
-            data.set(Matrix.model(Point.zero(), 1).v, 32);
+            data.set(Matrix4.orthographic(width, height).v, 0);
+            data.set(Matrix4.identity().v, 16);
+            data.set(Matrix4.model(Point.zero(), 1).v, 32);
             gl.bufferData(gl.UNIFORM_BUFFER, data, gl.STATIC_DRAW);
         }
 
@@ -185,8 +272,12 @@ class Renderer {
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
     }
 
-    setModelMatrix(matrix: Float32Array) {
-        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, BYTES_PER_FLOAT * 32, matrix);
+    setModelMatrix(matrix: Matrix4) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, BYTES_PER_FLOAT * 32, matrix.v);
+    }
+
+    setProjectionMatrix(matrix: Matrix4) {
+        this.gl.bufferSubData(this.gl.UNIFORM_BUFFER, 0, matrix.v);
     }
 
     uploadVertices() {
@@ -460,7 +551,28 @@ const LERP_FACTOR = 0.2;
         pulsingScale = lerp(pulsingScale, pulsingScaleTarget, LERP_FACTOR);
 
         gl.useProgram(patternProgram);
-        renderer.setModelMatrix(Matrix.model(Point.zero(), 200).v);
+        // renderer.setModelMatrix(Matrix4.model(Point.zero(), 200));
+
+
+        {
+            // console.log(Matrix4.orthographic(width, height));
+            let s = Matrix3.generalProjection2(new Point(width, height), handlePositions[0], handlePositions[1], handlePositions[2], handlePositions[3]);
+            // console.log(s);
+            let v = s.v;
+            for (let i=0; i<9; i++) {
+                v[i] = v[i] / v[8];
+            }
+            let t = new Matrix4([
+                v[0], v[3], 0, v[6],
+                v[1], v[4], 0, v[7],
+                0, 0, 1, 0,
+                v[2], v[5], 0, v[8]
+            ]);
+            console.log(t);
+            renderer.setModelMatrix(Matrix4.identity());
+            renderer.setProjectionMatrix(t);
+        }
+        
         renderer.drawPrimitive(weightedPlane);
 
         // const nearestHandle = findNearestPoint(mousePosition, handlePositions);
@@ -469,10 +581,10 @@ const LERP_FACTOR = 0.2;
         gl.useProgram(handleProgram);
         for (let i=0; i<4; i++) {
             if (i == currentHandle) {
-                renderer.setModelMatrix(Matrix.model(handlePositions[i], pulsingScale).v);
+                renderer.setModelMatrix(Matrix4.model(handlePositions[i], pulsingScale));
                 gl.uniform4fv(handleColorUniformIndex, [1, 1, 0, 1]);
             } else {
-                renderer.setModelMatrix(Matrix.model(handlePositions[i], HANDLE_SMALL).v);
+                renderer.setModelMatrix(Matrix4.model(handlePositions[i], HANDLE_SMALL));
                 gl.uniform4fv(handleColorUniformIndex, [1, 0, 0, 1]);
             }
             renderer.drawPrimitive(circle);
