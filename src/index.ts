@@ -1,9 +1,9 @@
 // TODO
 // [x] Handle sensitivity
-// Ruler zooming
+// [x] Ruler zooming
 // Handle appearance
-// change where planes originate
-// scale scene origin
+// [x] change where planes originate
+// [x] scale scene origin
 // move scene origin along xy plane
 // Swap menu placement?
 // display debug info on two lines
@@ -367,11 +367,12 @@ class Renderer {
 
     newPlane(width: number, height: number, resolution: number): Plane {
         return this.newPlaneUsingFunction(width, height, resolution, (position: Point): Vertex => {
+            const mappedPosition = Point.map(position, 0, 1, -1, 1);
             return new Vertex(
-                position,
+                mappedPosition,
                 position,
                 this.randomColor(),
-                [position.x, position.y, 1, 1]
+                [mappedPosition.x, mappedPosition.y, 1, 1]
             );
         });
     }
@@ -401,11 +402,17 @@ class Renderer {
 
 class Interface {
     handles: Array<HTMLElement>;
+    zoomReset: HTMLElement;
+    onZoomReset: () => void;
     zoomValue: HTMLElement;
     handleXValues: Array<HTMLElement>;
     handleYValues: Array<HTMLElement>;
 
     constructor () {
+        this.zoomReset = document.getElementById("zoom-reset");
+        this.zoomReset.onclick = () => {
+            this.onZoomReset();
+        }
         this.zoomValue = document.getElementById("zoom-value");
         this.handleXValues = new Array<HTMLElement>(4)
         this.handleYValues = new Array<HTMLElement>(4)
@@ -433,6 +440,7 @@ function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
 }
 
+const DEFAULT_SCALE_VALUE = 2.5;
 const DEFAULT_ZOOM_VALUE = 100;
 
 (() => {
@@ -465,6 +473,7 @@ const DEFAULT_ZOOM_VALUE = 100;
     let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
+    let scale = DEFAULT_SCALE_VALUE;
     let sensitivity = 0.01;
 
     const update = () => {
@@ -482,7 +491,7 @@ const DEFAULT_ZOOM_VALUE = 100;
                    0,    0, 1,    0,
                 _[2], _[5], 0, _[8],
             ])
-            renderer.setModelMatrix(Matrix4.model(new Point(-2, -2), 5));
+            renderer.setModelMatrix(Matrix4.model(new Point(0.5, 0.5), scale));
             renderer.setViewMatrix(t2);
             renderer.drawPrimitive(rulerPlane.primitive);
         }
@@ -496,7 +505,7 @@ const DEFAULT_ZOOM_VALUE = 100;
             handles[i].style.top = handlePosition.y + "px";
         }
 
-        interface.updateValues(renderer.orthographicScale, handlePositions);
+        interface.updateValues(scale, handlePositions);
     }
 
     update();
@@ -552,5 +561,15 @@ const DEFAULT_ZOOM_VALUE = 100;
         currentHandle = -1;
     }
     canvas.onmousemove = move;
+    canvas.onwheel = (e: WheelEvent) => {
+        scale += e.deltaY * 0.0005;
+        update();
+    }
+
+    interface.onZoomReset = () => {
+        scale = DEFAULT_SCALE_VALUE;
+        update();
+    }
+
     window.onresize = resize;
 })()
