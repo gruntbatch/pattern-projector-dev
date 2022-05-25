@@ -6,9 +6,10 @@
 // [x] scale scene origin
 // move scene origin along xy plane
 // Swap menu placement?
-// display debug info on two lines
+// [x] display debug info on two lines
 // fix handles blocking clicks
-// style handles
+// fix draggon off of the canvas bounds
+// [x] style handles
 // set handles to box size mode
 // save and load calibration
 // upload pattern pdf
@@ -405,6 +406,8 @@ class Interface {
     zoomReset: HTMLElement;
     onZoomReset: () => void;
     zoomValue: HTMLElement;
+    handleResets: Array<HTMLElement>;
+    onHandleReset: (i: number) => void;
     handleXValues: Array<HTMLElement>;
     handleYValues: Array<HTMLElement>;
 
@@ -414,9 +417,14 @@ class Interface {
             this.onZoomReset();
         }
         this.zoomValue = document.getElementById("zoom-value");
-        this.handleXValues = new Array<HTMLElement>(4)
-        this.handleYValues = new Array<HTMLElement>(4)
+        this.handleResets = new Array<HTMLElement>(4);
+        this.handleXValues = new Array<HTMLElement>(4);
+        this.handleYValues = new Array<HTMLElement>(4);
         for (let i=0; i<4; i++) {
+            this.handleResets[i] = document.getElementById("reset" + i);
+            this.handleResets[i].onclick = () => {
+                this.onHandleReset(i);
+            }
             this.handleXValues[i] = document.getElementById("x" + i);
             this.handleYValues[i] = document.getElementById("y" + i);
         }
@@ -427,9 +435,9 @@ class Interface {
 
         for (let i=0; i<4; i++) {
             const x = handleValues[i].x;
-            this.handleXValues[i].innerHTML = ((x < 0) ? "": " ") + x.toFixed(1);
+            this.handleXValues[i].innerHTML = ((x < 0) ? "": " ") + x.toFixed(3);
             const y = handleValues[i].y;
-            this.handleYValues[i].innerHTML = ((y < 0) ? "": " ") + y.toFixed(1);
+            this.handleYValues[i].innerHTML = ((y < 0) ? "": " ") + y.toFixed(3);
         }
     }
 }
@@ -440,6 +448,7 @@ function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
 }
 
+const DEFAULT_HANDLE_POSITION = 2;
 const DEFAULT_SCALE_VALUE = 2.5;
 const DEFAULT_ZOOM_VALUE = 100;
 
@@ -464,11 +473,17 @@ const DEFAULT_ZOOM_VALUE = 100;
         handles[i] = document.getElementById("handle" + i);
     }
 
+    const defaultHandlePositions = new Array<Point>(
+        new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point(-DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
+        new Point( DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION)
+    );
     let handlePositions = new Array<Point>(
-        new Point(-2, -2),
-        new Point( 2, -2),
-        new Point(-2,  2),
-        new Point( 2,  2)
+        new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+        new Point(-DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
+        new Point( DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION)
     );
     let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
@@ -568,6 +583,11 @@ const DEFAULT_ZOOM_VALUE = 100;
 
     interface.onZoomReset = () => {
         scale = DEFAULT_SCALE_VALUE;
+        update();
+    }
+
+    interface.onHandleReset = (i: number) => {
+        handlePositions[i] = defaultHandlePositions[i];
         update();
     }
 
