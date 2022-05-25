@@ -112,5 +112,6 @@ body {
 }
 
 .handle {
+    pointer-events: none;
     position: absolute;
 }

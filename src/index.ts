@@ -7,9 +7,11 @@
 // move scene origin along xy plane
 // Swap menu placement?
 // [x] display debug info on two lines
-// fix handles blocking clicks
-// fix draggon off of the canvas bounds
+// [x] fix handles blocking clicks
+// fix dragging off of the canvas bounds
 // [x] style handles
+// use texture for ruler
+// swap out rules based on zoom
 // set handles to box size mode
 // save and load calibration
 // upload pattern pdf
