@@ -1,14 +1,14 @@
 // TODO
 // [x] Handle sensitivity
 // [x] Ruler zooming
-// Handle appearance
+// [x] Handle appearance
 // [x] change where planes originate
 // [x] scale scene origin
 // move scene origin along xy plane
 // Swap menu placement?
 // [x] display debug info on two lines
 // [x] fix handles blocking clicks
-// fix dragging off of the canvas bounds
+// [x] fix dragging off of the canvas bounds
 // [x] style handles
 // use texture for ruler
 // swap out rules based on zoom
@@ -556,10 +556,18 @@ const DEFAULT_ZOOM_VALUE = 100;
         update();
     }
 
+    // Listen to mouseup and mousemove events on the _window_, as it's important to get these events wherever they are triggered
+    window.onmouseup = () => {
+        currentHandle = -1;
+    }
+    window.onmousemove = move;
+
+    // Listen to mousedown and wheel events on the _canvas_, as we're only interested in them occuring over the canvas
     canvas.onmousedown = (e: MouseEvent) => {
         const mousePosition = new Point(e.pageX, e.pageY);
         const canvasPosition = renderer.windowToCanvasPoint(mousePosition);
-        let best = renderer.windowToCanvasScalar(remToPixels(1)); // 1rem squared
+        let rem = renderer.windowToCanvasScalar(remToPixels(1));
+        let best = rem * rem; // 1rem squared
         currentHandle = -1;
         for (let i=0; i<4; i++) {
             let dx = canvasPosition.x - handlePositions[i].x;
@@ -574,10 +582,6 @@ const DEFAULT_ZOOM_VALUE = 100;
         }
         move(e);
     }
-    canvas.onmouseup = () => {
-        currentHandle = -1;
-    }
-    canvas.onmousemove = move;
     canvas.onwheel = (e: WheelEvent) => {
         scale += e.deltaY * 0.0005;
         update();
@@ -587,7 +591,6 @@ const DEFAULT_ZOOM_VALUE = 100;
         scale = DEFAULT_SCALE_VALUE;
         update();
     }
-
     interface.onHandleReset = (i: number) => {
         handlePositions[i] = defaultHandlePositions[i];
         update();
