@@ -102,13 +102,16 @@ body {
     padding: .75rem;
 }
 
-.number-large {
+.mono {
     font-family: 'Courier New', Courier, monospace;
 }
 
-.number {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.8rem;
+.small {
+    font-size: 0.9rem;
+}
+
+.vsmall {
+    font-size: 0.7rem;
 }
 
 .handle {

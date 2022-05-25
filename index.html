@@ -12,57 +12,60 @@
     <div id="menu" class="bg-light-trans flex-column flex-spaced">
         <div class="bg-light flex-row h-2 rounded">
             <a class="bg-blue fg-light flex-row-centered h-2 p-x-1 rounded">Calibration</a>
-            <a class="fg-gray flex-row-centered h-2 p-x-1">Hide</a>
+            <a class="fg-gray flex-row-centered h-2 p-x-1 small">Hide</a>
+            <a class="fg-gray flex-row-centered h-2 p-x-1 small">Swap</a>
             <a class="bg-gray fg-light flex-row-centered h-2 p-x-1 rounded">Pattern</a>
         </div>
         <div class="flex-column flex-spaced">
             <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="zoom-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <p class="fg-gray number p-r-1">Zoom<span id="zoom-value">1.0</span></p>
+                    <span class="fg-gray mono small">Zoom
+                    </span>
+                    <span id="zoom-value" class="fg-gray mono p-r-1 small">1.0</span>
                 </div>
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="zoom-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <span class="fg-gray number">Origin</span>
+                    <span class="fg-gray mono small">Origin</span>
                     <div class="flex-column p-r-1">
-                        <span class="fg-gray number">x <span id="zoom-value">1.0</span></span>
-                        <span class="fg-gray number">y <span id="zoom-value">1.0</span></span>
+                        <span class="fg-gray mono vsmall">x <span id="zoom-value">1.0</span></span>
+                        <span class="fg-gray mono vsmall">y <span id="zoom-value">1.0</span></span>
                     </div>
                 </div>
             </div>
             <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="reset2" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <span class="fg-gray number">A</span>
+                    <span class="fg-gray mono">A</span>
                     <div class="flex-column p-r-1">
-                        <span class="fg-gray number">x<span id="x2"> 1.000</span></span>
-                        <span class="fg-gray number">y<span id="y2"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">x<span id="x2"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">y<span id="y2"> 1.000</span></span>
                     </div>
                 </div>
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="reset3" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <span class="fg-gray number">B</span>
+                    <span class="fg-gray mono small">B</span>
                     <div class="flex-column p-r-1">
-                        <span class="fg-gray number">x<span id="x3"> 1.000</span></span>
-                        <span class="fg-gray number">y<span id="y3"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">x<span id="x3"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">y<span id="y3"> 1.000</span></span>
                     </div>
                 </div>
             </div>
             <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="reset0" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <span class="fg-gray number">C</span>
+                    <span class="fg-gray mono small">C</span>
                     <div class="flex-column p-r-1">
-                        <span class="fg-gray number">x<span id="x0"> 1.000</span></span>
-                        <span class="fg-gray number">y<span id="y0"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">x<span id="x0"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">y<span id="y0"> 1.000</span></span>
                     </div>
                 </div>
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="reset1" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
-                    <span class="fg-gray number">D</span>
+                    <span class="fg-gray mono small">D</span>
                     <div class="flex-column p-r-1">
-                        <span class="fg-gray number">x<span id="x1"> 1.000</span></span>
-                        <span class="fg-gray number">y<span id="y1"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">x<span id="x1"> 1.000</span></span>
+                        <span class="fg-gray mono vsmall">y<span id="y1"> 1.000</span></span>
                     </div>
                 </div>
             </div>
@@ -73,16 +76,16 @@
         </div>
     </div>
     <div id="handle0" class="bg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="fg-gray number-large">C</span>
+        <span class="fg-gray mono">C</span>
     </div>
     <div id="handle1" class="bg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="fg-gray number-large">D</span>
+        <span class="fg-gray mono">D</span>
     </div>
     <div id="handle2" class="bg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="fg-gray number-large">A</span>
+        <span class="fg-gray mono">A</span>
     </div>
     <div id="handle3" class="bg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="fg-gray number-large">B</span>
+        <span class="fg-gray mono">B</span>
     </div>
     <canvas id="canvas"></canvas>
     <script src="js/index.js"></script>
