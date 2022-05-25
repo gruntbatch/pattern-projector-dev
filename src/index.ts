@@ -387,11 +387,29 @@ class Renderer {
 
 class Interface {
     handles: Array<HTMLElement>;
+    zoomValue: HTMLElement;
+    handleXValues: Array<HTMLElement>;
+    handleYValues: Array<HTMLElement>;
 
     constructor () {
+        this.zoomValue = document.getElementById("zoom-value");
+        this.handleXValues = new Array<HTMLElement>(4)
+        this.handleYValues = new Array<HTMLElement>(4)
+        for (let i=0; i<4; i++) {
+            this.handleXValues[i] = document.getElementById("x" + i);
+            this.handleYValues[i] = document.getElementById("y" + i);
+        }
     }
 
-    updateMenuVisibility() {
+    updateValues(zoomValue: number, handleValues: Array<Point>) {
+        this.zoomValue.innerHTML = ((zoomValue < 0) ? "" : " ") + zoomValue.toFixed(2);
+
+        for (let i=0; i<4; i++) {
+            const x = handleValues[i].x;
+            this.handleXValues[i].innerHTML = ((x < 0) ? "": " ") + x.toFixed(1);
+            const y = handleValues[i].y;
+            this.handleYValues[i].innerHTML = ((y < 0) ? "": " ") + y.toFixed(1);
+        }
     }
 }
 
@@ -401,6 +419,8 @@ function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
 }
 
+const DEFAULT_ZOOM_VALUE = 100;
+
 (() => {
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -409,7 +429,7 @@ function remToPixels(rem: number): number {
     const gl = canvas.getContext("webgl2")!;
     const interface = new Interface();
 
-    const renderer = new Renderer(gl, 100);
+    const renderer = new Renderer(gl, DEFAULT_ZOOM_VALUE);
 
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     renderer.useProgram(rulerProgram);
@@ -461,6 +481,8 @@ function remToPixels(rem: number): number {
             handles[i].style.left = handlePosition.x + "px";
             handles[i].style.top = handlePosition.y + "px";
         }
+
+        interface.updateValues(renderer.orthographicScale, handlePositions);
     }
 
     update();
