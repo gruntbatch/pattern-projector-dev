@@ -96,10 +96,17 @@ body {
 #menu {
     position: absolute;
     top: 1rem;
-    left: 1rem;
     width: 24rem;
     border-radius: 1.75rem;
     padding: .75rem;
+}
+
+#menu.left {
+    left: 1rem;
+}
+
+#menu.right {
+    right: 1rem;
 }
 
 .mono {

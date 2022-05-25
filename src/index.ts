@@ -5,7 +5,7 @@
 // [x] change where planes originate
 // [x] scale scene origin
 // move scene origin along xy plane
-// Swap menu placement?
+// [x] Swap menu placement?
 // [x] display debug info on two lines
 // [x] fix handles blocking clicks
 // [x] fix dragging off of the canvas bounds
@@ -404,7 +404,9 @@ class Renderer {
 }
 
 class Interface {
-    handles: Array<HTMLElement>;
+    menu: HTMLElement;
+    menuLeft: boolean;
+    menuSwap: HTMLElement;
     zoomReset: HTMLElement;
     onZoomReset: () => void;
     zoomValue: HTMLElement;
@@ -412,8 +414,17 @@ class Interface {
     onHandleReset: (i: number) => void;
     handleXValues: Array<HTMLElement>;
     handleYValues: Array<HTMLElement>;
+    handles: Array<HTMLElement>;
 
     constructor () {
+        this.menu = document.getElementById("menu");
+        this.menuLeft = true;
+        this.swapMenu();
+        this.menuSwap = document.getElementById("swap");
+        this.menuSwap.onclick = () => {
+            this.menuLeft = !this.menuLeft;
+            this.swapMenu();
+        };
         this.zoomReset = document.getElementById("zoom-reset");
         this.zoomReset.onclick = () => {
             this.onZoomReset();
@@ -429,6 +440,16 @@ class Interface {
             }
             this.handleXValues[i] = document.getElementById("x" + i);
             this.handleYValues[i] = document.getElementById("y" + i);
+        }
+    }
+
+    swapMenu() {
+        if (this.menuLeft) {
+            this.menu.classList.add("left");
+            this.menu.classList.remove("right");
+        } else {
+            this.menu.classList.remove("left");
+            this.menu.classList.add("right");
         }
     }
 
