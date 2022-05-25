@@ -10,7 +10,7 @@
 // [x] fix handles blocking clicks
 // [x] fix dragging off of the canvas bounds
 // [x] style handles
-// use texture for ruler
+// [x] use texture for ruler
 // swap out ruler textures based on zoom
 // set handles to box size mode
 // save and load calibration
@@ -301,6 +301,42 @@ class Renderer {
     uploadVertices() {
         this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, this.vertices, 0, FLOATS_PER_VERTEX * this.vertexCount);
     }
+    
+    loadTexture(url: string) {
+        const gl = this.gl;
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(
+            gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 0, 255])
+        )
+        
+        const image = new Image();
+        image.onload = function() {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+            gl.generateMipmap(gl.TEXTURE_2D);
+        }
+        image.src = url;
+
+        return texture;
+    }
+    // getTexture(): WebGLTexture {
+    //     const gl = this.gl;
+    //     const texture = gl.createTexture();
+    //     gl.bindTexture(gl.TEXTURE_2D, texture);
+    //     gl.texImage2D(
+    //         gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+    //         new Uint8Array([0, 0, 255, 255])
+    //     );
+    //     return texture;
+    // }
+
+    // setTextureContents(texture: WebGLTexture, source: TexImageSource) {
+    //     const gl = this.gl;
+    //     gl.bindTexture(gl.TEXTURE_2D, texture);
+    //     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    //     gl.generateMipmap(gl.TEXTURE_2D);
+    // }
 
     createProgram(vert: string, frag: string): WebGLProgram {
         const gl = this.gl;
@@ -317,11 +353,25 @@ class Renderer {
         gl.attachShader(program, vertShader);
         gl.attachShader(program, fragShader);
         gl.linkProgram(program);
+        gl.useProgram(program);
 
-        const index = gl.getUniformBlockIndex(program, "Matrices");
-        gl.uniformBlockBinding(program, index, 0);
+        {
+            const index = gl.getUniformBlockIndex(program, "Matrices");
+            gl.uniformBlockBinding(program, index, 0);
+        }
+
+        {
+            const index = gl.getUniformLocation(program, "uni_texture");
+            gl.uniform1i(index, 0);
+        }
+
 
         return program;
+    }
+
+    useTexture(texture: WebGLTexture) {
+        this.gl.activeTexture(this.gl.TEXTURE0);
+        this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
     }
 
     useProgram(program: WebGLProgram) {
@@ -519,6 +569,8 @@ const DEFAULT_ZOOM_VALUE = 100;
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     renderer.useProgram(rulerProgram);
 
+    const rulerTexture = renderer.loadTexture("assets/ruler.png");
+
     const rulerPlane = renderer.newPlane(1, 1, 8);
     renderer.uploadVertices();
 
@@ -535,7 +587,7 @@ const DEFAULT_ZOOM_VALUE = 100;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
     let scale = DEFAULT_SCALE_VALUE;
-    let sensitivity = 0.01;
+    let sensitivity = 0.1;
 
     const update = () => {
         {
@@ -567,6 +619,7 @@ const DEFAULT_ZOOM_VALUE = 100;
                 )
             );
             renderer.setViewMatrix(t2);
+            renderer.useTexture(rulerTexture);
             renderer.drawPrimitive(rulerPlane.primitive);
         }
         
