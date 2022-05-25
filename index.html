@@ -3,33 +3,59 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hello, world!</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div id="menu" class="flex column">
-        <div id="mode-selector" class="bubble flex rounded h2">
-            <a id="ruler-tab">Ruler</a>
-            <a id="pattern-tab">Pattern</a>
-            <a id="view-tab">View</a>
+    <div id="menu" class="bg-light-trans flex-column">
+        <div class="bg-light flex-row h-2 rounded">
+            <a class="bg-blue fg-light flex-row-centered h-2 p-x-1 rounded">Calibration</a>
+            <a class="fg-gray flex-row-centered h-2 p-x-1">Hide</a>
+            <a class="bg-gray fg-light flex-row-centered h-2 p-x-1 rounded">Pattern</a>
         </div>
-        <div id="ruler-panel">
-            <div id="sensitivity" class="bubble flex rounded h2">
-                <p>Drag here to adjust sensitivity</p>
-                <p>1.00</p>
+        <div class="flex-column">
+            <div class="flex-row">
+                <div class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset-zoom" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Zoom</a>
+                    <p id="zoom-value" class="number p-r-1">1.0</p>
+                </div>
             </div>
-            <div id="scale" class="bubble flex rounded h2">
-                <p>Drag to adjust scale</p>
-                <p>1.00</p>
+            <div class="flex-row">
+                <div class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset0" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
+                    <p class="fg-gray number">x<span id="x0"> 1.0</span></p>
+                    <p class="fg-gray number p-r-1">y<span id="y0"> 1.0</span></p>
+                </div>
+                <div class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset1" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
+                    <p class="fg-gray number">x<span id="x1"> 1.0</span></p>
+                    <p class="fg-gray number p-r-1">y<span id="y1"> 1.0</span></p>
+                </div>
+            </div>
+            <div class="flex-row">
+                <div class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset2" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
+                    <p class="fg-gray number">x<span id="x2"> 1.0</span></p>
+                    <p class="fg-gray number p-r-1">y<span id="y2"> 1.0</span></p>
+                </div>
+                <div class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset3" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset</a>
+                    <p class="fg-gray number">x<span id="x3"> 1.0</span></p>
+                    <p class="fg-gray number p-r-1">y<span id="y3"> 1.0</span></p>
+                </div>
+            </div>
+            <div class="flex-row">
+                <a id="save-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Save Calibration</a>
+                <a id="load-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Load Calibration</a>
             </div>
         </div>
-        <div id="pattern-panel"></div>
     </div>
-    <div id="handle0" class="handle rounded h2 w2"></div>
-    <div id="handle1" class="handle rounded h2 w2"></div>
-    <div id="handle2" class="handle rounded h2 w2"></div>
-    <div id="handle3" class="handle rounded h2 w2"></div>
+    <div id="handle0" class="bg-light handle h-2 rounded w-2"></div>
+    <div id="handle1" class="bg-light handle h-2 rounded w-2"></div>
+    <div id="handle2" class="bg-light handle h-2 rounded w-2"></div>
+    <div id="handle3" class="bg-light handle h-2 rounded w-2"></div>
     <canvas id="canvas"></canvas>
     <script src="js/index.js"></script>
 </body>
