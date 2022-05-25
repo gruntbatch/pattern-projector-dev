@@ -11,6 +11,10 @@
 // [x] fix dragging off of the canvas bounds
 // [x] style handles
 // [x] use texture for ruler
+// constantly call update
+// seperate handle logic more intelligently
+// reset pattern scrubbing handle between drags
+// make high sensitivity a toggleable option
 // swap out ruler textures based on zoom
 // set handles to box size mode
 // save and load calibration
