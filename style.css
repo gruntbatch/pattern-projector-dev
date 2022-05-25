@@ -28,17 +28,21 @@ body {
     color: #f8f9fa;
 }
 
+.flex-centered {
+    justify-content: center !important;
+}
+
 .flex-column {
     display: flex;
     flex-direction: column;
 }
 
-.flex-column >:not(:first-child) {
+.flex-spaced >:not(:first-child) {
     margin-top: 1rem;
 }
 
 .flex-grow {
-    flex-grow: 1;
+    flex: 1;
 }
 
 .flex-grow:not(:last-child) {
@@ -96,6 +100,10 @@ body {
     width: 24rem;
     border-radius: 1.75rem;
     padding: .75rem;
+}
+
+.number-large {
+    font-family: 'Courier New', Courier, monospace;
 }
 
 .number {
