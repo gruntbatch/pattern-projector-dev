@@ -2,6 +2,20 @@
 // [x] Handle sensitivity
 // Ruler zooming
 // Handle appearance
+// change where planes originate
+// scale scene origin
+// move scene origin along xy plane
+// Swap menu placement?
+// display debug info on two lines
+// fix handles blocking clicks
+// style handles
+// set handles to box size mode
+// save and load calibration
+// upload pattern pdf
+// render pattern pdf to canvas
+// use rendered pattern canvas as texture
+// draw pattern
+// Split zoom and scale?
 
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
@@ -451,7 +465,7 @@ const DEFAULT_ZOOM_VALUE = 100;
     let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
-    let sensitivity = 0.1;
+    let sensitivity = 0.01;
 
     const update = () => {
         {
