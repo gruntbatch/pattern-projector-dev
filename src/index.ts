@@ -56,13 +56,10 @@ enum DisplayMode {
 const DEFAULT_HANDLE_RADIUS = remToPixels(1);
 const DEFAULT_HANDLE_POSITION = 2.0;
 
-interface Viewer {
 abstract class Viewer {
     origin: Handle;
     handles: Array<Handle>;
     scale: number;
-    resetHandle(index: number): void;
-    resetScale(): void;
     abstract resetHandle(index: number): void;
     abstract resetScale(): void;
     getModelMatrix(): Matrix4 {
@@ -83,7 +80,6 @@ abstract class Viewer {
 
 const DEFAULT_SCALE_VALUE = 2.0;
 
-class Calibrator implements Viewer {
 class Calibrator extends Viewer {
     perspective: Array<Handle>;
     origin: Handle;
@@ -140,6 +136,7 @@ class Calibrator extends Viewer {
 
 (() => {
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
+    const pdfCanvas = document.getElementById("pdf-canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
     const renderer = new Renderer(gl, 100);
     const interface = new Interface.Interface();
@@ -226,26 +223,13 @@ class Calibrator extends Viewer {
     interface.onHandleReset = (i: number) => {
         viewer.resetHandle(i);
     }
-    interface.onLoadPattern = PDF.onLoadPattern;
+    interface.onLoadPattern = (e) => {
+        PDF.onLoadPattern(e, pdfCanvas);
+    }
 
     const animationFrame = () => {
         requestAnimationFrame(animationFrame);
-        const model = Matrix4.mul(
-            Matrix4.translation(
-                Point.scale(
-                    calibrator.origin.pos,
-                    1 / (4 * viewer.scale)
-                )
-            ),
-            Matrix4.mul(
-                Matrix4.scale(viewer.scale),
-                Matrix4.translation(new Point(0.5, 0.5))
-            )
-        )
-        const view = rulerPlane.computeProjection(calibrator.handles[0].pos, calibrator.handles[1].pos, calibrator.handles[2].pos, calibrator.handles[3].pos);
 
-        renderer.setModelMatrix(model);
-        renderer.setViewMatrix(view);
         renderer.setModelMatrix(viewer.getModelMatrix());
         renderer.setViewMatrix(calibrator.getProjectionMatrix(rulerPlane));
         renderer.useProgram(rulerProgram);
