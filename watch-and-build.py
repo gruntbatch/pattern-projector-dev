@@ -77,7 +77,7 @@ def _preprocess(source, out_dependencies, out_lines):
 
 def compile(sources, outfile):
     cmd = [
-        "tsc", "--module", "none", "--outFile", outfile, *sources
+        "tsc", "--module", "none", "--target", "es6", "--outFile", outfile, *sources
     ]
 
     print()
