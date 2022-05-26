@@ -12,11 +12,11 @@
     <div id="menu" class="bg-light-trans flex-column flex-spaced">
         <div class="bg-light flex-row h-2 rounded">
             <a class="bg-blue fg-light flex-row-centered h-2 p-x-1 rounded">Calibration</a>
-            <a class="fg-gray flex-row-centered h-2 p-x-1 small">Hide</a>
+            <a id="hide" class="fg-gray flex-row-centered h-2 p-x-1 small">Hide</a>
             <a id="swap" class="fg-gray flex-row-centered h-2 p-x-1 small">Swap</a>
             <a class="bg-gray fg-light flex-row-centered h-2 p-x-1 rounded">Pattern</a>
         </div>
-        <div class="flex-column flex-spaced">
+        <div id="calibration-panel" class="flex-column flex-spaced">
             <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="zoom-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Zoom</a>
@@ -63,7 +63,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex-column flex-spaced">
+        <div id="pattern-panel" class="flex-column flex-spaced">
             <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="pattern-zoom-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Zoom</a>
@@ -75,7 +75,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex-column flex-spaced">
+        <div id="save-load-panel" class="flex-column flex-spaced">
             <div class="flex-row">
                 <a id="save-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Save Calibration</a>
                 <a id="load-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Load Calibration</a>
