@@ -8,9 +8,11 @@ class Interface {
     menu: HTMLElement;
     menuMode: MenuMode;
     previousMenuMode: MenuMode;
+    calibrationButton: HTMLElement;
     menuHide: HTMLElement;
     menuLeft: boolean;
     menuSwap: HTMLElement;
+    patternButton: HTMLElement;
 
     calibrationPanel: HTMLElement;
     zoomReset: HTMLElement;
@@ -30,18 +32,20 @@ class Interface {
         this.menu = document.getElementById("menu");
         this.menuMode = MenuMode.Calibration;
         this.previousMenuMode = this.menuMode;
+        this.calibrationButton = document.getElementById("calibration-button");
+        this.calibrationButton.onclick = () => {
+            this.menuMode = MenuMode.Calibration;
+            this.updateMenuMode();
+        }
         this.menuHide = document.getElementById("hide");
         this.menuHide.onclick = () => {
             if (this.menuMode == MenuMode.Hidden) {
-                this.menuHide.innerHTML = "Hide";
                 this.menuMode = this.previousMenuMode;
-                this.updateMenuMode();
             } else {
-                this.menuHide.innerHTML = "Show";
                 this.previousMenuMode = this.menuMode;
                 this.menuMode = MenuMode.Hidden
-                this.updateMenuMode();
             }
+            this.updateMenuMode();
         }
         this.menuLeft = true;
         this.menuSwap = document.getElementById("swap");
@@ -49,6 +53,11 @@ class Interface {
             this.menuLeft = !this.menuLeft;
             this.swapMenu();
         };
+        this.patternButton = document.getElementById("pattern-button");
+        this.patternButton.onclick = () => {
+            this.menuMode = MenuMode.Pattern;
+            this.updateMenuMode();
+        }
 
         this.calibrationPanel = document.getElementById("calibration-panel");
         this.zoomReset = document.getElementById("zoom-reset");
@@ -81,21 +90,45 @@ class Interface {
     updateMenuMode() {
         switch(this.menuMode) {
             case MenuMode.Calibration:
+                this.calibrationButton.classList.add("bg-blue");
+                this.calibrationButton.classList.remove("bg-gray");
                 this.calibrationPanel.classList.remove("display-none");
+
+                this.patternButton.classList.remove("bg-blue");
+                this.patternButton.classList.add("bg-gray");
                 this.patternPanel.classList.add("display-none");
+                
                 this.saveLoadPanel.classList.remove("display-none");
+
+                this.menuHide.innerHTML = "Hide";
                 break;
 
             case MenuMode.Hidden:
+                this.calibrationButton.classList.remove("bg-blue");
+                this.calibrationButton.classList.add("bg-gray");
                 this.calibrationPanel.classList.add("display-none");
+
+                this.patternButton.classList.remove("bg-blue");
+                this.patternButton.classList.add("bg-gray");
                 this.patternPanel.classList.add("display-none");
+
                 this.saveLoadPanel.classList.add("display-none");
+
+                this.menuHide.innerHTML = "Show";
                 break;
 
             case MenuMode.Pattern:
+                this.calibrationButton.classList.remove("bg-blue");
+                this.calibrationButton.classList.add("bg-gray");
                 this.calibrationPanel.classList.add("display-none");
+
+                this.patternButton.classList.add("bg-blue");
+                this.patternButton.classList.remove("bg-gray");
                 this.patternPanel.classList.remove("display-none");
+
                 this.saveLoadPanel.classList.remove("display-none");
+
+                this.menuHide.innerHTML = "Hide";
                 break;
         }
     }
