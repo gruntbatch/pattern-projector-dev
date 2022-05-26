@@ -47,6 +47,28 @@ namespace Interface {
             })
         }
     }
+
+    class Handle {
+        reset: Button;
+        handle: HTMLElement;
+        x: HTMLElement;
+        y: HTMLElement;
+
+        constructor(index: number, onclick) {
+            this.reset = new Button("reset-" + index, onclick);
+            this.handle = document.getElementById("handle-" + index);
+            this.x = document.getElementById("x-" + index);
+            this.y = document.getElementById("y-" + index);
+        }
+
+        updateValues(value: Point, position: Point) {
+            this.x.innerHTML = ((value.x < 0) ? "" : " ") + value.x.toFixed(3);
+            this.y.innerHTML = ((value.y < 0) ? "" : " ") + value.y.toFixed(3);
+            position = Point.add(new Point(-remToPixels(1), -remToPixels(1)), position);
+            this.handle.style.left = position.x + "px";
+            this.handle.style.top = position.y + "px";
+        }
+    }
     
     export class Interface {
         menuMode: MenuMode;
@@ -65,11 +87,8 @@ namespace Interface {
         zoomReset: HTMLElement;
         onZoomReset: () => void;
         zoomValue: HTMLElement;
-        handles: Array<HTMLElement>;
-        handleResets: Array<HTMLElement>;
         onHandleReset: (i: number) => void;
-        handleXValues: Array<HTMLElement>;
-        handleYValues: Array<HTMLElement>;
+        handles: Array<Handle>;
 
         constructor() {
             this.menuMode = MenuMode.Calibration;
@@ -111,18 +130,12 @@ namespace Interface {
                 this.onZoomReset();
             }
             this.zoomValue = document.getElementById("zoom-value");
-            this.handles = new Array<HTMLElement>(5);
-            this.handleResets = new Array<HTMLElement>(5);
-            this.handleXValues = new Array<HTMLElement>(5);
-            this.handleYValues = new Array<HTMLElement>(5);
+
+            this.handles = new Array<Handle>(5);
             for (let i = 0; i < 5; i++) {
-                this.handles[i] = document.getElementById("handle-" + i);
-                this.handleResets[i] = document.getElementById("reset-" + i);
-                this.handleResets[i].onclick = () => {
+                this.handles[i] = new Handle(i, () => {
                     this.onHandleReset(i);
-                }
-                this.handleXValues[i] = document.getElementById("x-" + i);
-                this.handleYValues[i] = document.getElementById("y-" + i);
+                });
             }
 
             this.showMenu();
@@ -167,16 +180,9 @@ namespace Interface {
 
         updateValues(zoomValue: number, handleValues: Array<Point>, handlePositions: Array<Point>) {
             this.zoomValue.innerHTML = ((zoomValue < 0) ? "" : " ") + zoomValue.toFixed(2);
-            const handleOffset = new Point(-remToPixels(1), -remToPixels(1));
-            for (let i = 0; i < 5; i++) {
-                const x = handleValues[i].x;
-                this.handleXValues[i].innerHTML = ((x < 0) ? "" : " ") + x.toFixed(3);
-                const y = handleValues[i].y;
-                this.handleYValues[i].innerHTML = ((y < 0) ? "" : " ") + y.toFixed(3);
 
-                let handlePosition = Point.add(handlePositions[i], handleOffset);
-                this.handles[i].style.left = handlePosition.x + "px";
-                this.handles[i].style.top = handlePosition.y + "px";
+            for (let i = 0; i < 5; i++) {
+                this.handles[i].updateValues(handleValues[i], handlePositions[i]);
             }
         }
     }
