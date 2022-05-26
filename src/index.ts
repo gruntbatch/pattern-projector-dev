@@ -11,7 +11,7 @@
 // [x] fix dragging off of the canvas bounds
 // [x] style handles
 // [x] use texture for ruler
-// Refactor code?
+// [x] Refactor code?
 // constantly call update
 // seperate handle logic more intelligently
 // reset pattern scrubbing handle between drags
@@ -25,78 +25,15 @@
 // draw pattern
 // Split zoom and scale?
 
+
+// #include("src/math.ts")
+// #include("src/renderer.ts")
+// #include("src/interface.ts")
+
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
 const rulerVert = `#include("src/ruler.vert")`;
 const rulerFrag = `#include("src/ruler.frag")`;
-
-class Interface {
-    menu: HTMLElement;
-    menuLeft: boolean;
-    menuSwap: HTMLElement;
-    zoomReset: HTMLElement;
-    onZoomReset: () => void;
-    zoomValue: HTMLElement;
-    handles: Array<HTMLElement>;
-    handleResets: Array<HTMLElement>;
-    onHandleReset: (i: number) => void;
-    handleXValues: Array<HTMLElement>;
-    handleYValues: Array<HTMLElement>;
-
-    constructor () {
-        this.menu = document.getElementById("menu");
-        this.menuLeft = true;
-        this.swapMenu();
-        this.menuSwap = document.getElementById("swap");
-        this.menuSwap.onclick = () => {
-            this.menuLeft = !this.menuLeft;
-            this.swapMenu();
-        };
-        this.zoomReset = document.getElementById("zoom-reset");
-        this.zoomReset.onclick = () => {
-            this.onZoomReset();
-        }
-        this.zoomValue = document.getElementById("zoom-value");
-        this.handles = new Array<HTMLElement>(5);
-        this.handleResets = new Array<HTMLElement>(5);
-        this.handleXValues = new Array<HTMLElement>(5);
-        this.handleYValues = new Array<HTMLElement>(5);
-        for (let i=0; i<5; i++) {
-            this.handles[i] = document.getElementById("handle-" + i);
-            this.handleResets[i] = document.getElementById("reset-" + i);
-            this.handleResets[i].onclick = () => {
-                this.onHandleReset(i);
-            }
-            this.handleXValues[i] = document.getElementById("x-" + i);
-            this.handleYValues[i] = document.getElementById("y-" + i);
-        }
-    }
-
-    swapMenu() {
-        if (this.menuLeft) {
-            this.menu.classList.add("left");
-            this.menu.classList.remove("right");
-        } else {
-            this.menu.classList.remove("left");
-            this.menu.classList.add("right");
-        }
-    }
-
-    updateValues(zoomValue: number, handleValues: Array<Point>, handlePositions: Array<Point>) {
-        this.zoomValue.innerHTML = ((zoomValue < 0) ? "" : " ") + zoomValue.toFixed(2);
-        const handleOffset = new Point(-remToPixels(1), -remToPixels(1));
-        for (let i=0; i<5; i++) {
-            const x = handleValues[i].x;
-            this.handleXValues[i].innerHTML = ((x < 0) ? "": " ") + x.toFixed(3);
-            const y = handleValues[i].y;
-            this.handleYValues[i].innerHTML = ((y < 0) ? "": " ") + y.toFixed(3);
-
-            let handlePosition = Point.add(handlePositions[i], handleOffset);
-            this.handles[i].style.left = handlePosition.x + "px";
-            this.handles[i].style.top = handlePosition.y + "px";
-        }
-    }
-}
 
 const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
@@ -104,36 +41,45 @@ function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
 }
 
-const DEFAULT_HANDLE_POSITION = 2;
+class Handle {
+    constructor(public pos: Point, public radius: number) {
+        this.pos = pos;
+        this.radius = radius;
+    }
+}
 const DEFAULT_SCALE_VALUE = 2.0;
-const DEFAULT_ZOOM_VALUE = 100;
 
 (() => {
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
+    const renderer = new Renderer(gl, 100);
     const interface = new Interface();
-
-    const renderer = new Renderer(gl, DEFAULT_ZOOM_VALUE);
-
+    
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
-    renderer.useProgram(rulerProgram);
-
     const rulerTexture = renderer.loadTexture("assets/ruler.png");
-
     const rulerPlane = renderer.newPlane(1, 1, 8);
     renderer.uploadVertices();
-
+    
+    const DEFAULT_HANDLE_RADIUS = remToPixels(1);
+    const DEFAULT_HANDLE_POSITION = 2.0;
     const defaultHandlePositions = new Array<Point>(
         new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
         new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
         new Point(-DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
         new Point( DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
-        new Point(0, 0), // Origin
     );
-    let handlePositions = [...defaultHandlePositions];
+
+    const perspectiveHandles = new Array<Handle>(4);
+    for (let i=0; i<4; i++) {
+        perspectiveHandles[i] = new Handle(defaultHandlePositions[i], DEFAULT_HANDLE_POSITION);
+    }
+
+    const originHandle = new Handle(new Point(0, 0), DEFAULT_HANDLE_RADIUS);
+    
+    const handles = new Array<Handle>(
+        ...perspectiveHandles,
+        originHandle
+    );
     let currentHandle = -1;
 
     let initialHandlePosition = new Point(0, 0);
@@ -145,7 +91,7 @@ const DEFAULT_ZOOM_VALUE = 100;
         {
             const w = rulerPlane.width;
             const h = rulerPlane.height;
-            const t = rulerPlane.computeProjection(handlePositions[0], handlePositions[1], handlePositions[2], handlePositions[3]);
+            const t = rulerPlane.computeProjection(handles[0].pos, handles[1].pos, handles[2].pos, handles[3].pos);
             const _ = t._;
             for (let i=0; i<9; i++) {
                 _[i] = _[i] / _[8];
@@ -160,7 +106,7 @@ const DEFAULT_ZOOM_VALUE = 100;
                 Matrix4.mul(
                     Matrix4.translation(
                         Point.scale(
-                            handlePositions[4],
+                            originHandle.pos,
                             1 / (4 * scale) // I'm pretty sure 4 is the _number of polygons_ (8) / 2
                         )
                     ),
@@ -171,22 +117,23 @@ const DEFAULT_ZOOM_VALUE = 100;
                 )
             );
             renderer.setViewMatrix(t2);
+            renderer.useProgram(rulerProgram);
             renderer.useTexture(rulerTexture);
             renderer.drawPrimitive(rulerPlane.primitive);
         }
         
         interface.updateValues(
             scale,
-            handlePositions,
-            handlePositions.map((v) => renderer.canvasToWindowPoint(v))
+            handles.map((v) => v.pos),
+            handles.map((v) => renderer.canvasToWindowPoint(v.pos))
         );
     }
 
     update();
 
     const resize = () => {
-        width = window.innerWidth;
-        height = window.innerHeight;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
         renderer.resizeCanvas(width, height);
@@ -200,7 +147,7 @@ const DEFAULT_ZOOM_VALUE = 100;
             return;
         }
 
-        handlePositions[currentHandle] = Point.add(
+        handles[currentHandle].pos = Point.add(
             initialHandlePosition,
             Point.scale(
                 Point.sub(
@@ -227,13 +174,13 @@ const DEFAULT_ZOOM_VALUE = 100;
         let best = rem * rem; // 1rem squared
         currentHandle = -1;
         for (let i=0; i<5; i++) {
-            let dx = canvasPosition.x - handlePositions[i].x;
-            let dy = canvasPosition.y - handlePositions[i].y;
+            let dx = canvasPosition.x - handles[i].pos.x;
+            let dy = canvasPosition.y - handles[i].pos.y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
                 best = distanceSquared;
                 currentHandle = i;
-                initialHandlePosition = handlePositions[currentHandle];
+                initialHandlePosition = handles[currentHandle].pos;
                 initialMousePosition = mousePosition;
             }
         }
@@ -249,7 +196,7 @@ const DEFAULT_ZOOM_VALUE = 100;
         update();
     }
     interface.onHandleReset = (i: number) => {
-        handlePositions[i] = defaultHandlePositions[i];
+        handles[i].pos = defaultHandlePositions[i];
         update();
     }
 
