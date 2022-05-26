@@ -49,44 +49,85 @@ class Handle {
     }
 }
 
+enum DisplayMode {
+    Calibration, Pattern
+}
+
+const DEFAULT_HANDLE_RADIUS = remToPixels(1);
+const DEFAULT_HANDLE_POSITION = 2.0;
+
+interface Viewer {
+    origin: Handle;
+    handles: Array<Handle>;
+    scale: number;
+    resetHandle(index: number): void;
+    resetScale(): void;
+}
+
+const DEFAULT_SCALE_VALUE = 2.0;
+
+class Calibrator implements Viewer {
+    perspective: Array<Handle>;
+    origin: Handle;
+    defaultHandlePositions: Array<Point>;
+    handles: Array<Handle>;
+    scale: number;
+
+    constructor() {
+        this.defaultHandlePositions = new Array<Point>(
+            new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+            new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
+            new Point(-DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
+            new Point( DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
+            new Point(0, 0),
+        );
+
+        this.perspective = new Array<Handle>(4);
+        for (let i=0; i<4; i++) {
+            this.perspective[i] = new Handle(this.defaultHandlePositions[i], DEFAULT_HANDLE_RADIUS);
+        }
+
+        this.origin = new Handle(new Point(0, 0), DEFAULT_HANDLE_RADIUS);
+
+        this.handles = new Array<Handle>(
+            ...this.perspective,
+            this.origin
+        );
+
+        this.scale = DEFAULT_SCALE_VALUE;
+    }
+
+    resetHandle(index: number): void {
+        this.handles[index].pos = this.defaultHandlePositions[index];
+    }
+
+    resetScale(): void {
+        this.scale = DEFAULT_SCALE_VALUE;
+    }
+}
+
+// class Projector implements Viewer {
+
+// }
+
 (() => {
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
     const renderer = new Renderer(gl, 100);
     const interface = new Interface.Interface();
+    const calibrator = new Calibrator();
+    let viewer: Viewer = calibrator;
     
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     const rulerTexture = renderer.loadTexture("assets/ruler.png");
     const rulerPlane = renderer.newPlane(1, 1, 8);
     renderer.uploadVertices();
-    
-    const DEFAULT_HANDLE_RADIUS = remToPixels(1);
-    const DEFAULT_HANDLE_POSITION = 2.0;
-    const defaultHandlePositions = new Array<Point>(
-        new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
-        new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
-        new Point(-DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
-        new Point( DEFAULT_HANDLE_POSITION,  DEFAULT_HANDLE_POSITION),
-    );
-
-    const perspectiveHandles = new Array<Handle>(4);
-    for (let i=0; i<4; i++) {
-        perspectiveHandles[i] = new Handle(defaultHandlePositions[i], DEFAULT_HANDLE_POSITION);
-    }
-
-    const originHandle = new Handle(new Point(0, 0), DEFAULT_HANDLE_RADIUS);
-    
-    const handles = new Array<Handle>(
-        ...perspectiveHandles,
-        originHandle
-    );
 
     let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
-    const DEFAULT_SCALE_VALUE = 2.0;
-    let scale = DEFAULT_SCALE_VALUE;
     let sensitivity = 0.1;
+    let displayMode = DisplayMode.Calibration;
 
     const onResize = () => {
         const width = window.innerWidth;
@@ -107,7 +148,7 @@ class Handle {
             return;
         }
 
-        handles[currentHandle].pos = Point.add(
+        viewer.handles[currentHandle].pos = Point.add(
             initialHandlePosition,
             Point.scale(
                 Point.sub(
@@ -127,26 +168,26 @@ class Handle {
         let best = radius * radius; // 1rem squared
         currentHandle = -1;
         for (let i=0; i<5; i++) {
-            let dx = canvasPosition.x - handles[i].pos.x;
-            let dy = canvasPosition.y - handles[i].pos.y;
+            let dx = canvasPosition.x - viewer.handles[i].pos.x;
+            let dy = canvasPosition.y - viewer.handles[i].pos.y;
             let distanceSquared = dx * dx + dy * dy;
             if (best > distanceSquared) {
                 best = distanceSquared;
                 currentHandle = i;
-                initialHandlePosition = handles[currentHandle].pos;
+                initialHandlePosition = viewer.handles[currentHandle].pos;
                 initialMousePosition = mousePosition;
             }
         }
     }
     canvas.onwheel = (e: WheelEvent) => {
-        scale += e.deltaY * 0.0005;
+        viewer.scale += e.deltaY * 0.0005;
     }
 
     interface.onZoomReset = () => {
-        scale = DEFAULT_SCALE_VALUE;
+        viewer.resetScale();
     }
     interface.onHandleReset = (i: number) => {
-        handles[i].pos = defaultHandlePositions[i];
+        viewer.resetHandle(i);
     }
     interface.onLoadPattern = PDF.onLoadPattern;
 
@@ -155,16 +196,16 @@ class Handle {
         const model = Matrix4.mul(
             Matrix4.translation(
                 Point.scale(
-                    originHandle.pos,
-                    1 / (4 * scale)
+                    calibrator.origin.pos,
+                    1 / (4 * viewer.scale)
                 )
             ),
             Matrix4.mul(
-                Matrix4.scale(scale),
+                Matrix4.scale(viewer.scale),
                 Matrix4.translation(new Point(0.5, 0.5))
             )
         )
-        const view = rulerPlane.computeProjection(handles[0].pos, handles[1].pos, handles[2].pos, handles[3].pos);
+        const view = rulerPlane.computeProjection(calibrator.handles[0].pos, calibrator.handles[1].pos, calibrator.handles[2].pos, calibrator.handles[3].pos);
 
         renderer.setModelMatrix(model);
         renderer.setViewMatrix(view);
@@ -173,9 +214,9 @@ class Handle {
         renderer.drawPrimitive(rulerPlane.primitive);
 
         interface.updateValues(
-            scale,
-            handles.map((v) => v.pos),
-            handles.map((v) => renderer.canvasToWindowPoint(v.pos))
+            viewer.scale,
+            calibrator.handles.map((v) => v.pos),
+            calibrator.handles.map((v) => renderer.canvasToWindowPoint(v.pos))
         );
     }
     animationFrame();
