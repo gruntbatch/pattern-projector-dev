@@ -146,5 +146,4 @@ class Matrix4 {
     static translation(position: Point): Matrix4 {
         return Matrix4.model(position, 1);
     }
-
 }

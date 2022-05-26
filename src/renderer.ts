@@ -16,7 +16,7 @@ class Plane {
         this.primitive = primitive;
     }
 
-    computeProjection(p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 {
+    computeProjection(p1: Point, p2: Point, p3: Point, p4: Point): Matrix4 {
         const basisToPoints = (p1: Point, p2: Point, p3: Point, p4: Point): Matrix3 => {
             const m = new Matrix3([
                 p1.x, p2.x, p3.x,
@@ -32,7 +32,17 @@ class Plane {
         }
         const s = basisToPoints(new Point(0, 0), new Point(this.width, 0), new Point(0, this.height), new Point(this.width, this.height));
         const d = basisToPoints(p1, p2, p3, p4);
-        return Matrix3.mul(d, Matrix3.adjugate(s));
+        const t = Matrix3.mul(d, Matrix3.adjugate(s));
+        const _ = t._;
+        for (let i=0; i<9; i++) {
+            _[i] = _[i] / _[8];
+        }
+        return new Matrix4([
+            _[0], _[3], 0, _[6],
+            _[1], _[4], 0, _[7],
+               0,    0, 1,    0,
+            _[2], _[5], 0, _[8],
+        ])
     }
 }
 

@@ -12,7 +12,7 @@
 // [x] style handles
 // [x] use texture for ruler
 // [x] Refactor code?
-// constantly call update
+// [x] constantly call update
 // seperate handle logic more intelligently
 // reset pattern scrubbing handle between drags
 // make high sensitivity a toggleable option
@@ -87,57 +87,12 @@ const DEFAULT_SCALE_VALUE = 2.0;
     let scale = DEFAULT_SCALE_VALUE;
     let sensitivity = 0.1;
 
-    const update = () => {
-        {
-            const w = rulerPlane.width;
-            const h = rulerPlane.height;
-            const t = rulerPlane.computeProjection(handles[0].pos, handles[1].pos, handles[2].pos, handles[3].pos);
-            const _ = t._;
-            for (let i=0; i<9; i++) {
-                _[i] = _[i] / _[8];
-            }
-            const t2 = new Matrix4([
-                _[0], _[3], 0, _[6],
-                _[1], _[4], 0, _[7],
-                   0,    0, 1,    0,
-                _[2], _[5], 0, _[8],
-            ])
-            renderer.setModelMatrix(
-                Matrix4.mul(
-                    Matrix4.translation(
-                        Point.scale(
-                            originHandle.pos,
-                            1 / (4 * scale) // I'm pretty sure 4 is the _number of polygons_ (8) / 2
-                        )
-                    ),
-                    Matrix4.mul(
-                        Matrix4.scale(scale),
-                        Matrix4.translation(new Point(0.5, 0.5))
-                    ),
-                )
-            );
-            renderer.setViewMatrix(t2);
-            renderer.useProgram(rulerProgram);
-            renderer.useTexture(rulerTexture);
-            renderer.drawPrimitive(rulerPlane.primitive);
-        }
-        
-        interface.updateValues(
-            scale,
-            handles.map((v) => v.pos),
-            handles.map((v) => renderer.canvasToWindowPoint(v.pos))
-        );
-    }
-
-    update();
-
     const resize = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
         renderer.resizeCanvas(width, height);
-        update();
     }
 
     resize();
@@ -157,7 +112,6 @@ const DEFAULT_SCALE_VALUE = 2.0;
                 sensitivity
             )
         );
-        update();
     }
 
     // Listen to mouseup and mousemove events on the _window_, as it's important to get these events wherever they are triggered
@@ -188,17 +142,44 @@ const DEFAULT_SCALE_VALUE = 2.0;
     }
     canvas.onwheel = (e: WheelEvent) => {
         scale += e.deltaY * 0.0005;
-        update();
     }
 
     interface.onZoomReset = () => {
         scale = DEFAULT_SCALE_VALUE;
-        update();
     }
     interface.onHandleReset = (i: number) => {
         handles[i].pos = defaultHandlePositions[i];
-        update();
     }
 
     window.onresize = resize;
+
+    const animationFrame = () => {
+        requestAnimationFrame(animationFrame);
+        const model = Matrix4.mul(
+            Matrix4.translation(
+                Point.scale(
+                    originHandle.pos,
+                    1 / (4 * scale)
+                )
+            ),
+            Matrix4.mul(
+                Matrix4.scale(scale),
+                Matrix4.translation(new Point(0.5, 0.5))
+            )
+        )
+        const view = rulerPlane.computeProjection(handles[0].pos, handles[1].pos, handles[2].pos, handles[3].pos);
+
+        renderer.setModelMatrix(model);
+        renderer.setViewMatrix(view);
+        renderer.useProgram(rulerProgram);
+        renderer.useTexture(rulerTexture);
+        renderer.drawPrimitive(rulerPlane.primitive);
+
+        interface.updateValues(
+            scale,
+            handles.map((v) => v.pos),
+            handles.map((v) => renderer.canvasToWindowPoint(v.pos))
+        );
+    }
+    animationFrame();
 })()
