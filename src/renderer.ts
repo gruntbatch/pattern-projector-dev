@@ -108,6 +108,7 @@ class Renderer {
         this.vertexCount = 0
         this.vertices = new Float32Array(FLOATS_PER_VERTEX * MAX_VERTEX_COUNT);
 
+        gl.clearColor(1.0, 0.0, 0.0, 1.0);
         gl.disable(gl.DEPTH_TEST);
 
         this.orthographicScale = orthographicScale;
@@ -140,7 +141,7 @@ class Renderer {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(
             gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255])
-        )
+        );
         
         const image = new Image();
         image.onload = function() {

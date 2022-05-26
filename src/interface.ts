@@ -174,6 +174,9 @@ namespace Interface {
                     this.hideButton.setInnerHTML("Hide");
                     break;
             }
+            if (this.onChangeMode) {
+                this.onChangeMode(this.menuMode);
+            }
         }
 
         positionMenu() {

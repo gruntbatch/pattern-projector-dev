@@ -139,6 +139,7 @@ class Calibrator extends Viewer {
     const pdfCanvas = document.getElementById("pdf-canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
     const renderer = new Renderer(gl, 100);
+    const pdfRenderer = new PDF.Renderer(gl);
     const interface = new Interface.Interface();
     const calibrator = new Calibrator();
     let viewer: Viewer = calibrator;
@@ -224,7 +225,7 @@ class Calibrator extends Viewer {
         viewer.resetHandle(i);
     }
     interface.onLoadPattern = (e) => {
-        PDF.onLoadPattern(e, pdfCanvas);
+        pdfRenderer.renderPattern(e);
     }
 
     const animationFrame = () => {
@@ -233,7 +234,15 @@ class Calibrator extends Viewer {
         renderer.setModelMatrix(viewer.getModelMatrix());
         renderer.setViewMatrix(calibrator.getProjectionMatrix(rulerPlane));
         renderer.useProgram(rulerProgram);
-        renderer.useTexture(rulerTexture);
+        switch (displayMode) {
+            case DisplayMode.Calibration:
+                renderer.useTexture(rulerTexture);
+                break;
+
+            case DisplayMode.Pattern:
+                renderer.useTexture(pdfRenderer.texture);
+                break;
+        }
         renderer.drawPrimitive(rulerPlane.primitive);
 
         interface.updateValues(
