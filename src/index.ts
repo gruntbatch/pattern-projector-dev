@@ -53,7 +53,7 @@ const DEFAULT_SCALE_VALUE = 2.0;
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
     const gl = canvas.getContext("webgl2")!;
     const renderer = new Renderer(gl, 100);
-    const interface = new Interface();
+    const interface = new Interface.Interface();
     
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
     const rulerTexture = renderer.loadTexture("assets/ruler.png");
