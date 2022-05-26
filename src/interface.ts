@@ -37,7 +37,6 @@ namespace Interface {
         constructor(tab: Button, ...contents: Array<string>) {
             this.tab = tab;
             this.contents = contents.map((v) => document.getElementById(v));
-            console.log(contents, this.contents);
         }
 
         setVisible(visible: boolean) {
@@ -82,16 +81,19 @@ namespace Interface {
         patternButton: Button;
 
         calibrationTab: Tab;
-        patternTab: Tab;
-
+        
         zoomReset: HTMLElement;
         onZoomReset: () => void;
         zoomValue: HTMLElement;
         onHandleReset: (i: number) => void;
         handles: Array<Handle>;
 
+        patternTab: Tab;
+        loadPatternButton: Button;
+        onLoadPattern: (e: any) => void;
+
         constructor() {
-            this.menuMode = MenuMode.Calibration;
+            this.menuMode = MenuMode.Pattern;
             this.previousMenuMode = this.menuMode;
             this.menuPosition = MenuPosition.Left;
 
@@ -123,20 +125,29 @@ namespace Interface {
             });
 
             this.calibrationTab = new Tab(this.calibrationButton, "calibration-panel", "save-load-panel");
-            this.patternTab = new Tab(this.patternButton, "pattern-panel", "save-load-panel");
-
+            
             this.zoomReset = document.getElementById("zoom-reset");
             this.zoomReset.onclick = () => {
                 this.onZoomReset();
             }
             this.zoomValue = document.getElementById("zoom-value");
-
+            
             this.handles = new Array<Handle>(5);
             for (let i = 0; i < 5; i++) {
                 this.handles[i] = new Handle(i, () => {
                     this.onHandleReset(i);
                 });
             }
+
+            this.patternTab = new Tab(this.patternButton, "pattern-panel", "save-load-panel");
+            const patternInput = document.getElementById("pattern-input");
+            patternInput.onchange = (e: any) => {
+                this.onLoadPattern(e);
+            }
+            this.loadPatternButton = new Button("load-pattern-button", () => {
+                patternInput.click();
+            });
+
 
             this.showMenu();
             this.positionMenu();

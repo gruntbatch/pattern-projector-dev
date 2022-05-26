@@ -29,6 +29,7 @@
 // #include("src/math.ts")
 // #include("src/renderer.ts")
 // #include("src/interface.ts")
+// #include("src/pdf.ts")
 
 const handleVert = `#include("src/handle.vert")`
 const handleFrag = `#include("src/handle.frag")`;
@@ -47,7 +48,6 @@ class Handle {
         this.radius = radius;
     }
 }
-const DEFAULT_SCALE_VALUE = 2.0;
 
 (() => {
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
@@ -84,6 +84,7 @@ const DEFAULT_SCALE_VALUE = 2.0;
     let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
+    const DEFAULT_SCALE_VALUE = 2.0;
     let scale = DEFAULT_SCALE_VALUE;
     let sensitivity = 0.1;
 
@@ -147,6 +148,7 @@ const DEFAULT_SCALE_VALUE = 2.0;
     interface.onHandleReset = (i: number) => {
         handles[i].pos = defaultHandlePositions[i];
     }
+    interface.onLoadPattern = PDF.onLoadPattern;
 
     const animationFrame = () => {
         requestAnimationFrame(animationFrame);
