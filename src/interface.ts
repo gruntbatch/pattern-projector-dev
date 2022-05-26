@@ -5,17 +5,63 @@ namespace Interface {
         Pattern
     }
     
+    enum MenuPosition {
+        Left, Right
+    }
+
+    class Button {
+        e: HTMLElement;
+
+        constructor(id: string, onclick) {
+            this.e = document.getElementById(id);
+            this.e.onclick = onclick;
+        }
+
+        setInnerHTML(innerHTML: string) {
+            this.e.innerHTML = innerHTML;
+        }
+
+        setActive(active: boolean) {
+            if (active) {
+                this.e.classList.add("active");
+            } else {
+                this.e.classList.remove("active");
+            }
+        }
+    }
+
+    class Tab {
+        tab: Button;
+        contents: Array<HTMLElement>;
+
+        constructor(tab: Button, ...contents: Array<string>) {
+            this.tab = tab;
+            this.contents = contents.map((v) => document.getElementById(v));
+            console.log(contents, this.contents);
+        }
+
+        setVisible(visible: boolean) {
+            this.tab.setActive(visible);
+            this.contents.map((v) => {
+                v.classList.toggle("display-none", !visible);
+            })
+        }
+    }
+    
     export class Interface {
-        menu: HTMLElement;
         menuMode: MenuMode;
         previousMenuMode: MenuMode;
-        calibrationButton: HTMLElement;
-        menuHide: HTMLElement;
-        menuLeft: boolean;
-        menuSwap: HTMLElement;
-        patternButton: HTMLElement;
+        menuPosition: MenuPosition;
 
-        calibrationPanel: HTMLElement;
+        menu: HTMLElement;
+        calibrationButton: Button;
+        hideButton: Button;
+        swapButton: Button;
+        patternButton: Button;
+
+        calibrationTab: Tab;
+        patternTab: Tab;
+
         zoomReset: HTMLElement;
         onZoomReset: () => void;
         zoomValue: HTMLElement;
@@ -25,42 +71,41 @@ namespace Interface {
         handleXValues: Array<HTMLElement>;
         handleYValues: Array<HTMLElement>;
 
-        patternPanel: HTMLElement;
-
-        saveLoadPanel: HTMLElement;
-
         constructor() {
-            this.menu = document.getElementById("menu");
             this.menuMode = MenuMode.Calibration;
             this.previousMenuMode = this.menuMode;
-            this.calibrationButton = document.getElementById("calibration-button");
-            this.calibrationButton.onclick = () => {
+            this.menuPosition = MenuPosition.Left;
+
+            this.menu = document.getElementById("menu");
+            this.calibrationButton = new Button("calibration-button", () => {
                 this.menuMode = MenuMode.Calibration;
-                this.updateMenuMode();
-            }
-            this.menuHide = document.getElementById("hide");
-            this.menuHide.onclick = () => {
+                this.showMenu();
+            });
+            this.hideButton = new Button("hide-button", () => {
                 if (this.menuMode == MenuMode.Hidden) {
                     this.menuMode = this.previousMenuMode;
                 } else {
                     this.previousMenuMode = this.menuMode;
-                    this.menuMode = MenuMode.Hidden
+                    this.menuMode = MenuMode.Hidden;
                 }
-                this.updateMenuMode();
-            }
-            this.menuLeft = true;
-            this.menuSwap = document.getElementById("swap");
-            this.menuSwap.onclick = () => {
-                this.menuLeft = !this.menuLeft;
-                this.swapMenu();
-            };
-            this.patternButton = document.getElementById("pattern-button");
-            this.patternButton.onclick = () => {
+                this.showMenu();
+            });
+            this.swapButton = new Button("swap-button", () => {
+                if (this.menuPosition == MenuPosition.Left) {
+                    this.menuPosition = MenuPosition.Right;
+                } else {
+                    this.menuPosition = MenuPosition.Left;
+                }
+                this.positionMenu();
+            })
+            this.patternButton = new Button("pattern-button", () => {
                 this.menuMode = MenuMode.Pattern;
-                this.updateMenuMode();
-            }
+                this.showMenu();
+            });
 
-            this.calibrationPanel = document.getElementById("calibration-panel");
+            this.calibrationTab = new Tab(this.calibrationButton, "calibration-panel", "save-load-panel");
+            this.patternTab = new Tab(this.patternButton, "pattern-panel", "save-load-panel");
+
             this.zoomReset = document.getElementById("zoom-reset");
             this.zoomReset.onclick = () => {
                 this.onZoomReset();
@@ -80,67 +125,43 @@ namespace Interface {
                 this.handleYValues[i] = document.getElementById("y-" + i);
             }
 
-            this.patternPanel = document.getElementById("pattern-panel");
-
-            this.saveLoadPanel = document.getElementById("save-load-panel");
-
-            this.swapMenu();
-            this.updateMenuMode();
+            this.showMenu();
+            this.positionMenu();
         }
 
-        updateMenuMode() {
+        showMenu() {
             switch (this.menuMode) {
                 case MenuMode.Calibration:
-                    this.calibrationButton.classList.add("bg-blue");
-                    this.calibrationButton.classList.remove("bg-gray");
-                    this.calibrationPanel.classList.remove("display-none");
-
-                    this.patternButton.classList.remove("bg-blue");
-                    this.patternButton.classList.add("bg-gray");
-                    this.patternPanel.classList.add("display-none");
-
-                    this.saveLoadPanel.classList.remove("display-none");
-
-                    this.menuHide.innerHTML = "Hide";
+                    this.patternTab.setVisible(false);
+                    this.calibrationTab.setVisible(true);
+                    this.hideButton.setInnerHTML("Hide");
                     break;
 
                 case MenuMode.Hidden:
-                    this.calibrationButton.classList.remove("bg-blue");
-                    this.calibrationButton.classList.add("bg-gray");
-                    this.calibrationPanel.classList.add("display-none");
-
-                    this.patternButton.classList.remove("bg-blue");
-                    this.patternButton.classList.add("bg-gray");
-                    this.patternPanel.classList.add("display-none");
-
-                    this.saveLoadPanel.classList.add("display-none");
-
-                    this.menuHide.innerHTML = "Show";
+                    this.patternTab.setVisible(false);
+                    this.calibrationTab.setVisible(false);
+                    this.hideButton.setInnerHTML("Show");
                     break;
 
                 case MenuMode.Pattern:
-                    this.calibrationButton.classList.remove("bg-blue");
-                    this.calibrationButton.classList.add("bg-gray");
-                    this.calibrationPanel.classList.add("display-none");
-
-                    this.patternButton.classList.add("bg-blue");
-                    this.patternButton.classList.remove("bg-gray");
-                    this.patternPanel.classList.remove("display-none");
-
-                    this.saveLoadPanel.classList.remove("display-none");
-
-                    this.menuHide.innerHTML = "Hide";
+                    this.calibrationTab.setVisible(false);
+                    this.patternTab.setVisible(true);
+                    this.hideButton.setInnerHTML("Hide");
                     break;
             }
         }
 
-        swapMenu() {
-            if (this.menuLeft) {
-                this.menu.classList.add("left");
-                this.menu.classList.remove("right");
-            } else {
-                this.menu.classList.remove("left");
-                this.menu.classList.add("right");
+        positionMenu() {
+            switch (this.menuPosition) {
+                case MenuPosition.Left:
+                    this.menu.classList.add("left");
+                    this.menu.classList.remove("right");
+                    break;
+                
+                case MenuPosition.Right:
+                    this.menu.classList.remove("left");
+                    this.menu.classList.add("right");
+                    break;
             }
         }
 

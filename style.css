@@ -8,6 +8,14 @@ body {
     display: none !important;
 }
 
+.button {
+    background-color: #adb5bd;
+}
+
+.button.active {
+    background-color: #0d6efd !important;
+}
+
 .bg-blue {
     background-color: #0d6efd;
 }
