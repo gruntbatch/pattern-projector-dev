@@ -102,18 +102,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--builddir", type=str)
     parser.add_argument("--outfile", type=str)
-    parser.add_argument("--sourcedir", type=str, dest="sourcedirs", action="append")
+    parser.add_argument("--sourcedir", type=str, dest="sourcedirs", action="append", default=[])
+    parser.add_argument("sources", nargs="*")
     args = parser.parse_args()
 
     # scan sourcedirs for additional source files
-    sources = scan_for_source_files(set(args.sourcedirs))
+    required_sources = set(args.sources)
+    sources = required_sources | scan_for_source_files(set(args.sourcedirs))
 
     # preprocess and compile files
     dependencies = preprocess_and_compile(sources, args.builddir, args.outfile)
 
     while True:
         # watch for new or changed sources
-        sources = watch_for_source_files(args.sourcedirs, dependencies)
+        sources = required_sources | watch_for_source_files(args.sourcedirs, dependencies)
 
         # preprocess and compile files
         dependencies = preprocess_and_compile(sources, args.builddir, args.outfile)
