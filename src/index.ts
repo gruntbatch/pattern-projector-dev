@@ -57,16 +57,34 @@ const DEFAULT_HANDLE_RADIUS = remToPixels(1);
 const DEFAULT_HANDLE_POSITION = 2.0;
 
 interface Viewer {
+abstract class Viewer {
     origin: Handle;
     handles: Array<Handle>;
     scale: number;
     resetHandle(index: number): void;
     resetScale(): void;
+    abstract resetHandle(index: number): void;
+    abstract resetScale(): void;
+    getModelMatrix(): Matrix4 {
+        return Matrix4.mul(
+            Matrix4.translation(
+                Point.scale(
+                    this.origin.pos,
+                    1 / (4 * this.scale)
+                )
+            ),
+            Matrix4.mul(
+                Matrix4.scale(this.scale),
+                Matrix4.translation(new Point(0.5, 0.5))
+            )
+        )
+    }
 }
 
 const DEFAULT_SCALE_VALUE = 2.0;
 
 class Calibrator implements Viewer {
+class Calibrator extends Viewer {
     perspective: Array<Handle>;
     origin: Handle;
     defaultHandlePositions: Array<Point>;
@@ -74,6 +92,7 @@ class Calibrator implements Viewer {
     scale: number;
 
     constructor() {
+        super();
         this.defaultHandlePositions = new Array<Point>(
             new Point(-DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
             new Point( DEFAULT_HANDLE_POSITION, -DEFAULT_HANDLE_POSITION),
@@ -103,6 +122,15 @@ class Calibrator implements Viewer {
 
     resetScale(): void {
         this.scale = DEFAULT_SCALE_VALUE;
+    }
+
+    getProjectionMatrix(plane: Plane): Matrix4 {
+        return plane.computeProjection(
+            this.perspective[0].pos,
+            this.perspective[1].pos,
+            this.perspective[2].pos,
+            this.perspective[3].pos
+        );
     }
 }
 
@@ -183,6 +211,15 @@ class Calibrator implements Viewer {
         viewer.scale += e.deltaY * 0.0005;
     }
 
+    interface.onChangeMode = (mode: Interface.MenuMode) => {
+        if (mode == Interface.MenuMode.Calibration) {
+            displayMode = DisplayMode.Calibration;
+            viewer = calibrator;
+        } else {
+            displayMode = DisplayMode.Pattern;
+            // viewer = projector;
+        }
+    };
     interface.onZoomReset = () => {
         viewer.resetScale();
     }
@@ -209,6 +246,8 @@ class Calibrator implements Viewer {
 
         renderer.setModelMatrix(model);
         renderer.setViewMatrix(view);
+        renderer.setModelMatrix(viewer.getModelMatrix());
+        renderer.setViewMatrix(calibrator.getProjectionMatrix(rulerPlane));
         renderer.useProgram(rulerProgram);
         renderer.useTexture(rulerTexture);
         renderer.drawPrimitive(rulerPlane.primitive);

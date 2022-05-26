@@ -1,5 +1,5 @@
 namespace Interface {
-    enum MenuMode {
+    export enum MenuMode {
         Calibration,
         Hidden,
         Pattern
@@ -71,6 +71,7 @@ namespace Interface {
     
     export class Interface {
         menuMode: MenuMode;
+        onChangeMode: (mode: MenuMode) => void;
         previousMenuMode: MenuMode;
         menuPosition: MenuPosition;
 
