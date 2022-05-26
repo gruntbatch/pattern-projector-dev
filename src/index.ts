@@ -13,7 +13,7 @@
 // [x] use texture for ruler
 // [x] Refactor code?
 // [x] constantly call update
-// seperate handle logic more intelligently
+// [x] seperate handle logic more intelligently
 // reset pattern scrubbing handle between drags
 // make high sensitivity a toggleable option
 // swap out ruler textures based on zoom
@@ -80,24 +80,28 @@ const DEFAULT_SCALE_VALUE = 2.0;
         ...perspectiveHandles,
         originHandle
     );
-    let currentHandle = -1;
 
+    let currentHandle = -1;
     let initialHandlePosition = new Point(0, 0);
     let initialMousePosition = new Point(0, 0);
     let scale = DEFAULT_SCALE_VALUE;
     let sensitivity = 0.1;
 
-    const resize = () => {
+    const onResize = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
         canvas.width = width;
         canvas.height = height;
         renderer.resizeCanvas(width, height);
     }
+    onResize();
+    window.onresize = onResize;
 
-    resize();
-
-    const move = (e: MouseEvent) => {
+    // Listen to mouseup and mousemove events on the _window_, as it's important to get these events wherever they are triggered
+    window.onmouseup = () => {
+        currentHandle = -1;
+    }
+    window.onmousemove = (e: MouseEvent) => {
         if (currentHandle < 0) {
             return;
         }
@@ -112,20 +116,14 @@ const DEFAULT_SCALE_VALUE = 2.0;
                 sensitivity
             )
         );
-    }
-
-    // Listen to mouseup and mousemove events on the _window_, as it's important to get these events wherever they are triggered
-    window.onmouseup = () => {
-        currentHandle = -1;
-    }
-    window.onmousemove = move;
+    };
 
     // Listen to mousedown and wheel events on the _canvas_, as we're only interested in them occuring over the canvas
     canvas.onmousedown = (e: MouseEvent) => {
         const mousePosition = new Point(e.pageX, e.pageY);
         const canvasPosition = renderer.windowToCanvasPoint(mousePosition);
-        let rem = renderer.windowToCanvasScalar(remToPixels(1));
-        let best = rem * rem; // 1rem squared
+        let radius = renderer.windowToCanvasScalar(DEFAULT_HANDLE_RADIUS);
+        let best = radius * radius; // 1rem squared
         currentHandle = -1;
         for (let i=0; i<5; i++) {
             let dx = canvasPosition.x - handles[i].pos.x;
@@ -138,7 +136,6 @@ const DEFAULT_SCALE_VALUE = 2.0;
                 initialMousePosition = mousePosition;
             }
         }
-        move(e);
     }
     canvas.onwheel = (e: WheelEvent) => {
         scale += e.deltaY * 0.0005;
@@ -150,8 +147,6 @@ const DEFAULT_SCALE_VALUE = 2.0;
     interface.onHandleReset = (i: number) => {
         handles[i].pos = defaultHandlePositions[i];
     }
-
-    window.onresize = resize;
 
     const animationFrame = () => {
         requestAnimationFrame(animationFrame);
