@@ -1,5 +1,5 @@
+#!/usr/bin/env python3
 import glob
-import itertools
 import os
 import subprocess
 import time
@@ -30,7 +30,6 @@ def watch_for_source_files(sourcedirs, dependencies: set[str]):
                     return sources2
             except FileNotFoundError:
                 return sources2
-
 
 
 def preprocess_and_compile(sources, builddir, outfile):
@@ -91,10 +90,10 @@ def compile(sources, outfile):
     print(result.stdout.decode("utf-8"))
 
     if result.returncode != 0:
-        print("... Done! Errors detected!")
+        print("... Failed! Errors detected!")
 
     else:
-        print("... Done!")
+        print("... Succeeded!")
 
 
 if __name__ == "__main__":
