@@ -14,6 +14,7 @@
 // [x] Refactor code?
 // [x] constantly call update
 // [x] seperate handle logic more intelligently
+// Create state-specific ui
 // reset pattern scrubbing handle between drags
 // make high sensitivity a toggleable option
 // swap out ruler textures based on zoom
@@ -60,8 +61,17 @@ abstract class Viewer {
     origin: Handle;
     handles: Array<Handle>;
     scale: number;
+    
+    constructor() {
+        this.origin = new Handle(new Point(0, 0), DEFAULT_HANDLE_RADIUS);
+        this.handles = new Array<Handle>(this.origin);
+        this.scale = DEFAULT_SCALE_VALUE;
+    }
+
     abstract resetHandle(index: number): void;
+    
     abstract resetScale(): void;
+    
     getModelMatrix(): Matrix4 {
         return Matrix4.mul(
             Matrix4.translation(
@@ -102,14 +112,10 @@ class Calibrator extends Viewer {
             this.perspective[i] = new Handle(this.defaultHandlePositions[i], DEFAULT_HANDLE_RADIUS);
         }
 
-        this.origin = new Handle(new Point(0, 0), DEFAULT_HANDLE_RADIUS);
-
         this.handles = new Array<Handle>(
             ...this.perspective,
             this.origin
         );
-
-        this.scale = DEFAULT_SCALE_VALUE;
     }
 
     resetHandle(index: number): void {
@@ -130,9 +136,16 @@ class Calibrator extends Viewer {
     }
 }
 
-// class Projector implements Viewer {
+class Projector extends Viewer {
 
-// }
+    resetHandle(index: number): void {
+        this.origin.pos = new Point(0, 0);
+    }
+
+    resetScale(): void {
+        this.scale = DEFAULT_SCALE_VALUE;
+    }
+}
 
 (() => {
     const canvas = document.getElementById("canvas")! as HTMLCanvasElement;
@@ -142,6 +155,7 @@ class Calibrator extends Viewer {
     const pdfRenderer = new PDF.Renderer(gl);
     const interface = new Interface.Interface();
     const calibrator = new Calibrator();
+    const projector = new Projector();
     let viewer: Viewer = calibrator;
     
     const rulerProgram = renderer.createProgram(rulerVert, rulerFrag);
@@ -215,7 +229,7 @@ class Calibrator extends Viewer {
             viewer = calibrator;
         } else {
             displayMode = DisplayMode.Pattern;
-            // viewer = projector;
+            viewer = projector;
         }
     };
     interface.onZoomReset = () => {
