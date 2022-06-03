@@ -61,7 +61,6 @@ namespace Interface {
 
         constructor(handle: Model.Handle, id: string) {
             this.handle = handle;
-            console.log(id);
             this.reset = new Button(id + "-reset", () => { this.handle.resetPosition(); });
             this.handleElement = document.getElementById(id + "-handle");
             this.x = new Value(id + "-x", 3);

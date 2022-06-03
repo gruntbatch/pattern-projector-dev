@@ -1,31 +1,3 @@
-// TODO
-// [x] Handle sensitivity
-// [x] Ruler zooming
-// [x] Handle appearance
-// [x] change where planes originate
-// [x] scale scene origin
-// [x] move scene origin along xy plane
-// [x] Swap menu placement?
-// [x] display debug info on two lines
-// [x] fix handles blocking clicks
-// [x] fix dragging off of the canvas bounds
-// [x] style handles
-// [x] use texture for ruler
-// [x] Refactor code?
-// [x] constantly call update
-// [x] seperate handle logic more intelligently
-// [x] Create state-specific ui
-// [x] reset pattern scrubbing handle between drags
-// [x] make high sensitivity a toggleable option
-// [x] save and load calibration
-// [x] upload pattern pdf
-// [x] render pattern pdf to canvas
-// [x] use rendered pattern canvas as texture
-// [x] draw pattern
-// [x] Prevent scalar values from becoming negative
-// [x] Use a sane default scale value for pattern
-// [x] Lock zoom
-
 // #include("src/interface.ts")
 // #include("src/gl.ts")
 // #include("src/math.ts")
