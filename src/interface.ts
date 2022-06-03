@@ -82,6 +82,17 @@ namespace Interface {
         }
     }
 
+    class ScrubHandle extends Handle {
+        setValue(position: Point): void {
+            this.x.setValue(position.x);
+            this.y.setValue(position.y);
+            position = Context.glRenderer.canvasToWindowPoint(new Point(0, 0));
+            position = Point.add(new Point(-remToPixels(1), -remToPixels(1)), position);
+            this.handleElement.style.left = position.x + "px";
+            this.handleElement.style.top = position.y + "px";
+        }
+    }
+
     class VisibilityGroup {
         contents: Array<HTMLElement>;
 
@@ -106,6 +117,8 @@ namespace Interface {
         allHandles: Handle[];
         
         visibilityGroup: VisibilityGroup;
+
+        abstract getNearestHandle(position: Point): number;
 
         update() {
             this.scaleValue.setValue(this.model.scale);
@@ -135,6 +148,22 @@ namespace Interface {
                 ...this.allHandles.map(x => x.handleElement)
             );
         }
+
+        getNearestHandle(position: Point): number {
+            // We'll always select _a_ handle
+            let best = Infinity;
+            let currentHandle = -1;
+            this.allHandles.map((handle, i) => {
+                let x = position.x - handle.handle.position.x;
+                let y = position.y - handle.handle.position.y;
+                let distanceSquared = x * x + y * y;
+                if (best > distanceSquared) {
+                    best = distanceSquared;
+                    currentHandle = i;
+                }
+            })
+            return currentHandle;
+        }
     }
 
     export class Projector extends Editor {
@@ -147,8 +176,9 @@ namespace Interface {
             this.scaleReset = new Button("pattern-scale-reset", () => { this.model.onResetScale(); });
             this.scaleValue = new Value("pattern-scale-value", this.model.scale);
 
+            this.origin = new ScrubHandle(projection.origin, "pattern-origin");
             this.allHandles = [
-                new Handle(projection.origin, "pattern-origin")
+                this.origin
             ];
 
             const patternInput = document.getElementById("pattern-input");
@@ -163,6 +193,10 @@ namespace Interface {
                 ...["pattern-panel", "save-load-panel"].map(x => document.getElementById(x)),
                 ...this.allHandles.map(x => x.handleElement)
             );
+        }
+
+        getNearestHandle(position: Point): number {
+            return 0;
         }
     }
 
@@ -296,19 +330,8 @@ namespace Interface {
 
         onMouseDown(e: MouseEvent) {
             this.initialMousePosition = Context.glRenderer.windowToCanvasPoint(new Point(e.pageX, e.pageY));
-            let radius = Context.glRenderer.windowToCanvasScalar(remToPixels(1));
-            let best = radius * radius;
-            this.currentHandle = -1;
-            this.editor.allHandles.map((handle, i) => {
-                let x = this.initialMousePosition.x - handle.handle.position.x;
-                let y = this.initialMousePosition.y - handle.handle.position.y;
-                let distanceSquared = x * x + y * y;
-                if (best > distanceSquared) {
-                    best = distanceSquared;
-                    this.currentHandle = i;
-                    this.initialHandlePosition = handle.handle.position;
-                }
-            })
+            this.currentHandle = this.editor.getNearestHandle(this.initialMousePosition);
+            this.initialHandlePosition = this.editor.allHandles[this.currentHandle].handle.position;
         }
 
         onMouseMove(e: MouseEvent) {

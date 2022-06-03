@@ -15,13 +15,15 @@
 // [x] constantly call update
 // [x] seperate handle logic more intelligently
 // [x] Create state-specific ui
-// reset pattern scrubbing handle between drags
+// [x] reset pattern scrubbing handle between drags
 // [x] make high sensitivity a toggleable option
 // save and load calibration
 // [x] upload pattern pdf
 // [x] render pattern pdf to canvas
 // [x] use rendered pattern canvas as texture
 // [x] draw pattern
+// Prevent scalar calues from becoming negative
+// Use a sane default scale value for pattern
 
 // #include("src/interface.ts")
 // #include("src/math.ts")
