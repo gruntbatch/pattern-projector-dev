@@ -260,7 +260,7 @@ class Renderer {
 
     newPlane(width: number, height: number, resolution: number): Plane {
         return this.newPlaneUsingFunction(width, height, resolution, (position: Point): Vertex => {
-            const mappedPosition = Point.map(position, 0, 1, -1, 1);
+            const mappedPosition = Point.map(position, 0, 1, 0, 1);
             return new Vertex(
                 mappedPosition,
                 position,

@@ -27,16 +27,16 @@ namespace Model {
         getModelMatrix(): Matrix4 {
             return Matrix4.mul(
                 Matrix4.translation(
-                    Point.scale(
-                        this.origin.position,
-                        1 / (4 * this.scale)
-                    )
+                    Point.scale(this.origin.position, 1 / (4 * this.scale))
                 ),
                 Matrix4.mul(
-                    Matrix4.scale(this.scale),
-                    Matrix4.translation(new Point(0.5, 0.5))
+                    Matrix4.translation(new Point(-0.5, -0.5)),
+                    Matrix4.mul(
+                        Matrix4.scale(this.scale),
+                        Matrix4.translation(new Point(0.5, 0.5))
+                    )
                 )
-            )
+            );
         }
 
         onResetScale() {
@@ -74,5 +74,25 @@ namespace Model {
     }
 
     export class Projection extends Model {
+        getModelMatrix(): Matrix4 {
+            const pdfDimensions = new Point(Context.pdfCanvas.width, Context.pdfCanvas.height);
+            const scaledPdfDimensions = Point.scale(pdfDimensions, 1 / Context.glRenderer.orthographicScale);
+            const scaledPosition = new Point(
+                this.origin.position.x / (4 * this.scale * scaledPdfDimensions.x),
+                this.origin.position.y / (4 * this.scale * scaledPdfDimensions.y)
+            );
+            return Matrix4.mul(
+                Matrix4.translation(
+                    scaledPosition
+                ),
+                Matrix4.mul(
+                    Matrix4.translation(new Point(-0.5, -0.5)),
+                    Matrix4.mul(
+                        Matrix4.scale2(Point.scale(scaledPdfDimensions, this.scale)),
+                        Matrix4.translation(new Point(0.5, 0.5))
+                    )
+                )
+            );
+        }
     }
 }

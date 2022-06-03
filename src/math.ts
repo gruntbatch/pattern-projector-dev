@@ -120,6 +120,15 @@ class Matrix4 {
         ]);
     }
 
+    static model2(position: Point, scale: Point): Matrix4 {
+        return new Matrix4([
+            scale.x, 0, 0, 0,
+            0, scale.y, 0, 0,
+            0, 0, 1, 0,
+            position.x, position.y, 0, 1
+        ]);
+    }
+
     static orthographic(x: number, y: number): Matrix4 {
         const left = x / -2.0;
         const right = x / 2.0;
@@ -142,6 +151,15 @@ class Matrix4 {
         return new Matrix4([
             scale, 0, 0, 0,
             0, scale, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ])
+    }
+
+    static scale2(scale: Point): Matrix4 {
+        return new Matrix4([
+            scale.x, 0, 0, 0,
+            0, scale.y, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1
         ])
