@@ -35,6 +35,23 @@ namespace Interface {
         }
     }
 
+    class Scalar {
+        container: HTMLElement;
+        value: Value;
+        reset: Button;
+
+        constructor(id: string, initial: number, onwheel: (e: WheelEvent) => void, onclick: (e: MouseEvent) => void, truncate: number=2) {
+            this.container = document.getElementById(id + "-container");
+            this.container.onwheel = onwheel;
+            this.value = new Value(id + "-value", initial, truncate);
+            this.reset = new Button(id + "-reset", onclick);
+        }
+
+        setValue(value: number) {
+            this.value.setValue(value);
+        }
+    }
+
     class Handle {
         handle: Model.Handle;
         reset: Button;
@@ -172,6 +189,7 @@ namespace Interface {
         editor: Editor;
         
         sensitivity: number;
+        sensitivityScalar: Scalar;
 
         currentHandle: number;
         initialHandlePosition: Point;
@@ -210,6 +228,15 @@ namespace Interface {
             this.editor = this.calibrator;
 
             this.sensitivity = 0.1;
+            this.sensitivityScalar = new Scalar(
+                "precision", 0.1, (e: WheelEvent) => {
+                    this.sensitivity += e.deltaY * 0.0002;
+                },
+                (e: MouseEvent) => {
+                    this.sensitivity = 0.1;
+                },
+                3
+            );
 
             this.currentHandle = -1;
 
@@ -316,6 +343,7 @@ namespace Interface {
         onUpdate() {
             this.calibrator.update();
             this.projector.update();
+            this.sensitivityScalar.setValue(this.sensitivity);
         }
     }
 }

@@ -16,7 +16,7 @@
 // [x] seperate handle logic more intelligently
 // [x] Create state-specific ui
 // reset pattern scrubbing handle between drags
-// make high sensitivity a toggleable option
+// [x] make high sensitivity a toggleable option
 // save and load calibration
 // [x] upload pattern pdf
 // [x] render pattern pdf to canvas
