@@ -63,7 +63,7 @@ namespace Model {
             );
         }
 
-        getProjectionMatrix(plane: Plane): Matrix4 {
+        getProjectionMatrix(plane: GL.Plane): Matrix4 {
             return plane.computeProjection(
                 this.perspective[0].position,
                 this.perspective[1].position,

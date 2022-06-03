@@ -27,9 +27,9 @@
 // [x] Lock zoom
 
 // #include("src/interface.ts")
+// #include("src/gl.ts")
 // #include("src/math.ts")
 // #include("src/model.ts")
-// #include("src/renderer.ts")
 // #include("src/pdf.ts")
 
 const rulerVert = `#include("src/ruler.vert")`;
@@ -59,7 +59,7 @@ namespace Context {
 
     export const glCanvas = document.getElementById("gl-canvas") as HTMLCanvasElement;
     export const gl = glCanvas.getContext("webgl2");
-    export const glRenderer = new Renderer(gl, 100);
+    export const glRenderer = new GL.Renderer(gl, 100);
 
     export const pdfCanvas = document.getElementById("pdf-canvas") as HTMLCanvasElement;
     export const pdfRenderer = new PDF.Renderer();
