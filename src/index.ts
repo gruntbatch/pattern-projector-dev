@@ -22,8 +22,8 @@
 // [x] render pattern pdf to canvas
 // [x] use rendered pattern canvas as texture
 // [x] draw pattern
-// Prevent scalar calues from becoming negative
-// Use a sane default scale value for pattern
+// [x] Prevent scalar values from becoming negative
+// [x] Use a sane default scale value for pattern
 
 // #include("src/interface.ts")
 // #include("src/math.ts")
@@ -41,13 +41,9 @@ function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
 }
 
-const DEFAULT_HANDLE_RADIUS = remToPixels(1);
-const DEFAULT_HANDLE_POSITION = 2.0;
-const DEFAULT_SCALE_VALUE = 2.0;
-
 namespace Context {
-    export const calibration = new Model.Calibration(DEFAULT_SCALE_VALUE);
-    export const projection = new Model.Projection(DEFAULT_SCALE_VALUE);
+    export const calibration = new Model.Calibration(2.0);
+    export const projection = new Model.Projection(0.5);
 
     export const glCanvas = document.getElementById("gl-canvas") as HTMLCanvasElement;
     export const gl = glCanvas.getContext("webgl2");

@@ -264,7 +264,7 @@ namespace Interface {
             this.sensitivity = 0.1;
             this.sensitivityScalar = new Scalar(
                 "precision", 0.1, (e: WheelEvent) => {
-                    this.sensitivity += e.deltaY * 0.0002;
+                    this.sensitivity = Math.max( 0.01, this.sensitivity + e.deltaY * 0.0002);
                 },
                 (e: MouseEvent) => {
                     this.sensitivity = 0.1;
@@ -360,7 +360,7 @@ namespace Interface {
         }
 
         onWheel(e: WheelEvent) {
-            this.editor.model.onChangeScale(e.deltaY * 0.0005);
+            this.editor.model.onChangeScale(e.deltaY * (10 * this.sensitivity));
         }
 
         onUpdate() {
