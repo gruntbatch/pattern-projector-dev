@@ -110,8 +110,10 @@ namespace Interface {
     abstract class Editor {
         model: Model.Model;
 
+        scaleIsLocked: boolean
         scaleReset: Button;
         scaleValue: Value;
+        lockScale: Button;
 
         origin: Handle;
         allHandles: Handle[];
@@ -133,8 +135,13 @@ namespace Interface {
             super();
             this.model = calibration;
 
+            this.scaleIsLocked = false;
             this.scaleReset = new Button("ruler-scale-reset", () => { this.model.onResetScale(); });
             this.scaleValue = new Value("ruler-scale-value", this.model.scale);
+            this.lockScale = new Button("ruler-lock-scale", () => {
+                this.scaleIsLocked = !this.scaleIsLocked;
+                this.lockScale.e.classList.toggle("active", this.scaleIsLocked);
+            });
 
             this.origin = new Handle(calibration.origin, "ruler-origin");
             this.perspective = calibration.perspective.map((handle, i) => new Handle(handle, "ruler-perspective-" + i.toString()));
@@ -173,8 +180,13 @@ namespace Interface {
             super();
             this.model = projection;
 
+            this.scaleIsLocked = false;
             this.scaleReset = new Button("pattern-scale-reset", () => { this.model.onResetScale(); });
             this.scaleValue = new Value("pattern-scale-value", this.model.scale);
+            this.lockScale = new Button("pattern-lock-scale", () => {
+                this.scaleIsLocked = !this.scaleIsLocked;
+                this.lockScale.e.classList.toggle("active", this.scaleIsLocked);
+            })
 
             this.origin = new ScrubHandle(projection.origin, "pattern-origin");
             this.allHandles = [
@@ -359,7 +371,9 @@ namespace Interface {
         }
 
         onWheel(e: WheelEvent) {
-            this.editor.model.onChangeScale(e.deltaY * this.sensitivity);
+            if (!this.editor.scaleIsLocked) {
+                this.editor.model.onChangeScale(e.deltaY * this.sensitivity);
+            }
         }
 
         onUpdate() {

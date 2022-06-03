@@ -24,6 +24,7 @@
 // [x] draw pattern
 // [x] Prevent scalar values from becoming negative
 // [x] Use a sane default scale value for pattern
+// [x] Lock zoom
 
 // #include("src/interface.ts")
 // #include("src/math.ts")
