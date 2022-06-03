@@ -21,7 +21,7 @@
 // [x] upload pattern pdf
 // [x] render pattern pdf to canvas
 // [x] use rendered pattern canvas as texture
-// draw pattern
+// [x] draw pattern
 
 // #include("src/interface.ts")
 // #include("src/math.ts")
@@ -29,10 +29,9 @@
 // #include("src/renderer.ts")
 // #include("src/pdf.ts")
 
-const handleVert = `#include("src/handle.vert")`
-const handleFrag = `#include("src/handle.frag")`;
 const rulerVert = `#include("src/ruler.vert")`;
 const rulerFrag = `#include("src/ruler.frag")`;
+const patternFrag = `#include("src/pattern.frag")`;
 
 const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
@@ -61,6 +60,7 @@ namespace Context {
         const rulerProgram = glRenderer.createProgram(rulerVert, rulerFrag);
         const rulerTexture = glRenderer.loadTexture("assets/ruler.png");
         const rulerPlane = glRenderer.newPlane(1, 1, 8);
+        const patternProgram = glRenderer.createProgram(rulerVert, patternFrag);
         glRenderer.uploadVertices();
     
         window.onresize = () => { interface.onResize(); };
@@ -87,7 +87,7 @@ namespace Context {
                     break;
                     
                 case (Interface.ActiveEditor.Projector):
-                    glRenderer.useProgram(rulerProgram);
+                    glRenderer.useProgram(patternProgram);
                     glRenderer.useTexture(pdfRenderer.texture);
                     break;
             }
