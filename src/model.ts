@@ -99,4 +99,42 @@ namespace Model {
             this.scale = Math.max(0.00001, this.scale + s * 0.0005);
         }
     }
+
+    type SerialData = {
+        calibration: {
+            scale: number;
+            origin: Point;
+            perspective: Point[];
+        };
+        projection: {
+            scale: number;
+            origin: Point;
+        }
+    }
+
+    export function serialize(calibration: Calibration, projection: Projection): string {
+        return JSON.stringify({
+                calibration: {
+                    scale: calibration.scale,
+                    origin: calibration.origin.position,
+                    perspective: [...calibration.perspective.map(x => x.position)]
+                },
+                projection: {
+                    scale: projection.scale,
+                    origin: projection.origin.position
+                }
+            },
+            null,
+            2
+        );
+    }
+
+    export function deserialize(json: string, calibration: Calibration, projection: Projection) {
+        const data = JSON.parse(json);
+        calibration.scale = data.calibration.scale;
+        calibration.origin.position = data.calibration.origin;
+        calibration.perspective.map((x, i) => { x.position = data.calibration.perspective[i]; });
+        projection.scale = data.projection.scale;
+        projection.origin.position = data.projection.origin;
+    }
 }

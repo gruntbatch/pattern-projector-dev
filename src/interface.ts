@@ -233,6 +233,9 @@ namespace Interface {
         calibrator: Calibrator;
         projector: Projector;
         editor: Editor;
+
+        saveCalibration: Button;
+        loadCalibration: Button;
         
         sensitivity: number;
         sensitivityScalar: Scalar;
@@ -272,6 +275,25 @@ namespace Interface {
             this.calibrator = new Calibrator(calibration);
             this.projector = new Projector(projection);
             this.editor = this.calibrator;
+
+            this.saveCalibration = new Button("save-calibration", () => {
+                const a = this.saveCalibration.e as HTMLAnchorElement;
+                a.href = URL.createObjectURL(
+                    new Blob(
+                        [Model.serialize(calibration, projection)],
+                        { type: "text/plain" }
+                    )
+                );
+            });
+            const calibrationInput = document.getElementById("calibration-input");
+            calibrationInput.onchange = async (e: any) => {
+                const file = e.target.files[0];
+                const data = await readFileAsync(file);
+                Model.deserialize(data as string, calibration, projection);
+            }
+            this.loadCalibration = new Button("load-calibration", () => {
+                calibrationInput.click();
+            })
 
             this.sensitivity = 0.1;
             this.sensitivityScalar = new Scalar(

@@ -17,7 +17,7 @@
 // [x] Create state-specific ui
 // [x] reset pattern scrubbing handle between drags
 // [x] make high sensitivity a toggleable option
-// save and load calibration
+// [x] save and load calibration
 // [x] upload pattern pdf
 // [x] render pattern pdf to canvas
 // [x] use rendered pattern canvas as texture
@@ -40,6 +40,17 @@ const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).font
 
 function remToPixels(rem: number): number {
     return rem * REM_TO_PIXELS;
+}
+
+function readFileAsync(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve(reader.result);
+        }
+        reader.onerror = reject;
+        reader.readAsBinaryString(file);
+    })
 }
 
 namespace Context {
