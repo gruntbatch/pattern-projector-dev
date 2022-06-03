@@ -352,7 +352,6 @@ namespace Interface {
             );
             
             this.editor.allHandles[this.currentHandle].handle.position = canvasPosition;
-            // this.editor.allHandles[this.currentHandle].setPosition(canvasPosition);
         }
 
         onMouseUp() {
@@ -360,7 +359,7 @@ namespace Interface {
         }
 
         onWheel(e: WheelEvent) {
-            this.editor.model.onChangeScale(e.deltaY * (10 * this.sensitivity));
+            this.editor.model.onChangeScale(e.deltaY * this.sensitivity);
         }
 
         onUpdate() {

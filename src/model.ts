@@ -44,7 +44,7 @@ namespace Model {
         }
 
         onChangeScale(s: number) {
-            this.scale = Math.max(0.00001, this.scale + s);
+            this.scale = Math.max(0.00001, this.scale + s * 0.01);
         }
     }
 
@@ -93,6 +93,10 @@ namespace Model {
                     )
                 )
             );
+        }
+
+        onChangeScale(s: number) {
+            this.scale = Math.max(0.00001, this.scale + s * 0.0005);
         }
     }
 }
