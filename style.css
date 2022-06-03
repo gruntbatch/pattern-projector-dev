@@ -101,7 +101,7 @@ body {
     width: 2rem;
 }
 
-#canvas {
+#gl-canvas {
     display: block;
 }
 

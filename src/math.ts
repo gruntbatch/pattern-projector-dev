@@ -8,6 +8,10 @@ class Point {
         this.y = y;
     }
 
+    clone() {
+        return new Point(this.x, this.y);
+    }
+
     static add(a: Point, b: Point): Point {
         return new Point(a.x + b.x, a.y + b.y);
     }
