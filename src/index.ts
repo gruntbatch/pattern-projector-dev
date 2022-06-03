@@ -53,7 +53,7 @@ namespace Context {
     export const glRenderer = new Renderer(gl, 100);
 
     export const pdfCanvas = document.getElementById("pdf-canvas") as HTMLCanvasElement;
-    export const pdfRenderer = new PDF.Renderer(gl);
+    export const pdfRenderer = new PDF.Renderer();
 
     (() => {
         const interface = new Interface.Interface(calibration, projection);
