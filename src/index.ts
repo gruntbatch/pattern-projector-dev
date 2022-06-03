@@ -82,11 +82,20 @@ namespace Context {
 
             interface.onUpdate();
     
-            glRenderer.setModelMatrix(calibration.getModelMatrix());
+            glRenderer.setModelMatrix(interface.editor.model.getModelMatrix());
             glRenderer.setViewMatrix(calibration.getProjectionMatrix(rulerPlane));
-            glRenderer.useProgram(rulerProgram);
-            glRenderer.useTexture(rulerTexture);
-            glRenderer.drawPrimitive(rulerPlane.primitive);
+            switch (interface.getActiveEditor()) {
+                case (Interface.ActiveEditor.Calibrator):
+                    glRenderer.useProgram(rulerProgram);
+                    glRenderer.useTexture(rulerTexture);
+                    break;
+                    
+                case (Interface.ActiveEditor.Projector):
+                    glRenderer.useProgram(rulerProgram);
+                    glRenderer.useTexture(pdfRenderer.texture);
+                    break;
+            }
+                glRenderer.drawPrimitive(rulerPlane.primitive);
         }
         animationFrame();
     })();

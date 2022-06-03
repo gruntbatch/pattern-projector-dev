@@ -146,7 +146,7 @@ namespace Interface {
         }
     }
 
-    enum ActiveEditor {
+    export enum ActiveEditor {
         Calibrator,
         Hidden,
         Projector
@@ -215,6 +215,14 @@ namespace Interface {
 
             this.setActiveEditor(ActiveEditor.Calibrator);
             this.onResize();
+        }
+
+        getActiveEditor() {
+            if (this.activeEditor == ActiveEditor.Hidden) {
+                return this.previousEditor;
+            } else {
+                return this.activeEditor;
+            }
         }
 
         setActiveEditor(activeEditor: ActiveEditor) {
