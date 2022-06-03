@@ -135,6 +135,9 @@ namespace Interface {
             ];
 
             const patternInput = document.getElementById("pattern-input");
+            patternInput.onchange = (e) => {
+                Context.pdfRenderer.renderPattern(e);
+            };
             this.loadPatternButton = new Button("load-pattern-button", () => {
                 patternInput.click();
             });

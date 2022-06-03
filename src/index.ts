@@ -14,18 +14,14 @@
 // [x] Refactor code?
 // [x] constantly call update
 // [x] seperate handle logic more intelligently
-// Create state-specific ui
+// [x] Create state-specific ui
 // reset pattern scrubbing handle between drags
 // make high sensitivity a toggleable option
-// swap out ruler textures based on zoom
-// set handles to box size mode
 // save and load calibration
-// upload pattern pdf
-// render pattern pdf to canvas
-// use rendered pattern canvas as texture
+// [x] upload pattern pdf
+// [x] render pattern pdf to canvas
+// [x] use rendered pattern canvas as texture
 // draw pattern
-// Split zoom and scale?
-
 
 // #include("src/interface.ts")
 // #include("src/math.ts")
@@ -56,8 +52,8 @@ namespace Context {
     export const gl = glCanvas.getContext("webgl2");
     export const glRenderer = new Renderer(gl, 100);
 
-    const pdfCanvas = document.getElementById("pdf-canvas") as HTMLCanvasElement;
-    const pdfRenderer = new PDF.Renderer(gl);
+    export const pdfCanvas = document.getElementById("pdf-canvas") as HTMLCanvasElement;
+    export const pdfRenderer = new PDF.Renderer(gl);
 
     (() => {
         const interface = new Interface.Interface(calibration, projection);
