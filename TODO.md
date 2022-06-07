@@ -1,2 +1,0 @@
-- [ ] Use a texture
-- [ ] Fix mesh generation
