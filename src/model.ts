@@ -101,6 +101,7 @@ namespace Model {
     }
 
     type SerialData = {
+        version: string;
         calibration: {
             scale: number;
             origin: Point;
@@ -114,6 +115,7 @@ namespace Model {
 
     export function serialize(calibration: Calibration, projection: Projection): string {
         return JSON.stringify({
+                version: "v0.1.0",
                 calibration: {
                     scale: calibration.scale,
                     origin: calibration.origin.position,

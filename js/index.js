@@ -722,6 +722,7 @@ var Model;
     Model_1.Projection = Projection;
     function serialize(calibration, projection) {
         return JSON.stringify({
+            version: "v0.1.0",
             calibration: {
                 scale: calibration.scale,
                 origin: calibration.origin.position,
