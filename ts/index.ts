@@ -1,6 +1,11 @@
+import * as editor from "./editor.js";
+import * as model from "./model.js";
 import * as render from "./render.js";
 
 (() => {
+    const myModel = new model.Model();
+    const myEditor = new editor.Editor(myModel);
+
     const glCanvas = document.getElementById("gl-canvas") as HTMLCanvasElement | null;
     if (!glCanvas) {
         throw new Error();
@@ -32,7 +37,7 @@ import * as render from "./render.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
-        mTriangle.draw(pHello, render.identityMatrix());
+        mTriangle.draw(pHello, model.translation(myModel.origin));
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();

@@ -1,8 +1,8 @@
+import * as model from "./model.js";
+
 export {
-    identityMatrix,
     newVertex,
     onResize,
-    orthographicMatrix,
     setContext,
 
     Buffer,
@@ -10,8 +10,6 @@ export {
 };
 
 type Color = [number, number, number, number];
-type Matrix = Float32Array;
-type Point = [number, number];
 type Vertex = [number, number, number, number, number, number, number, number];
 
 const VERTEX_ELEMENT_SIZE = 4;
@@ -20,19 +18,10 @@ const VERTEX_ELEMENT_COUNT = 8;
 let gl: WebGLRenderingContext;
 let currentBuffer: WebGLBuffer | null = null;
 let currentProgram: WebGLProgram | null = null;
-let currentProjection: Matrix = identityMatrix();
-let currentView: Matrix = identityMatrix();
+let currentProjection: model.Matrix = model.identity();
+let currentView: model.Matrix = model.identity();
 
-function identityMatrix(): Matrix {
-    return new Float32Array([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ]);
-}
-
-function newVertex(position: Point = [0, 0], texCoord: Point = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
+function newVertex(position: model.Point = [0, 0], texCoord: model.Point = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
     return [
         position[0], position[1],
         texCoord[0], texCoord[1],
@@ -42,23 +31,7 @@ function newVertex(position: Point = [0, 0], texCoord: Point = [0, 0], color: Co
 
 function onResize(width: number, height: number) {
     gl.viewport(0, 0, width, height);
-    currentProjection = orthographicMatrix(width, height);
-}
-
-function orthographicMatrix(width: number, height: number): Matrix {
-    const left = width / -2;
-    const right = width / 2;
-    const bottom = height / -2;
-    const top = height / 2;
-    const far = -1000;
-    const near = 1000;
-
-    return new Float32Array([
-        2.0 / (right - left), 0, 0, 0,
-        0, 2.0 / (top - bottom), 0, 0,
-        0, 0, -2.0 / (far - near), 0,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
-    ]);
+    currentProjection = model.orthographic(width, height);
 }
 
 // Of course typescript is a fucking idiot and asks me to write a getter instead
@@ -67,11 +40,11 @@ function setContext(glContext: WebGLRenderingContext) {
     gl = glContext;
 }
 
-function setProjection(projection: Matrix) {
+function setProjection(projection: model.Matrix) {
     currentProjection = projection;
 }
 
-function setView(view: Matrix) {
+function setView(view: model.Matrix) {
     currentView = view;
 }
 
@@ -143,7 +116,7 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: Matrix) {
+    draw(program: Program, model: model.Matrix) {
         if (program.bind(model) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
@@ -184,7 +157,7 @@ class Program {
         this.uLocModel = gl.getUniformLocation(this.program, "u_model");
     }
 
-    bind(model: Matrix) {
+    bind(model: model.Matrix) {
         if (!this.program) {
             return false;
         }
