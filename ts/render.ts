@@ -1,14 +1,17 @@
 export {
+    identityMatrix,
     newVertex,
     onResize,
+    orthographicMatrix,
     setContext,
 
     Buffer,
     Program,
 };
 
-type Point = [number, number];
 type Color = [number, number, number, number];
+type Matrix = Float32Array;
+type Point = [number, number];
 type Vertex = [number, number, number, number, number, number, number, number];
 
 const VERTEX_ELEMENT_SIZE = 4;
@@ -17,6 +20,17 @@ const VERTEX_ELEMENT_COUNT = 8;
 let gl: WebGLRenderingContext;
 let currentBuffer: WebGLBuffer | null = null;
 let currentProgram: WebGLProgram | null = null;
+let currentProjection: Matrix = identityMatrix();
+let currentView: Matrix = identityMatrix();
+
+function identityMatrix(): Matrix {
+    return new Float32Array([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ]);
+}
 
 function newVertex(position: Point = [0, 0], texCoord: Point = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
     return [
@@ -28,12 +42,37 @@ function newVertex(position: Point = [0, 0], texCoord: Point = [0, 0], color: Co
 
 function onResize(width: number, height: number) {
     gl.viewport(0, 0, width, height);
+    currentProjection = orthographicMatrix(width, height);
+}
+
+function orthographicMatrix(width: number, height: number): Matrix {
+    const left = width / -2;
+    const right = width / 2;
+    const bottom = height / -2;
+    const top = height / 2;
+    const far = -1000;
+    const near = 1000;
+
+    return new Float32Array([
+        2.0 / (right - left), 0, 0, 0,
+        0, 2.0 / (top - bottom), 0, 0,
+        0, 0, -2.0 / (far - near), 0,
+        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
+    ]);
 }
 
 // Of course typescript is a fucking idiot and asks me to write a getter instead
 // of expose a variable. I shouldn't be surprised.
 function setContext(glContext: WebGLRenderingContext) {
     gl = glContext;
+}
+
+function setProjection(projection: Matrix) {
+    currentProjection = projection;
+}
+
+function setView(view: Matrix) {
+    currentView = view;
 }
 
 class Buffer {
@@ -104,8 +143,8 @@ class Mesh {
 
     }
 
-    draw(program: Program) {
-        if (program.bind() && this.buffer.bind()) {
+    draw(program: Program, model: Matrix) {
+        if (program.bind(model) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
     }
@@ -113,6 +152,9 @@ class Mesh {
 
 class Program {
     program: WebGLProgram | null;
+    uLocProjection: WebGLUniformLocation;
+    uLocView: WebGLUniformLocation;
+    uLocModel: WebGLUniformLocation;
 
     constructor(vertUrl: string, fragUrl: string) {
         this.program = null;
@@ -136,9 +178,13 @@ class Program {
         gl.attachShader(this.program, vert);
         gl.attachShader(this.program, frag);
         gl.linkProgram(this.program);
+
+        this.uLocProjection = gl.getUniformLocation(this.program, "u_projection");
+        this.uLocView = gl.getUniformLocation(this.program, "u_view");
+        this.uLocModel = gl.getUniformLocation(this.program, "u_model");
     }
 
-    bind() {
+    bind(model: Matrix) {
         if (!this.program) {
             return false;
         }
@@ -147,6 +193,9 @@ class Program {
             currentProgram = this.program;
             gl.useProgram(this.program);
         }
+        gl.uniformMatrix4fv(this.uLocProjection, false, currentProjection);
+        gl.uniformMatrix4fv(this.uLocView, false, currentView);
+        gl.uniformMatrix4fv(this.uLocModel, false, model);
 
         return true;
     }

@@ -15,9 +15,9 @@ import * as render from "./render.js";
 
     const buffer = new render.Buffer();
     const mTriangle = buffer.mesh([
-        render.newVertex([-1, -1]),
-        render.newVertex([0, 1]),
-        render.newVertex([1, -1])
+        render.newVertex([-100, -100]),
+        render.newVertex([0, 100]),
+        render.newVertex([100, -100])
     ]);
     const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag");
 
@@ -32,7 +32,7 @@ import * as render from "./render.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
-        mTriangle.draw(pHello);
+        mTriangle.draw(pHello, render.identityMatrix());
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();
