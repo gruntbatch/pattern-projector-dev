@@ -21,6 +21,16 @@ import * as render from "./render.js";
     ]);
     const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag");
 
+    const onResize = () => {
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        glCanvas.width = width;
+        glCanvas.height = height;
+        render.onResize(width, height);
+    }
+    onResize();
+    window.onresize = onResize;
+
     const onAnimationFrame = () => {
         mTriangle.draw(pHello);
         requestAnimationFrame(onAnimationFrame);

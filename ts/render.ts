@@ -1,5 +1,6 @@
 export {
     newVertex,
+    onResize,
     setContext,
 
     Buffer,
@@ -23,6 +24,10 @@ function newVertex(position: Point = [0, 0], texCoord: Point = [0, 0], color: Co
         texCoord[0], texCoord[1],
         color[0], color[1], color[2], color[3]
     ];
+}
+
+function onResize(width: number, height: number) {
+    gl.viewport(0, 0, width, height);
 }
 
 // Of course typescript is a fucking idiot and asks me to write a getter instead
