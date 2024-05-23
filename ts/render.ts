@@ -4,6 +4,7 @@ export {
     gl,
 
     newVertex,
+    newTranslationMatrix,
     onResize,
     wrapCanvasById,
 
@@ -12,6 +13,7 @@ export {
 };
 
 type Color = [number, number, number, number];
+type Matrix = Float32Array;
 type Vertex = [number, number, number, number, number, number, number, number];
 
 const VERTEX_ELEMENT_SIZE = 4;
@@ -22,8 +24,42 @@ let gl: WebGLRenderingContext;
 
 let currentBuffer: WebGLBuffer | null = null;
 let currentProgram: WebGLProgram | null = null;
-let currentProjection: model.Matrix = model.identity();
-let currentView: model.Matrix = model.identity();
+let currentProjection: Matrix = newIdentityMatrix();
+let currentView: Matrix = newIdentityMatrix();
+
+function newIdentityMatrix(): Matrix {
+    return new Float32Array([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ]);
+}
+
+function newOrthographicMatrix(width: number, height: number): Matrix {
+    const left = width / -2;
+    const right = width / 2;
+    const bottom = height / -2;
+    const top = height / 2;
+    const far = -1000;
+    const near = 1000;
+
+    return new Float32Array([
+        2.0 / (right - left), 0, 0, 0,
+        0, 2.0 / (top - bottom), 0, 0,
+        0, 0, -2.0 / (far - near), 0,
+        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
+    ]);
+}
+
+function newTranslationMatrix(translation: model.Point): Matrix {
+    return new Float32Array([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        translation[0], translation[1], 0, 1
+    ]);
+}
 
 function newVertex(position: model.Point = [0, 0], texCoord: model.Point = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
     return [
@@ -37,14 +73,14 @@ function onResize(width: number, height: number) {
     canvas.width = width;
     canvas.height = height;
     gl.viewport(0, 0, width, height);
-    currentProjection = model.orthographic(width, height);
+    currentProjection = newOrthographicMatrix(width, height);
 }
 
-function setProjection(projection: model.Matrix) {
+function setProjection(projection: Matrix) {
     currentProjection = projection;
 }
 
-function setView(view: model.Matrix) {
+function setView(view: Matrix) {
     currentView = view;
 }
 
@@ -128,7 +164,7 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: model.Matrix) {
+    draw(program: Program, model: Matrix) {
         if (program.bind(model) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
@@ -169,7 +205,7 @@ class Program {
         this.uLocModel = gl.getUniformLocation(this.program, "u_model");
     }
 
-    bind(model: model.Matrix) {
+    bind(model: Matrix) {
         if (!this.program) {
             return false;
         }

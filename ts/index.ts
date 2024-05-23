@@ -24,7 +24,7 @@ import * as render from "./render.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
-        mTriangle.draw(pHello, model.translation(myModel.origin));
+        mTriangle.draw(pHello, render.newTranslationMatrix(myModel.origin));
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();
