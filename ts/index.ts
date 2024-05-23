@@ -6,18 +6,7 @@ import * as render from "./render.js";
     const myModel = new model.Model();
     const myEditor = new editor.Editor(myModel);
 
-    const glCanvas = document.getElementById("gl-canvas") as HTMLCanvasElement | null;
-    if (!glCanvas) {
-        throw new Error();
-    }
-
-    const glContext = glCanvas.getContext("webgl");
-    if (!glContext) {
-        throw new Error();
-    }
-
-    render.setContext(glContext);
-
+    render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
     const mTriangle = buffer.mesh([
         render.newVertex([-100, -100]),
@@ -29,8 +18,6 @@ import * as render from "./render.js";
     const onResize = () => {
         let width = window.innerWidth;
         let height = window.innerHeight;
-        glCanvas.width = width;
-        glCanvas.height = height;
         render.onResize(width, height);
     }
     onResize();

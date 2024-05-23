@@ -1,9 +1,11 @@
 import * as model from "./model.js";
 
 export {
+    gl,
+
     newVertex,
     onResize,
-    setContext,
+    wrapCanvasById,
 
     Buffer,
     Program,
@@ -15,7 +17,9 @@ type Vertex = [number, number, number, number, number, number, number, number];
 const VERTEX_ELEMENT_SIZE = 4;
 const VERTEX_ELEMENT_COUNT = 8;
 
+let canvas: HTMLCanvasElement | null;
 let gl: WebGLRenderingContext;
+
 let currentBuffer: WebGLBuffer | null = null;
 let currentProgram: WebGLProgram | null = null;
 let currentProjection: model.Matrix = model.identity();
@@ -30,14 +34,10 @@ function newVertex(position: model.Point = [0, 0], texCoord: model.Point = [0, 0
 }
 
 function onResize(width: number, height: number) {
+    canvas.width = width;
+    canvas.height = height;
     gl.viewport(0, 0, width, height);
     currentProjection = model.orthographic(width, height);
-}
-
-// Of course typescript is a fucking idiot and asks me to write a getter instead
-// of expose a variable. I shouldn't be surprised.
-function setContext(glContext: WebGLRenderingContext) {
-    gl = glContext;
 }
 
 function setProjection(projection: model.Matrix) {
@@ -46,6 +46,18 @@ function setProjection(projection: model.Matrix) {
 
 function setView(view: model.Matrix) {
     currentView = view;
+}
+
+function wrapCanvasById(id: string) {
+    canvas = document.getElementById(id) as HTMLCanvasElement | null;
+    if (!canvas) {
+        throw new Error();
+    }
+
+    gl = canvas.getContext("webgl");
+    if (!gl) {
+        throw new Error();
+    }
 }
 
 class Buffer {
