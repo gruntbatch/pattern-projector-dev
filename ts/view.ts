@@ -5,6 +5,8 @@ export {
     Scalar,
 };
 
+const SCROLL_SCALAR = 0.001;
+
 class Editor {
     model: model.Model;
 
@@ -17,12 +19,10 @@ class Editor {
             }
         }
 
-        new Scalar(model.precision, document.getElementById("precision-field"));
+        new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
         new Point(model.origin, model.precision, document.getElementById("origin-field"));
     }
 }
-
-const SCROLL_SCALAR = 0.001;
 
 class Point {
     value: model.Point;
@@ -30,9 +30,15 @@ class Point {
     displayX: HTMLElement;
     displayY: HTMLElement;
 
-    constructor(value: model.Point, scalar: model.Scalar, e: HTMLElement) {
+    constructor(value: model.Point, scalar: number | model.Scalar, e: HTMLElement) {
         this.value = value;
-        this.scalar = scalar;
+
+        // Mr. Yuk does not like this
+        if (typeof(scalar) == "number") {
+            this.scalar = new model.Scalar(scalar);
+        } else {
+            this.scalar = scalar;
+        }
 
         this.displayX = e.querySelector<HTMLElement>("#display-x");
         this.displayY = e.querySelector<HTMLElement>("#display-y");
@@ -63,16 +69,24 @@ class Point {
 
 class Scalar {
     value: model.Scalar;
+    scalar: model.Scalar;
     display: HTMLElement;
 
-    constructor(value: model.Scalar, e: HTMLElement) {
+    constructor(value: model.Scalar, scalar: number | model.Scalar, e: HTMLElement) {
         this.value = value;
+
+        // Mr. Yuk does not like this
+        if (typeof(scalar) == "number") {
+            this.scalar = new model.Scalar(scalar);
+        } else {
+            this.scalar = scalar;
+        }
 
         this.display = e.querySelector<HTMLElement>("#display");
         this.view();
 
         e.onwheel = (e) => {
-            this.value.update(e.deltaY * SCROLL_SCALAR);
+            this.value.update(e.deltaY * this.scalar.get());
             this.view();
         };
 
