@@ -21,11 +21,9 @@
                 <div class="flex-row h-2 bg-blue fg-light">
                     <h2 class="flex-grow p-x-1">Precision</h2>
                 </div>
-                <div class="flex-column">
-                    <div id="precision-field" class="flex-row h-2 p-x-1">
-                        <a id="reset">Reset</a>
-                        <span id="display" class="mono">1.0</span>
-                    </div>
+                <div id="precision-field" class="flex-row h-2 p-x-1">
+                    <a id="reset">Reset</a>
+                    <span id="display" class="mono">1.0</span>
                 </div>
             </div>
 
@@ -33,7 +31,16 @@
                 <div class="flex-row h-2 bg-blue fg-light">
                     <h2 class="flex-grow p-x-1">Origin</h2>
                 </div>
-
+                <div id="origin-field" class="flex-column">
+                    <div id="field-x" class="flex-row h-2 p-x-1">
+                        <a id="randomize">Randomize</a>
+                        <span class="mono">x <span id="display-x">1.0</span></span>
+                    </div>
+                    <div id="field-y" class="flex-row h-2 p-x-1">
+                        <a id="reset">Reset</a>
+                        <span class="mono">y <span id="display-y">1.0</span></span>
+                    </div>
+                </div>
             </div>
 
             <div class="flex-row">

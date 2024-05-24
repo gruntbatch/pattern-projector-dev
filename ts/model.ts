@@ -1,18 +1,13 @@
+import { Vector2 } from "./render.js";
+
 export {
     Model,
 
     Point,
-    point,
 
     Scalar,
     BoundedScalar,
 };
-
-type Point = [number, number];
-
-function point(x = 0, y = 0): Point {
-    return [x, y];
-}
 
 class Model {
     precision: BoundedScalar;
@@ -22,7 +17,21 @@ class Model {
     constructor() {
         this.precision = new BoundedScalar(0.001, 0.5, 0.1);
 
-        this.origin = point();
+        this.origin = new Point();
+    }
+}
+
+class Point {
+    x: Scalar;
+    y: Scalar;
+
+    constructor(x: number = 0, y: number = 0) {
+        this.x = new Scalar(x);
+        this.y = new Scalar(y);
+    }
+
+    getVector2(): Vector2 {
+        return [this.x.get(), this.y.get()];
     }
 }
 

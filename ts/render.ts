@@ -1,6 +1,8 @@
 import * as model from "./model.js";
 
 export {
+    Vector2,
+
     gl,
 
     newVertex,
@@ -14,6 +16,7 @@ export {
 
 type Color = [number, number, number, number];
 type Matrix = Float32Array;
+type Vector2 = [number, number];
 type Vertex = [number, number, number, number, number, number, number, number];
 
 const VERTEX_ELEMENT_SIZE = 4;
@@ -52,7 +55,7 @@ function newOrthographicMatrix(width: number, height: number): Matrix {
     ]);
 }
 
-function newTranslationMatrix(translation: model.Point): Matrix {
+function newTranslationMatrix(translation: Vector2): Matrix {
     return new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -61,7 +64,7 @@ function newTranslationMatrix(translation: model.Point): Matrix {
     ]);
 }
 
-function newVertex(position: model.Point = [0, 0], texCoord: model.Point = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
+function newVertex(position: Vector2 = [0, 0], texCoord: Vector2 = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
     return [
         position[0], position[1],
         texCoord[0], texCoord[1],
