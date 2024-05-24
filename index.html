@@ -17,10 +17,15 @@
             <a id="pattern-menu-button" class="button fg-light flex-row-centered h-2 p-x-1 rounded">Pattern</a>
         </div>
         <div id="ruler-panel" class="flex-column flex-spaced">
-            <div class="flex-row">
-                <div id="precision-field" class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Precision</a>
-                    <span id="display" class="fg-gray mono p-r-1 small">1.0</span>
+            <div class="flex-column rounded bg-light">
+                <div id="drawer-header" class="flex-row h-2 bg-blue fg-light">
+                    <h2 class="flex-grow p-x-1">Precision</h2>
+                </div>
+                <div id="drawer-content" class="flex-column">
+                    <div id="precision-field" class="flex-row h-2 p-x-1">
+                        <a id="reset">Reset</a>
+                        <span id="display" class="mono">1.0</span>
+                    </div>
                 </div>
             </div>
             <div class="flex-row">
