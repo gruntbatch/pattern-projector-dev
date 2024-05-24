@@ -18,6 +18,12 @@
         </div>
         <div id="ruler-panel" class="flex-column flex-spaced">
             <div class="flex-row">
+                <div id="precision-field" class="bg-light flex-row flex-grow h-2 rounded">
+                    <a id="reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Precision</a>
+                    <span id="display" class="fg-gray mono p-r-1 small">1.0</span>
+                </div>
+            </div>
+            <div class="flex-row">
                 <div class="bg-light flex-row flex-grow h-2 rounded">
                     <a id="randomize-origin" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Randomize Origin</a>
                     <a id="reset-origin" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Origin</a>
@@ -104,12 +110,12 @@
             </div>
         </div>
         <div id="save-load-panel" class="flex-column flex-spaced">
-            <div class="flex-row">
-                <div id="precision-container" class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="precision-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Precision</a>
-                    <span id="precision-value" class="fg-gray mono p-r-1 small">1.0</span>
-                </div>
-            </div>
+            <!-- <div class="flex-row"> -->
+            <!--     <div id="precision-container" class="bg-light flex-row flex-grow h-2 rounded"> -->
+            <!--         <a id="precision-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Precision</a> -->
+            <!--         <span id="precision-value" class="fg-gray mono p-r-1 small">1.0</span> -->
+            <!--     </div> -->
+            <!-- </div> -->
             <div class="flex-row">
                 <a id="save-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded" download="calibration.txt">Save Calibration</a>
                 <input id="calibration-input" class="display-none" type="file" />

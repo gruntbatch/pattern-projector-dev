@@ -33,3 +33,9 @@
   - [x] Projections
 
 - [ ] Drop requestAnimationFrame() usage in favor of event-based updates
+
+
+- [ ] Model
+- [ ] Update
+- [ ] View
+

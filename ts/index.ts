@@ -1,10 +1,10 @@
-import * as editor from "./editor.js";
 import * as model from "./model.js";
 import * as render from "./render.js";
+import * as view from "./view.js";
 
 (() => {
     const myModel = new model.Model();
-    const myEditor = new editor.Editor(myModel);
+    const myEditor = new view.Editor(myModel);
 
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
