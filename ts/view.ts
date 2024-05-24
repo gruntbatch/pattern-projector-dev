@@ -16,6 +16,8 @@ const SCROLL_SCALAR = 0.001;
 class Editor {
     model: model.Model;
 
+    handles: [Point, Point, Point, Point];
+
     currentHandle: number = -1;
     initialMousePosition: [number, number];
     initialCornerPosition: [number, number];
@@ -30,6 +32,16 @@ class Editor {
         }
 
         new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
+
+        // NOTE: This is kind of a hack right now because several Points reference and update the same HTMLElements. It works, it might actually even be the way to go, but it was discovered by accident.
+        this.handles = [null, null, null, null];
+        for (let i = 0; i < 4; i++) {
+            this.handles[i] = new Point(
+                model.corners[i],
+                model.precision,
+                document.getElementById("corner-a-field")
+            );
+        }
 
         // Global event handlers
         canvas.onwheel = (e) => {
@@ -70,6 +82,8 @@ class Editor {
 
             this.model.corners[this.currentHandle].x.set(currentCornerPosition[0]);
             this.model.corners[this.currentHandle].y.set(currentCornerPosition[1]);
+
+            this.handles[this.currentHandle].view();
         }
         window.onmouseup = (e) => {
             this.currentHandle = -1;

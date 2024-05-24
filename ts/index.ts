@@ -16,6 +16,8 @@ import * as view from "./view.js";
         let width = window.innerWidth;
         let height = window.innerHeight;
         render.onResize(width, height);
+        // TODO: Model needs to resize so that when you reset a corner it goes to a reasonable place
+        // myModel.onResize(width, height);
     }
     onResize();
     window.onresize = onResize;
