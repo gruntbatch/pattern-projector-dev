@@ -14,18 +14,21 @@ export {
 class Model {
     precision: BoundedScalar;
 
-    origin: Point;
+    corners: [Point, Point, Point, Point];
+    
+    dimension: BoundedIntegerScalar;
 
-    zoom: Scalar;
-    scale: BoundedIntegerScalar;
+    constructor(offset: number) {
+        this.precision = new BoundedScalar(0.001, 1.0, 1.0);
 
-    constructor() {
-        this.precision = new BoundedScalar(0.001, 0.5, 0.1);
+        this.corners = [
+            new Point(offset, offset),
+            new Point(-offset, offset),
+            new Point(-offset, -offset),
+            new Point(offset, -offset)
+        ];
 
-        this.origin = new Point();
-
-        this.zoom = new Scalar(1.0);
-        this.scale = new BoundedIntegerScalar(1, 8, 4);
+        this.dimension = new BoundedIntegerScalar(1, 8, 4);
     }
 }
 

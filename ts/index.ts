@@ -3,9 +3,6 @@ import * as render from "./render.js";
 import * as view from "./view.js";
 
 (() => {
-    const myModel = new model.Model();
-    const myEditor = new view.Editor(myModel);
-
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
     const mTriangle = buffer.mesh([
@@ -23,8 +20,15 @@ import * as view from "./view.js";
     onResize();
     window.onresize = onResize;
 
+    const myModel = new model.Model(
+        Math.min(window.innerWidth, window.innerHeight) / 4
+    );
+    const myEditor = new view.Editor(myModel);
+
     const onAnimationFrame = () => {
-        mTriangle.draw(pHello, render.newTranslationMatrix(myModel.origin.getVector2()));
+        for (const corner of myModel.corners) {
+            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()));
+        }
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();

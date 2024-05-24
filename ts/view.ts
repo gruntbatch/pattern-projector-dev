@@ -20,12 +20,6 @@ class Editor {
         }
 
         new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
-        
-        new Point(model.origin, model.precision, document.getElementById("origin-field"));
-
-        // TODO: Revisit how this scalar gets calculated
-        new Scalar(model.zoom, SCROLL_SCALAR, document.getElementById("zoom-field"));
-        new IntegerScalar(model.scale, 0.05, document.getElementById("scale-field"));
     }
 }
 

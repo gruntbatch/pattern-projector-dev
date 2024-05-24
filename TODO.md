@@ -36,9 +36,9 @@
 
 
 - [ ] Model
-  - [ ] Precision
-  - [ ] Corners
-  - [ ] Dimensions
+  - [x] Precision
+  - [x] Corners
+  - [x] Dimensions
 - [ ] Update
   - [ ] Gross adjustment (zoom)
   - [ ] Handle adjustment
