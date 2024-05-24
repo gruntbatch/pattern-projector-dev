@@ -5,12 +5,18 @@ export {
     Scalar,
 };
 
+const CORNER_MOVEMENT = [
+    [1, 1],
+    [-1, 1],
+    [-1, -1],
+    [1, -1]
+];
 const SCROLL_SCALAR = 0.001;
 
 class Editor {
     model: model.Model;
 
-    constructor(model: model.Model) {
+    constructor(model: model.Model, canvas: HTMLElement) {
         this.model = model;
 
         for (let e of document.getElementsByClassName("drawer")) {
@@ -20,6 +26,15 @@ class Editor {
         }
 
         new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
+
+        // Global event handlers
+        canvas.onwheel = (e) => {
+            const delta = e.deltaY * this.model.precision.get();
+            for (let i = 0; i < 4; i++) {
+                model.corners[i].x.update(delta * CORNER_MOVEMENT[i][0]);
+                model.corners[i].y.update(delta * CORNER_MOVEMENT[i][1]);
+            }
+        }
     }
 }
 

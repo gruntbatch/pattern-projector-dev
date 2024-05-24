@@ -3,6 +3,7 @@ import * as model from "./model.js";
 export {
     Vector2,
 
+    canvas,
     gl,
 
     newVertex,
