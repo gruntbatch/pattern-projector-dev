@@ -16,6 +16,10 @@ const SCROLL_SCALAR = 0.001;
 class Editor {
     model: model.Model;
 
+    currentHandle: number = -1;
+    initialMousePosition: [number, number];
+    initialCornerPosition: [number, number];
+
     constructor(model: model.Model, canvas: HTMLElement) {
         this.model = model;
 
@@ -35,6 +39,57 @@ class Editor {
                 model.corners[i].y.update(delta * CORNER_MOVEMENT[i][1]);
             }
         }
+        canvas.onmousedown = (e) => {
+            this.selectNearestCorner(e.pageX, e.pageY);
+            this.initialMousePosition = [e.pageX, e.pageY];
+            this.initialCornerPosition = [
+                this.model.corners[this.currentHandle].x.get(),
+                this.model.corners[this.currentHandle].y.get()
+            ];
+        }
+        window.onmousemove = (e) => {
+            if (this.currentHandle < 0) {
+                return;
+            }
+
+            const currentMousePosition = [e.pageX, e.pageY];
+            const deltaMousePosition = [
+                currentMousePosition[0] - this.initialMousePosition[0],
+                currentMousePosition[1] - this.initialMousePosition[1]
+            ];
+
+            const deltaCornerPosition = [
+                deltaMousePosition[0] * model.precision.get(),
+                deltaMousePosition[1] * model.precision.get()
+            ];
+
+            const currentCornerPosition = [
+                this.initialCornerPosition[0] + deltaCornerPosition[0],
+                this.initialCornerPosition[1] - deltaCornerPosition[1]
+            ];
+
+            this.model.corners[this.currentHandle].x.set(currentCornerPosition[0]);
+            this.model.corners[this.currentHandle].y.set(currentCornerPosition[1]);
+        }
+        window.onmouseup = (e) => {
+            this.currentHandle = -1;
+        }
+    }
+
+    selectNearestCorner(pageX: number, pageY: number) {
+        pageX = pageX - (window.innerWidth / 2);
+        pageY = (window.innerHeight / 2) - pageY;
+        let best = Infinity;
+        this.currentHandle = -1;
+        this.model.corners.map((corner, i) => {
+            const x = pageX - corner.x.get();
+            const y = pageY - corner.y.get();
+            const distanceSquared = Math.sqrt(x * x + y * y);
+            if (distanceSquared < best) {
+                best = distanceSquared;
+                this.currentHandle = i;
+            }
+        });
     }
 }
 
