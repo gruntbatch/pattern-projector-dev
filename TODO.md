@@ -40,8 +40,9 @@
   - [x] Corners
   - [x] Dimensions
 - [ ] Update
-  - [ ] Gross adjustment (zoom)
-  - [ ] Handle adjustment
+  - [x] Precision adjustment
+  - [x] Gross adjustment (zoom)
+  - [x] Handle adjustment
   - [ ] Manual adjustment (field entry)
 - [ ] View
   - [ ] Ruler toggle
