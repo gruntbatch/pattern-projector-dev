@@ -4,4 +4,7 @@
         "outDir": "js",
         "target": "ES6",
     },
+    "exclude": [
+        "src/"
+    ]
 }
