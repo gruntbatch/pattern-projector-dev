@@ -33,13 +33,30 @@
                 </div>
                 <div id="origin-field" class="flex-column">
                     <div id="field-x" class="flex-row h-2 p-x-1">
-                        <a id="randomize">Randomize</a>
+                        <span></span>
                         <span class="mono">x <span id="display-x">1.0</span></span>
                     </div>
                     <div id="field-y" class="flex-row h-2 p-x-1">
                         <a id="reset">Reset</a>
                         <span class="mono">y <span id="display-y">1.0</span></span>
                     </div>
+                </div>
+            </div>
+
+            <div class="drawer flex-column rounded bg-light">
+                <div class="flex-row h-2 bg-blue fg-light">
+                    <h2 class="flex-grow p-x-1">Scale</h2>
+                </div>
+                <div id="zoom-field" class="flex-row h-2 p-x-1">
+                    <span class="p-r-1">Zoom</span>
+                    <a class="p-r-1">Lock</a>
+                    <a id="reset" class="p-r-1">Reset</a>
+                    <span id="display" class="flex-grow align-right mono">1.0</span>
+                </div>
+                <div id="scale-field" class="flex-row h-2 p-x-1">
+                    <span class="p-r-1">Scale</span>
+                    <a id="reset" class="p-r-1">Reset</a>
+                    <span class="flex-grow align-right mono"><span id="display">1.0</span> inches</span>
                 </div>
             </div>
 

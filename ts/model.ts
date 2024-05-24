@@ -7,6 +7,8 @@ export {
 
     Scalar,
     BoundedScalar,
+    IntegerScalar,
+    BoundedIntegerScalar,
 };
 
 class Model {
@@ -14,10 +16,16 @@ class Model {
 
     origin: Point;
 
+    zoom: Scalar;
+    scale: BoundedIntegerScalar;
+
     constructor() {
         this.precision = new BoundedScalar(0.001, 0.5, 0.1);
 
         this.origin = new Point();
+
+        this.zoom = new Scalar(1.0);
+        this.scale = new BoundedIntegerScalar(1, 8, 4);
     }
 }
 
@@ -75,5 +83,25 @@ class BoundedScalar extends Scalar {
     set(value: number) {
         value = Math.max(this.minValue, Math.min(this.maxValue, value));
         super.set(value);
+    }
+}
+
+class IntegerScalar extends Scalar {
+    constructor(value: number) {
+        super(Math.round(value));
+    }
+
+    get(): number {
+        return Math.round(super.get());
+    }
+}
+
+class BoundedIntegerScalar extends BoundedScalar {
+    constructor(minValue: number, maxValue: number, value: number = minValue) {
+        super(Math.round(minValue), Math.round(maxValue), Math.round(value));
+    }
+
+    get(): number {
+        return Math.round(super.get());
     }
 }
