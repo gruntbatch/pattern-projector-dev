@@ -36,6 +36,14 @@
 
 
 - [ ] Model
+  - [ ] Precision
+  - [ ] Corners
+  - [ ] Dimensions
 - [ ] Update
+  - [ ] Gross adjustment (zoom)
+  - [ ] Handle adjustment
+  - [ ] Manual adjustment (field entry)
 - [ ] View
-
+  - [ ] Ruler toggle
+  - [ ] Grid lines
+  - [ ] Handles (WebGL or DOM?)
