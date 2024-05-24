@@ -12,6 +12,10 @@ h2 {
     font-size: 1rem;
 }
 
+.drawer.collapsed >:not(:first-child) {
+    display: none !important;
+}
+
 .display-none {
     display: none !important;
 }

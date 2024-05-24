@@ -11,6 +11,12 @@ class Editor {
     constructor(model: model.Model) {
         this.model = model;
 
+        for (let e of document.getElementsByClassName("drawer")) {
+            (e.firstElementChild as HTMLElement).onclick = () => {
+                e.classList.toggle("collapsed");
+            }
+        }
+
         new Scalar(model.precision, document.getElementById("precision-field"));
     }
 }
