@@ -201,8 +201,8 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: Matrix) {
-        if (program.bind(model) && this.buffer.bind()) {
+    draw(program: Program, model: Matrix, color: Color) {
+        if (program.bind(model, color) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
     }
@@ -213,6 +213,7 @@ class Program {
     uLocProjection: WebGLUniformLocation;
     uLocView: WebGLUniformLocation;
     uLocModel: WebGLUniformLocation;
+    uLocColor: WebGLUniformLocation;
 
     constructor(vertUrl: string, fragUrl: string) {
         this.program = null;
@@ -240,9 +241,10 @@ class Program {
         this.uLocProjection = gl.getUniformLocation(this.program, "u_projection");
         this.uLocView = gl.getUniformLocation(this.program, "u_view");
         this.uLocModel = gl.getUniformLocation(this.program, "u_model");
+        this.uLocColor = gl.getUniformLocation(this.program, "u_color");
     }
 
-    bind(model: Matrix) {
+    bind(model: Matrix, color: Color) {
         if (!this.program) {
             return false;
         }
@@ -254,6 +256,7 @@ class Program {
         gl.uniformMatrix4fv(this.uLocProjection, false, currentProjection);
         gl.uniformMatrix4fv(this.uLocView, false, currentView);
         gl.uniformMatrix4fv(this.uLocModel, false, model);
+        gl.uniform4fv(this.uLocColor, color);
 
         return true;
     }

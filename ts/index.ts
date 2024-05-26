@@ -31,9 +31,9 @@ import * as view from "./view.js";
 
     const onAnimationFrame = () => {
         for (const corner of myModel.corners) {
-            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()));
+            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [1, 0, 0, 1]);
         }
-        mPlane.draw(pHello, render.newIdentityMatrix());
+        mPlane.draw(pHello, render.newIdentityMatrix(), [0, 0, 1, 1]);
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();
