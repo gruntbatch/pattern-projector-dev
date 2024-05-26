@@ -12,6 +12,7 @@ import * as view from "./view.js";
         render.newVertex([2, -2])
     ]);
     const mPlane = buffer.newPlane(100, [0, 0, 1, 1])
+    const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag", [["u_color", [1, 0, 0, 1]]]);
     const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag");
 
     const onResize = () => {
@@ -31,7 +32,7 @@ import * as view from "./view.js";
 
     const onAnimationFrame = () => {
         for (const corner of myModel.corners) {
-            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [1, 0, 0, 1]);
+            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [["u_color", [1, 0, 0, 1]]]);
         }
         mPlane.draw(
             pHello,
@@ -39,7 +40,7 @@ import * as view from "./view.js";
                 [[100, 100], [0, 100], [0, 0], [100, 0]],
                 myModel.getCornersAsVectors()
             ),
-            [0, 0, 1, 1]
+            [["u_color", [0, 0, 1, 1]]]
         );
         requestAnimationFrame(onAnimationFrame);
     }

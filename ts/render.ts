@@ -22,6 +22,7 @@ type Matrix = Float32Array;
 type Vector2 = [number, number];
 type Vector3 = [number, number, number];
 type Vertex = [number, number, number, number, number, number, number, number];
+type Uniform = [string, Array<number>];
 
 const VERTEX_ELEMENT_SIZE = 4;
 const VERTEX_ELEMENT_COUNT = 8;
@@ -258,8 +259,8 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: Matrix, color: Color) {
-        if (program.bind(model, color) && this.buffer.bind()) {
+    draw(program: Program, model: Matrix, uniforms: Iterable<Uniform>) {
+        if (program.bind(model, uniforms) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
     }
@@ -270,14 +271,14 @@ class Program {
     uLocProjection: WebGLUniformLocation;
     uLocView: WebGLUniformLocation;
     uLocModel: WebGLUniformLocation;
-    uLocColor: WebGLUniformLocation;
+    uniformLocations: Record<string, WebGLUniformLocation>;
 
-    constructor(vertUrl: string, fragUrl: string) {
+    constructor(vertUrl: string, fragUrl: string, uniforms: Iterable<Uniform>) {
         this.program = null;
-        this.load(vertUrl, fragUrl);
+        this.load(vertUrl, fragUrl, uniforms);
     }
 
-    private async load(vertUrl: string, fragUrl: string) {
+    private async load(vertUrl: string, fragUrl: string, uniforms: Iterable<Uniform>) {
         let response = await fetch(vertUrl);
         let content = await response.text();
         let vert = gl.createShader(gl.VERTEX_SHADER);
@@ -298,10 +299,14 @@ class Program {
         this.uLocProjection = gl.getUniformLocation(this.program, "u_projection");
         this.uLocView = gl.getUniformLocation(this.program, "u_view");
         this.uLocModel = gl.getUniformLocation(this.program, "u_model");
-        this.uLocColor = gl.getUniformLocation(this.program, "u_color");
+
+        this.uniformLocations = {};
+        for (const uniform of uniforms) {
+            this.uniformLocations[uniform[0]] = gl.getUniformLocation(this.program, uniform[0]);
+        }
     }
 
-    bind(model: Matrix, color: Color) {
+    bind(model: Matrix, uniforms: Iterable<Uniform>) {
         if (!this.program) {
             return false;
         }
@@ -313,7 +318,20 @@ class Program {
         gl.uniformMatrix4fv(this.uLocProjection, false, currentProjection);
         gl.uniformMatrix4fv(this.uLocView, false, currentView);
         gl.uniformMatrix4fv(this.uLocModel, false, model);
-        gl.uniform4fv(this.uLocColor, color);
+
+        for (const uniform of uniforms) {
+            const name = uniform[0];
+            const value = uniform[1];
+            switch(value.length) {
+                case 1:
+                    gl.uniform1fv(this.uniformLocations[name], value);
+                    break;
+
+                case 4:
+                    gl.uniform4fv(this.uniformLocations[name], value);
+                    break;
+            }
+        }
 
         return true;
     }
