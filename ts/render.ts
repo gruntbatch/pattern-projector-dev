@@ -7,6 +7,7 @@ export {
     gl,
 
     newVertex,
+    newIdentityMatrix,
     newTranslationMatrix,
     onResize,
     wrapCanvasById,
@@ -160,6 +161,38 @@ class Buffer {
         let mesh = new Mesh(this, mode, this.length, vertices.length);
         this.length += vertices.length;
         return mesh;
+    }
+
+    newPlane(size: number, color: Color): Mesh {
+        const vertexCount = 6;
+        const vertices = new Array<Vertex>(vertexCount);
+
+        let resolution = 1;
+        let x = 0;
+        let y = 0;
+        {
+            const minX = (x / resolution);
+            const maxX = ((x + 1) / resolution);
+            const minY = (y / resolution);
+            const maxY = ((y + 1) / resolution);
+
+            const v0 = newVertex([minX * size, minY * size], [minX, minY], color);
+            const v1 = newVertex([minX * size, maxY * size], [minX, maxY], color);
+            const v2 = newVertex([maxX * size, minY * size], [maxX, minY], color);
+            const v3 = newVertex([maxX * size, maxY * size], [maxX, maxY], color);
+
+            const index = 6 * (x + y * resolution);
+
+            vertices[index    ] = v0;
+            vertices[index + 1] = v1;
+            vertices[index + 2] = v2;
+
+            vertices[index + 3] = v1;
+            vertices[index + 4] = v3;
+            vertices[index + 5] = v2;
+        }
+
+        return this.newMesh(vertices, gl.TRIANGLES);
     }
 }
 
