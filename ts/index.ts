@@ -44,11 +44,10 @@ import * as view from "./view.js";
             render.newSkewMatrix(
                 [[100, 100], [0, 100], [0, 0], [100, 0]],
                 myModel.getCornersAsVectors()
-            ),
-            [["u_color", [0, 0, 1, 1]]]
+            )
         );
         for (const corner of myModel.corners) {
-            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [["u_color", [1, 0, 0, 1]]]);
+            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()));
         }
         requestAnimationFrame(onAnimationFrame);
     }

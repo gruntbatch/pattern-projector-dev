@@ -254,7 +254,7 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: Matrix, uniforms: Iterable<Uniform>) {
+    draw(program: Program, model: Matrix, uniforms: Iterable<Uniform> = []) {
         if (program.bind(model, uniforms) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
@@ -299,6 +299,8 @@ class Program {
         for (const uniform of uniforms) {
             this.uniformLocations[uniform[0]] = gl.getUniformLocation(this.program, uniform[0]);
         }
+
+        // Bind the program once in order to initialize uniforms
         this.bind(newIdentityMatrix(), uniforms);
     }
 
