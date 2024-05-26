@@ -138,7 +138,7 @@ class Buffer {
         return true;
     }
 
-    mesh(vertices: Array<Vertex>, mode: number = gl.TRIANGLES): Mesh {
+    newMesh(vertices: Array<Vertex>, mode: number = gl.TRIANGLES): Mesh {
         if (this.length + vertices.length > this.capacity) {
             throw new Error("Too many vertices!");
         }

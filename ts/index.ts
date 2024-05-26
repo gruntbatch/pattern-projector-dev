@@ -5,7 +5,8 @@ import * as view from "./view.js";
 (() => {
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
-    const mTriangle = buffer.mesh([
+    // TODO: Replace with buffer.circle() or something
+    const mTriangle = buffer.newMesh([
         render.newVertex([-2, -2]),
         render.newVertex([0, 2]),
         render.newVertex([2, -2])
