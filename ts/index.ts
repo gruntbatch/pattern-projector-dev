@@ -12,8 +12,16 @@ import * as view from "./view.js";
         render.newVertex([2, -2])
     ]);
     const mPlane = buffer.newPlane(100);
-    const pHello = new render.Program("glsl/standard.vert", "glsl/solid.frag", [["u_color", [1, 0, 0, 1]]]);
-    const pRuler = new render.Program("glsl/standard.vert", "glsl/ruler.frag", [["u_color", [1, 0, 0, 1]]]);
+    const pHello = new render.Program(
+        "glsl/standard.vert",
+        "glsl/solid.frag",
+        [["u_color", [1, 0, 0, 1]]]
+    );
+    const pRuler = new render.Program(
+        "glsl/standard.vert",
+        "glsl/ruler.frag",
+        [["u_color", [0, 0, 1, 1]]]
+    );
 
     const onResize = () => {
         let width = window.innerWidth;

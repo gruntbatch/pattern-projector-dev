@@ -299,6 +299,7 @@ class Program {
         for (const uniform of uniforms) {
             this.uniformLocations[uniform[0]] = gl.getUniformLocation(this.program, uniform[0]);
         }
+        this.bind(newIdentityMatrix(), uniforms);
     }
 
     bind(model: Matrix, uniforms: Iterable<Uniform>) {
