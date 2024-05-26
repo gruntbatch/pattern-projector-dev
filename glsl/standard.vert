@@ -1,7 +1,7 @@
 precision mediump float;
 
 attribute vec2 a_position;
-attribute vec4 a_color;
+attribute vec2 a_texCoord;
 
 uniform mat4 u_projection;
 uniform mat4 u_view;

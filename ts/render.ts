@@ -17,11 +17,11 @@ export {
     Program,
 };
 
-type Color = [number, number, number, number];
+// type Color = [number, number, number, number];
 type Matrix = Float32Array;
 type Vector2 = [number, number];
 type Vector3 = [number, number, number];
-type Vertex = [number, number, number, number, number, number, number, number];
+type Vertex = [number, number, number, number];
 type Uniform = [string, Array<number>];
 
 const VERTEX_ELEMENT_SIZE = 4;
@@ -124,11 +124,10 @@ function newTranslationMatrix(translation: Vector2): Matrix {
     ]);
 }
 
-function newVertex(position: Vector2 = [0, 0], texCoord: Vector2 = [0, 0], color: Color = [1, 0, 0, 1]): Vertex {
+function newVertex(position: Vector2 = [0, 0], texCoord: Vector2 = [0, 0]): Vertex {
     return [
         position[0], position[1],
-        texCoord[0], texCoord[1],
-        color[0], color[1], color[2], color[3]
+        texCoord[0], texCoord[1]
     ];
 }
 
@@ -182,10 +181,6 @@ class Buffer {
         // texCoord
         gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 32, 8);
         gl.enableVertexAttribArray(1);
-
-        // color
-        gl.vertexAttribPointer(2, 4, gl.FLOAT, false, 32, 16);
-        gl.enableVertexAttribArray(2);
     }
 
     bind() {
@@ -221,7 +216,7 @@ class Buffer {
         return mesh;
     }
 
-    newPlane(size: number, color: Color): Mesh {
+    newPlane(size: number): Mesh {
         const vertexCount = 6;
         const vertices = new Array<Vertex>(vertexCount);
 
@@ -234,10 +229,10 @@ class Buffer {
             const minY = (y / resolution);
             const maxY = ((y + 1) / resolution);
 
-            const v0 = newVertex([minX * size, minY * size], [minX, minY], color);
-            const v1 = newVertex([minX * size, maxY * size], [minX, maxY], color);
-            const v2 = newVertex([maxX * size, minY * size], [maxX, minY], color);
-            const v3 = newVertex([maxX * size, maxY * size], [maxX, maxY], color);
+            const v0 = newVertex([minX * size, minY * size], [minX, minY]);
+            const v1 = newVertex([minX * size, maxY * size], [minX, maxY]);
+            const v2 = newVertex([maxX * size, minY * size], [maxX, minY]);
+            const v3 = newVertex([maxX * size, maxY * size], [maxX, maxY]);
 
             const index = 6 * (x + y * resolution);
 

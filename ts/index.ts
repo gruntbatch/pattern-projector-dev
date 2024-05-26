@@ -11,7 +11,7 @@ import * as view from "./view.js";
         render.newVertex([0, 2]),
         render.newVertex([2, -2])
     ]);
-    const mPlane = buffer.newPlane(100, [0, 0, 1, 1])
+    const mPlane = buffer.newPlane(100);
     const pHello = new render.Program("glsl/standard.vert", "glsl/solid.frag", [["u_color", [1, 0, 0, 1]]]);
     const pRuler = new render.Program("glsl/standard.vert", "glsl/ruler.frag", [["u_color", [1, 0, 0, 1]]]);
 
@@ -31,9 +31,6 @@ import * as view from "./view.js";
     const myEditor = new view.Editor(myModel, render.canvas);
 
     const onAnimationFrame = () => {
-        for (const corner of myModel.corners) {
-            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [["u_color", [1, 0, 0, 1]]]);
-        }
         mPlane.draw(
             pRuler,
             render.newSkewMatrix(
@@ -42,6 +39,9 @@ import * as view from "./view.js";
             ),
             [["u_color", [0, 0, 1, 1]]]
         );
+        for (const corner of myModel.corners) {
+            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [["u_color", [1, 0, 0, 1]]]);
+        }
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();
