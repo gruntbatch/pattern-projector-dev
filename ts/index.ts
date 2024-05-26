@@ -12,8 +12,8 @@ import * as view from "./view.js";
         render.newVertex([2, -2])
     ]);
     const mPlane = buffer.newPlane(100, [0, 0, 1, 1])
-    const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag", [["u_color", [1, 0, 0, 1]]]);
-    const pHello = new render.Program("glsl/hello.vert", "glsl/hello.frag");
+    const pHello = new render.Program("glsl/standard.vert", "glsl/solid.frag", [["u_color", [1, 0, 0, 1]]]);
+    const pRuler = new render.Program("glsl/standard.vert", "glsl/ruler.frag", [["u_color", [1, 0, 0, 1]]]);
 
     const onResize = () => {
         let width = window.innerWidth;
@@ -35,7 +35,7 @@ import * as view from "./view.js";
             mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [["u_color", [1, 0, 0, 1]]]);
         }
         mPlane.draw(
-            pHello,
+            pRuler,
             render.newSkewMatrix(
                 [[100, 100], [0, 100], [0, 0], [100, 0]],
                 myModel.getCornersAsVectors()
