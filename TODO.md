@@ -45,6 +45,7 @@
   - [x] Handle adjustment
   - [ ] Manual adjustment (field entry)
 - [ ] View
+  - [x] Skew plane
   - [ ] Ruler toggle
   - [ ] Grid lines
   - [ ] Handles (WebGL or DOM?)

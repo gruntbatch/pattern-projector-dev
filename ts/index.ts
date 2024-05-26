@@ -33,7 +33,14 @@ import * as view from "./view.js";
         for (const corner of myModel.corners) {
             mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()), [1, 0, 0, 1]);
         }
-        mPlane.draw(pHello, render.newIdentityMatrix(), [0, 0, 1, 1]);
+        mPlane.draw(
+            pHello,
+            render.newSkewMatrix(
+                [[100, 100], [0, 100], [0, 0], [100, 0]],
+                myModel.getCornersAsVectors()
+            ),
+            [0, 0, 1, 1]
+        );
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();

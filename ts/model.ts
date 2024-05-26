@@ -30,6 +30,15 @@ class Model {
 
         this.dimension = new BoundedIntegerScalar(1, 8, 4);
     }
+
+    getCornersAsVectors(): [Vector2, Vector2, Vector2, Vector2] {
+        return [
+            this.corners[0].getVector2(),
+            this.corners[1].getVector2(),
+            this.corners[2].getVector2(),
+            this.corners[3].getVector2(),
+        ]
+    }
 }
 
 class Point {
