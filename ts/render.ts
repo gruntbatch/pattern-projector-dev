@@ -91,7 +91,7 @@ function newSkewMatrix(originalPoints: Array<Vector2>, transformedPoints: Array<
     const basis = (p: Array<Vector2>): Matrix => {
         const m = new Float32Array([
             p[0][0], p[1][0], p[2][0],
-            p[0][1], p[1][1], p[2][0],
+            p[0][1], p[1][1], p[2][1],
             1, 1, 1
         ]);
         const v = mulVector(adjugate(m), [p[3][0], p[3][1], 1]);
