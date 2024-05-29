@@ -33,14 +33,21 @@ class Editor {
 
         new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
-        // NOTE: This is kind of a hack right now because several Points reference and update the same HTMLElements. It works, it might actually even be the way to go, but it was discovered by accident.
         this.handles = [null, null, null, null];
+        const ids = ["corner-a-field", "corner-b-field", "corner-c-field", "corner-d-field"];
         for (let i = 0; i < 4; i++) {
             this.handles[i] = new Point(
                 model.corners[i],
                 model.precision,
-                document.getElementById("corner-a-field")
+                document.getElementById(ids[i])
             );
+        }
+        document.getElementById("reset-all-corners").onclick = () => {
+            for (let i = 0; i < 4; i++) {
+                model.corners[i].x.reset();
+                model.corners[i].y.reset();
+                this.handles[i].view();
+            }
         }
 
         new IntegerScalar(model.dimension, 0.1, document.getElementById("scale-field"));

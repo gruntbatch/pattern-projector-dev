@@ -118,6 +118,10 @@ h2 {
     width: 2rem;
 }
 
+.w-50 {
+    width: 50%;
+}
+
 #gl-canvas {
     display: block;
 }
