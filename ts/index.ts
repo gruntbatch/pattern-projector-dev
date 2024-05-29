@@ -3,6 +3,10 @@ import * as render from "./render.js";
 import * as view from "./view.js";
 
 (() => {
+    const myModel = new model.Model(
+        Math.min(window.innerWidth, window.innerHeight) / 4
+    );
+
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
     // TODO: Replace with buffer.circle() or something
@@ -20,7 +24,12 @@ import * as view from "./view.js";
     const pRuler = new render.Program(
         "glsl/standard.vert",
         "glsl/ruler.frag",
-        [["u_color", [0, 0, 1, 1]]]
+        [
+            ["u_color", [0, 0, 1, 1]],
+            ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
+            ["u_resolution", [myModel.dimension.get()]],
+            ["u_width", [4.0]]
+        ]
     );
 
     const onResize = () => {
@@ -33,9 +42,6 @@ import * as view from "./view.js";
     onResize();
     window.onresize = onResize;
 
-    const myModel = new model.Model(
-        Math.min(window.innerWidth, window.innerHeight) / 4
-    );
     const myEditor = new view.Editor(myModel, render.canvas);
 
     const onAnimationFrame = () => {
@@ -44,7 +50,11 @@ import * as view from "./view.js";
             render.newSkewMatrix(
                 [[100, 100], [0, 100], [0, 0], [100, 0]],
                 myModel.getCornersAsVectors()
-            )
+            ),
+            [
+                ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
+                ["u_resolution", [myModel.dimension.get()]]
+            ]
         );
         for (const corner of myModel.corners) {
             mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()));

@@ -43,6 +43,8 @@ class Editor {
             );
         }
 
+        new IntegerScalar(model.dimension, 0.1, document.getElementById("scale-field"));
+
         // Global event handlers
         canvas.onwheel = (e) => {
             const delta = e.deltaY * this.model.precision.get();

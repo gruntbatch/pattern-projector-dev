@@ -53,6 +53,12 @@ class Point {
     getVector2(): Vector2 {
         return [this.x.get(), this.y.get()];
     }
+
+    distanceTo(other: Point): number {
+        const x = this.x.get() - other.x.get();
+        const y = this.y.get() - other.y.get();
+        return Math.sqrt(x * x + y * y);
+    }
 }
 
 class Scalar {

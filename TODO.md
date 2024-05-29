@@ -47,5 +47,5 @@
 - [ ] View
   - [x] Skew plane
   - [ ] Ruler toggle
-  - [ ] Grid lines
+  - [x] Grid lines
   - [ ] Handles (WebGL or DOM?)
