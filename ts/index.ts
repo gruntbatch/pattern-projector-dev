@@ -9,12 +9,6 @@ import * as view from "./view.js";
 
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
-    // TODO: Replace with buffer.circle() or something
-    const mTriangle = buffer.newMesh([
-        render.newVertex([-2, -2]),
-        render.newVertex([0, 2]),
-        render.newVertex([2, -2])
-    ]);
     const mPlane = buffer.newPlane(1, [-1, -1], [3, 3]);
     const pHello = new render.Program(
         "glsl/standard.vert",
@@ -58,9 +52,6 @@ import * as view from "./view.js";
                 ["u_width", [myModel.pixelsPerLine.get()]],
             ]
         );
-        for (const corner of myModel.corners) {
-            mTriangle.draw(pHello, render.newTranslationMatrix(corner.getVector2()));
-        }
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();

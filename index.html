@@ -9,6 +9,19 @@
 </head>
 
 <body>
+    <div id="corner-b-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
+        <span class="mono">NW</span>
+    </div>
+    <div id="corner-a-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
+        <span class="mono">NE</span>
+    </div>
+    <div id="corner-c-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
+        <span class="mono">SW</span>
+    </div>
+    <div id="corner-d-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
+        <span class="mono">SE</span>
+    </div>
+
     <div id="menu" class="bg-light-trans flex-column flex-spaced">
         <div class="bg-light flex-row h-2 rounded">
             <a id="ruler-menu-button" class="button fg-light flex-row-centered h-2 p-x-1 rounded">Calibration</a>
@@ -34,7 +47,7 @@
                 <div class="flex-row">
                     <div id="corner-b-field" class="flex-column w-50">
                         <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span></span>
+                            <span>NW</span>
                             <span class="mono">x <span id="display-x">1.0</span></span>
                         </div>
                         <div id="field-y" class="flex-row h-2 p-x-1">
@@ -44,7 +57,7 @@
                     </div>
                     <div id="corner-a-field" class="flex-column w-50">
                         <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span></span>
+                            <span>NE</span>
                             <span class="mono">x <span id="display-x">1.0</span></span>
                         </div>
                         <div id="field-y" class="flex-row h-2 p-x-1">
@@ -56,7 +69,7 @@
                 <div class="flex-row">
                     <div id="corner-c-field" class="flex-column w-50">
                         <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span></span>
+                            <span>SW</span>
                             <span class="mono">x <span id="display-x">1.0</span></span>
                         </div>
                         <div id="field-y" class="flex-row h-2 p-x-1">
@@ -66,7 +79,7 @@
                     </div>
                     <div id="corner-d-field" class="flex-column w-50">
                         <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span></span>
+                            <span>SE</span>
                             <span class="mono">x <span id="display-x">1.0</span></span>
                         </div>
                         <div id="field-y" class="flex-row h-2 p-x-1">
@@ -187,24 +200,13 @@
             </div>
         </div>
     </div>
-    <div id="ruler-perspective-0-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="mono">C</span>
-    </div>
-    <div id="ruler-perspective-1-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="mono">D</span>
-    </div>
-    <div id="ruler-perspective-2-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="mono">A</span>
-    </div>
-    <div id="ruler-perspective-3-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
-        <span class="mono">B</span>
-    </div>
-    <div id="ruler-origin-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
+
+    <!-- <div id="ruler-origin-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
         <span class="mono">O</span>
     </div>
     <div id="pattern-origin-handle" class="bg-blue fg-light flex-row flex-centered handle h-2 rounded w-2">
         <span class="mono">O</span>
-    </div>
+    </div> -->
     <canvas id="gl-canvas"></canvas>
     <canvas id="pdf-canvas" class="display-none"></canvas>
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.14.305/build/pdf.min.js" integrity="sha256-HyYlSbhjYnxbc8y6bMUhGGQ1q+mEOHM2FDWZzwKc/qg=" crossorigin="anonymous"></script>

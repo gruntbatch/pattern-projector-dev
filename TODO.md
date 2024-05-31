@@ -48,7 +48,7 @@
   - [x] Skew plane
   - [ ] Ruler toggle
   - [x] Grid lines
-  - [ ] Handles (WebGL or DOM?)
+  - [x] Handles (WebGL or DOM?)
   - [x] +/- buttons
   - [ ] Axis-specific ruler dimensions
   - [ ] Antialiasing

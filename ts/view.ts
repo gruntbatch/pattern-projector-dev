@@ -12,6 +12,7 @@ const CORNER_MOVEMENT = [
     [1, -1]
 ];
 const SCROLL_SCALAR = 0.001;
+const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
 class Editor {
     model: model.Model;
@@ -34,13 +35,16 @@ class Editor {
         new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
         this.handles = [null, null, null, null];
-        const ids = ["corner-a-field", "corner-b-field", "corner-c-field", "corner-d-field"];
+        const editors = ["corner-a-field", "corner-b-field", "corner-c-field", "corner-d-field"];
+        const handles = ["corner-a-handle", "corner-b-handle", "corner-c-handle", "corner-d-handle"];
         for (let i = 0; i < 4; i++) {
             this.handles[i] = new Point(
                 model.corners[i],
                 model.precision,
-                document.getElementById(ids[i])
+                document.getElementById(editors[i]),
+                document.getElementById(handles[i])
             );
+            this.handles[i].view();
         }
         document.getElementById("reset-all-corners").onclick = () => {
             for (let i = 0; i < 4; i++) {
@@ -128,8 +132,9 @@ class Point {
     scalar: model.Scalar;
     displayX: HTMLElement;
     displayY: HTMLElement;
+    handle: HTMLElement | null;
 
-    constructor(value: model.Point, scalar: number | model.Scalar, e: HTMLElement) {
+    constructor(value: model.Point, scalar: number | model.Scalar, e: HTMLElement, handle: HTMLElement | null = null) {
         this.value = value;
 
         // Mr. Yuk does not like this
@@ -158,11 +163,19 @@ class Point {
             this.value.y.reset();
             this.view();
         }
+
+        this.handle = handle;
     }
 
     view() {
-        this.displayX.innerText = this.value.x.get().toFixed(3);
-        this.displayY.innerText = this.value.y.get().toFixed(3);
+        let x = this.value.x.get();
+        let y = this.value.y.get();
+        this.displayX.innerText = x.toFixed(3);
+        this.displayY.innerText = y.toFixed(3);
+        if (this.handle) {
+            this.handle.style.left = x + (window.innerWidth / 2) - REM_TO_PIXELS + "px";
+            this.handle.style.top = (window.innerHeight / 2) - y - REM_TO_PIXELS + "px"
+        }
     }
 }
 
