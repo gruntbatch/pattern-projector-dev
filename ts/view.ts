@@ -54,10 +54,16 @@ class Editor {
 
         // Global event handlers
         canvas.onwheel = (e) => {
-            const delta = e.deltaY * this.model.precision.get();
+            const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
+    
             for (let i = 0; i < 4; i++) {
-                model.corners[i].x.update(delta * CORNER_MOVEMENT[i][0]);
-                model.corners[i].y.update(delta * CORNER_MOVEMENT[i][1]);
+                this.model.corners[i].x.set(
+                    this.model.corners[i].x.get() * delta
+                );
+                this.model.corners[i].y.set(
+                    this.model.corners[i].y.get() * delta
+                );
+                this.handles[i].view();
             }
         }
         canvas.onmousedown = (e) => {
