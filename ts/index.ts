@@ -15,7 +15,7 @@ import * as view from "./view.js";
         render.newVertex([0, 2]),
         render.newVertex([2, -2])
     ]);
-    const mPlane = buffer.newPlane(100);
+    const mPlane = buffer.newPlane(1, [-1, -1], [3, 3]);
     const pHello = new render.Program(
         "glsl/standard.vert",
         "glsl/solid.frag",
@@ -48,7 +48,7 @@ import * as view from "./view.js";
         mPlane.draw(
             pRuler,
             render.newSkewMatrix(
-                [[100, 100], [0, 100], [0, 0], [100, 0]],
+                [[1, 1], [0, 1], [0, 0], [1, 0]],
                 myModel.getCornersAsVectors()
             ),
             [
