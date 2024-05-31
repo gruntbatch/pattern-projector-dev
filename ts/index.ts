@@ -4,7 +4,7 @@ import * as view from "./view.js";
 
 (() => {
     const myModel = new model.Model(
-        Math.min(window.innerWidth, window.innerHeight) / 4
+        Math.min(window.innerWidth, window.innerHeight) / 8
     );
 
     render.wrapCanvasById("gl-canvas");
