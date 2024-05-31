@@ -50,7 +50,8 @@ class Editor {
             }
         }
 
-        new IntegerScalar(model.dimension, 0.1, document.getElementById("scale-field"));
+        new IntegerScalar(model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
+        new IntegerScalar(model.unitsPerQuad, 0.1, document.getElementById("units-per-quad-field"));
 
         // Global event handlers
         canvas.onwheel = (e) => {

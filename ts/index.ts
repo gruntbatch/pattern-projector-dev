@@ -27,7 +27,7 @@ import * as view from "./view.js";
         [
             ["u_color", [0, 0, 1, 1]],
             ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
-            ["u_resolution", [myModel.dimension.get()]],
+            ["u_resolution", [myModel.unitsPerQuad.get()]],
             ["u_width", [4.0]]
         ]
     );
@@ -53,7 +53,8 @@ import * as view from "./view.js";
             ),
             [
                 ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
-                ["u_resolution", [myModel.dimension.get()]]
+                ["u_resolution", [myModel.unitsPerQuad.get()]],
+                ["u_width", [myModel.pixelsPerLine.get()]],
             ]
         );
         for (const corner of myModel.corners) {
