@@ -51,3 +51,4 @@
   - [ ] Handles (WebGL or DOM?)
   - [x] +/- buttons
   - [ ] Axis-specific ruler dimensions
+  - [ ] Antialiasing
