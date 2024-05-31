@@ -30,68 +30,13 @@
             <a id="pattern-menu-button" class="button fg-light flex-row-centered h-2 p-x-1 rounded">Pattern</a>
         </div>
         <div id="ruler-panel" class="flex-column flex-spaced">
-            <div class="drawer flex-column rounded bg-light">
+            <div id="precision-drawer" class="drawer flex-column rounded bg-light">
                 <div class="flex-row h-2 bg-blue fg-light">
                     <h2 class="flex-grow p-x-1">Precision</h2>
                 </div>
                 <div id="precision-field" class="flex-row h-2 p-x-1">
                     <a id="reset">Reset</a>
                     <span id="display" class="mono">1.0</span>
-                </div>
-            </div>
-
-            <div class="drawer flex-column rounded bg-light">
-                <div class="flex-row h-2 bg-blue fg-light">
-                    <h2 class="flex-grow p-x-1">Corners</h2>
-                </div>
-                <div class="flex-row">
-                    <div id="corner-b-field" class="flex-column w-50">
-                        <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span>NW</span>
-                            <span class="mono">x <span id="display-x">1.0</span></span>
-                        </div>
-                        <div id="field-y" class="flex-row h-2 p-x-1">
-                            <a id="reset">Reset</a>
-                            <span class="mono">y <span id="display-y">1.0</span></span>
-                        </div>
-                    </div>
-                    <div id="corner-a-field" class="flex-column w-50">
-                        <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span>NE</span>
-                            <span class="mono">x <span id="display-x">1.0</span></span>
-                        </div>
-                        <div id="field-y" class="flex-row h-2 p-x-1">
-                            <a id="reset">Reset</a>
-                            <span class="mono">y <span id="display-y">1.0</span></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-row">
-                    <div id="corner-c-field" class="flex-column w-50">
-                        <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span>SW</span>
-                            <span class="mono">x <span id="display-x">1.0</span></span>
-                        </div>
-                        <div id="field-y" class="flex-row h-2 p-x-1">
-                            <a id="reset">Reset</a>
-                            <span class="mono">y <span id="display-y">1.0</span></span>
-                        </div>
-                    </div>
-                    <div id="corner-d-field" class="flex-column w-50">
-                        <div id="field-x" class="flex-row h-2 p-x-1">
-                            <span>SE</span>
-                            <span class="mono">x <span id="display-x">1.0</span></span>
-                        </div>
-                        <div id="field-y" class="flex-row h-2 p-x-1">
-                            <a id="reset">Reset</a>
-                            <span class="mono">y <span id="display-y">1.0</span></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex-row">
-                    <div class="flex-column p-x-1">
-                        <a id="reset-all-corners">Reset All</a>
-                    </div>
                 </div>
             </div>
 
@@ -108,6 +53,63 @@
                     <span class="p-r-1">Scale</span>
                     <a id="reset" class="p-r-1">Reset</a>
                     <span class="flex-grow align-right mono"><a id="decrement">-</a> <a id="increment">+</a> <span id="display">1.0</span> inches</span>
+                </div>
+            </div>
+
+            <div id="corners-drawer" class="drawer flex-column rounded bg-light">
+                <div class="flex-row h-2 bg-blue fg-light">
+                    <h2 class="flex-grow p-x-1">Corners</h2>
+                </div>
+
+                <div class="flex-row h-3">
+                    <div id="corner-b-field" class="flex-column w-50">
+                        <div id="field-x" class="flex-row p-x-1">
+                            <b>NW</b>
+                            <span class="mono">x <span id="display-x">1.0</span></span>
+                        </div>
+                        <div id="field-y" class="flex-row p-x-1">
+                            <a id="reset">Reset</a>
+                            <span class="mono">y <span id="display-y">1.0</span></span>
+                        </div>
+                    </div>
+                    <div id="corner-a-field" class="flex-column w-50">
+                        <div id="field-x" class="flex-row p-x-1">
+                            <b>NE</b>
+                            <span class="mono">x <span id="display-x">1.0</span></span>
+                        </div>
+                        <div id="field-y" class="flex-row p-x-1">
+                            <a id="reset">Reset</a>
+                            <span class="mono">y <span id="display-y">1.0</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-row h-3">
+                    <div id="corner-c-field" class="flex-column w-50">
+                        <div id="field-x" class="flex-row p-x-1">
+                            <b>SW</b>
+                            <span class="mono">x <span id="display-x">1.0</span></span>
+                        </div>
+                        <div id="field-y" class="flex-row p-x-1">
+                            <a id="reset">Reset</a>
+                            <span class="mono">y <span id="display-y">1.0</span></span>
+                        </div>
+                    </div>
+                    <div id="corner-d-field" class="flex-column w-50">
+                        <div id="field-x" class="flex-row p-x-1">
+                            <b>SE</b>
+                            <span class="mono">x <span id="display-x">1.0</span></span>
+                        </div>
+                        <div id="field-y" class="flex-row p-x-1">
+                            <a id="reset">Reset</a>
+                            <span class="mono">y <span id="display-y">1.0</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-row h-2">
+                    <span></span>
+                    <div class="flex-column p-x-1">
+                        <a id="reset-all-corners">Reset All</a>
+                    </div>
                 </div>
             </div>
 
