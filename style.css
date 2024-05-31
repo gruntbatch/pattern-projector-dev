@@ -6,6 +6,7 @@ body {
 
 a {
     text-decoration: underline;
+    cursor: pointer;
 }
 
 h2 {
@@ -157,4 +158,8 @@ h2 {
 .handle {
     pointer-events: none;
     position: absolute;
+}
+
+#increment, #decrement {
+    font-weight: bold;
 }

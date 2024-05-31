@@ -192,6 +192,26 @@ class Scalar {
             this.value.reset();
             this.view();
         };
+
+        let decr = e.querySelector<HTMLElement>("#decrement");
+        if (decr) {
+            decr.onclick = () => {
+                this.incr(-1);
+                this.view();
+            }
+        }
+
+        let incr = e.querySelector<HTMLElement>("#increment");
+        if (incr) {
+            incr.onclick = () => {
+                this.incr(1);
+                this.view();
+            }
+        }
+    }
+
+    incr(value: number) {
+        this.value.update(value * this.scalar.get());
     }
 
     view() {
@@ -200,6 +220,10 @@ class Scalar {
 }
 
 class IntegerScalar extends Scalar {
+    incr(value: number) {
+        this.value.update(value);
+    }
+
     view() {
         this.display.innerText = this.value.get().toFixed(0);
     }

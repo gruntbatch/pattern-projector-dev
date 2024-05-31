@@ -49,5 +49,5 @@
   - [ ] Ruler toggle
   - [x] Grid lines
   - [ ] Handles (WebGL or DOM?)
-  - [ ] +/- buttons
+  - [x] +/- buttons
   - [ ] Axis-specific ruler dimensions
