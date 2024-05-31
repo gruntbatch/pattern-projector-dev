@@ -3,6 +3,7 @@ precision mediump float;
 varying vec2 v_texCoord;
 
 uniform vec4 u_color;
+uniform vec4 u_background_color;
 uniform float u_distance;
 uniform float u_resolution;
 uniform float u_width;
@@ -20,5 +21,5 @@ void main() {
         u_resolution,
         (1.0 / (distance / u_resolution))
     );
-    gl_FragColor = vec4(u_color.xyz * factor, 1);
+    gl_FragColor = vec4(mix(u_color.xyz, u_background_color.xyz, factor), 1);
 }

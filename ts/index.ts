@@ -25,7 +25,8 @@ import * as view from "./view.js";
         "glsl/standard.vert",
         "glsl/ruler.frag",
         [
-            ["u_color", [0, 0, 1, 1]],
+            ["u_color", [0, 0, 0, 1]],
+            ["u_background_color", [1, 1, 1, 1]],
             ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
             ["u_resolution", [myModel.unitsPerQuad.get()]],
             ["u_width", [4.0]]
