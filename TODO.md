@@ -52,3 +52,6 @@
   - [x] +/- buttons
   - [ ] Axis-specific ruler dimensions
   - [ ] Antialiasing
+  - [ ] Pattern upload
+  - [ ] Hide corners when panel is deactivated
+  - [ ] Hide pattern pannel when corner pannel is deactivated
