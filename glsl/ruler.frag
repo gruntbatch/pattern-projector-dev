@@ -20,6 +20,10 @@ void main() {
         texCoord,
         u_resolution,
         (1.0 / (distance / u_resolution))
+    ) * grid(
+        texCoord,
+        1.0,
+        (1.0 / ((u_distance / (u_width * 2.0)) / 1.0))   
     );
     gl_FragColor = vec4(mix(u_color.xyz, u_background_color.xyz, factor), 1);
 }
