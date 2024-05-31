@@ -9,7 +9,7 @@ uniform float u_resolution;
 uniform float u_width;
 
 float grid(vec2 uv, float res, float width) {
-    vec2 grid = fract(uv * res);
+    vec2 grid = fract((uv * res) + (width / 2.0));
     return step(width, grid.x) * step(width, grid.y);
 }
 
