@@ -125,6 +125,12 @@ class Editor {
         }
     }
 
+    onResize(width: number, height: number) {
+        for (const handle of this.handles) {
+            handle.view();
+        }
+    }
+
     selectNearestCorner(pageX: number, pageY: number) {
         pageX = pageX - (window.innerWidth / 2);
         pageY = (window.innerHeight / 2) - pageY;
