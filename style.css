@@ -119,6 +119,12 @@ h2 {
     overflow: hidden;
 }
 
+.rounded-top {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    overflow: hidden;
+}
+
 .w-2 {
     width: 2rem;
 }

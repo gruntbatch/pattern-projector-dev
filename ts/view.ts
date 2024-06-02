@@ -26,6 +26,21 @@ class Editor {
     constructor(model: model.Model, canvas: HTMLElement) {
         this.model = model;
 
+        const tabview = new Tabview();
+        tabview.push(
+            document.getElementById("calibration-tab"),
+            [
+                document.getElementById("precision-drawer"),
+                document.getElementById("ruler-drawer"),
+                document.getElementById("corners-drawer"),
+            ]
+        );
+        tabview.push(
+            document.getElementById("pattern-tab"),
+            [ document.getElementById("precision-drawer") ]
+        );
+        tabview.showTab(0);
+
         for (let e of document.getElementsByClassName("drawer")) {
             (e.firstElementChild as HTMLElement).onclick = () => {
                 e.classList.toggle("collapsed");
@@ -240,5 +255,42 @@ class IntegerScalar extends Scalar {
 
     view() {
         this.display.innerText = this.value.get().toFixed(0);
+    }
+}
+
+class Tabview {
+    tabs: Array<HTMLElement>;
+    drawers: Array<Array<HTMLElement>>;
+
+    constructor() {
+        this.tabs = new Array<HTMLElement>();
+        this.drawers = new Array<Array<HTMLElement>>();
+    }
+
+    push(tab: HTMLElement, drawers: Array<HTMLElement>) {
+        const index = this.tabs.length;
+
+        this.tabs.push(tab);
+        this.drawers.push(drawers);
+
+        tab.onclick = () => {
+            this.showTab(index);
+        }
+    }
+
+    showTab(index: number) {
+        for (let i = 0; i < this.tabs.length; i++) {
+            if (i != index) {
+                this.tabs[i].classList.remove("active");
+                for (const drawer of this.drawers[i]) {
+                    drawer.classList.add("display-none");
+                }
+            }
+        }
+
+        this.tabs[index].classList.add("active");
+        for (const drawer of this.drawers[index]) {
+            drawer.classList.remove("display-none");
+        }
     }
 }
