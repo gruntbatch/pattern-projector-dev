@@ -74,9 +74,9 @@ h2 {
     flex: 1;
 }
 
-.flex-grow:not(:last-child) {
+/* .flex-grow:not(:last-child) {
     margin-right: 1rem;
-}
+} */
 
 .flex-row {
     display: flex;
@@ -121,6 +121,16 @@ h2 {
 
 .rounded-top {
     border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+    overflow: hidden;
+}
+
+.rounded-top-left {
+    border-top-left-radius: 1rem;
+    overflow: hidden;
+}
+
+.rounded-top-right {
     border-top-right-radius: 1rem;
     overflow: hidden;
 }

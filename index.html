@@ -23,13 +23,6 @@
     </div>
 
     <div id="menu" class="bg-light-trans flex-column flex-spaced">
-        <div class="flex-row h-2">
-            <a id="calibration-tab" class="button fg-light flex-grow flex-row-centered h-2 p-x-1 rounded-top">Calibration</a>
-            <a id="pattern-tab" class="button fg-light flex-grow flex-row-centered h-2 p-x-1 rounded-top">Pattern</a>
-            <!-- <a id="hide-menu-button" class="fg-gray flex-row-centered h-2 p-x-1 small">Hide</a> -->
-            <!-- <a id="swap-sides-button" class="fg-gray flex-row-centered h-2 p-x-1 small">Swap</a> -->
-        </div>
-
         <div id="precision-drawer" class="drawer flex-column rounded bg-light">
             <div class="flex-row h-2 bg-blue fg-light">
                 <h2 class="flex-grow p-x-1">Precision</h2>
@@ -41,24 +34,60 @@
         </div>
 
         <div id="ruler-drawer" class="drawer flex-column rounded bg-light">
-            <div class="flex-row h-2 bg-blue fg-light">
-                <h2 class="flex-grow p-x-1">Ruler</h2>
+            <div class="flex-row h-2">
+                <h2 id="ruler-tab" class="flex-grow flex-row h-2 p-x-1 rounded-top-left button fg-light">Ruler</h2>
+                <h2 id="pattern-tab" class="flex-grow flex-row h-2 p-x-1 rounded-top-right button fg-light">Pattern</h2>
             </div>
-            <div id="pixels-per-line-field" class="flex-row h-2 p-x-1">
-                <span class="p-r-1">Thickness</span>
-                <a id="reset" class="p-r-1">Reset</a>
-                <span class="flex-grow align-right mono"><a id="decrement">-</a> <a id="increment">+</a> <span id="display">1.0</span> pixels</span>
+
+            <div id="ruler-contents">
+                <div id="pixels-per-line-field" class="flex-row h-2 p-x-1">
+                    <span class="p-r-1">Thickness</span>
+                    <a id="reset" class="p-r-1">Reset</a>
+                    <span class="flex-grow align-right mono"><a id="decrement">-</a> <a id="increment">+</a> <span id="display">1.0</span> pixels</span>
+                </div>
+                <div id="units-per-quad-field" class="flex-row h-2 p-x-1">
+                    <span class="p-r-1">Scale</span>
+                    <a id="reset" class="p-r-1">Reset</a>
+                    <span class="flex-grow align-right mono"><a id="decrement">-</a> <a id="increment">+</a> <span id="display">1.0</span> inches</span>
+                </div>
             </div>
-            <div id="units-per-quad-field" class="flex-row h-2 p-x-1">
-                <span class="p-r-1">Scale</span>
-                <a id="reset" class="p-r-1">Reset</a>
-                <span class="flex-grow align-right mono"><a id="decrement">-</a> <a id="increment">+</a> <span id="display">1.0</span> inches</span>
+
+            <div id="pattern-contents">
+                <div class="flex-row h-2 p-x-1">
+                    <input id="pattern-input" class="display-none" type="file" />
+                    <a id="load-pattern-button">Load Pattern</a>
+                </div>
+
+                <div id="precision-field" class="flex-row h-2 p-x-1">
+                    <b class="p-r-1">Scale</b>
+                    <a id="reset">Reset</a>
+                    <span id="display" class="flex-grow align-right mono">1.0</span>
+                </div>
+
+                <div class="flex-row h-3">
+                    <div id="origin-field" class="flex-grow flex-column">
+                        <div id="field-x" class="flex-row p-x-1">
+                            <b>Origin</b>
+                            <span class="mono">x <span id="display-x">1.0</span></span>
+                        </div>
+                        <div id="field-y" class="flex-row p-x-1">
+                            <a id="reset">Reset</a>
+                            <span class="mono">y <span id="display-y">1.0</span></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="corners-drawer" class="drawer flex-column rounded bg-light">
             <div class="flex-row h-2 bg-blue fg-light">
                 <h2 class="flex-grow p-x-1">Corners</h2>
+            </div>
+
+            <div id="precision-field" class="flex-row h-2 p-x-1">
+                <span class="p-r-1">Precision</span>
+                <a id="reset">Reset</a>
+                <span id="display" class="flex-grow align-right mono">1.0</span>
             </div>
 
             <div class="flex-row h-3">
@@ -113,95 +142,14 @@
             </div>
         </div>
 
-        <div id="ruler-panel" class="flex-column flex-spaced">
-
-
-            <!-- Old stuff below -->
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-scale-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Zoom</a>
-                    <span id="ruler-scale-value" class="fg-gray mono p-r-1 small">1.0</span>
-                </div>
-                <a id="ruler-lock-scale" class="button fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Lock Zoom</a>
+        <div id="configuration-drawer" class="drawer flex-column rounded bg-light">
+            <div class="flex-row h-2 bg-blue fg-light">
+                <h2 class="flex-grow p-x-1">Configuration</h2>
             </div>
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-origin-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Origin</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="ruler-origin-x">1.0</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="ruler-origin-y">1.0</span></span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-perspective-2-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset A</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="ruler-perspective-2-x"> 1.000</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="ruler-perspective-2-y"> 1.000</span></span>
-                    </div>
-                </div>
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-perspective-3-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset B</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="ruler-perspective-3-x"> 1.000</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="ruler-perspective-3-y"> 1.000</span></span>
-                    </div>
-                </div>
-            </div>
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-perspective-0-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset C</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="ruler-perspective-0-x"> 1.000</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="ruler-perspective-0-y"> 1.000</span></span>
-                    </div>
-                </div>
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="ruler-perspective-1-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset D</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="ruler-perspective-1-x"> 1.000</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="ruler-perspective-1-y"> 1.000</span></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="pattern-panel" class="flex-column flex-spaced">
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <input id="pattern-input" class="display-none" type="file" />
-                    <a id="load-pattern-button" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Load Pattern</a>
-                </div>
-            </div>
-            <div class="flex-row">
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="pattern-scale-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Zoom</a>
-                    <span id="pattern-scale-value" class="fg-gray mono p-r-1 small">1.0</span>
-                </div>
-
-                <a id="pattern-lock-scale" class="button fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Lock Zoom</a>
-            </div>
-            <div>
-                <div class="bg-light flex-row flex-grow h-2 rounded">
-                    <a id="pattern-origin-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Origin</a>
-                    <div class="flex-column p-r-1">
-                        <span class="fg-gray mono vsmall">x<span id="pattern-origin-x"> 1.000</span></span>
-                        <span class="fg-gray mono vsmall">y<span id="pattern-origin-y"> 1.000</span></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="save-load-panel" class="flex-column flex-spaced">
-            <!-- <div class="flex-row"> -->
-            <!--     <div id="precision-container" class="bg-light flex-row flex-grow h-2 rounded"> -->
-            <!--         <a id="precision-reset" class="bg-blue fg-light flex-row h-2 p-x-1 rounded">Reset Precision</a> -->
-            <!--         <span id="precision-value" class="fg-gray mono p-r-1 small">1.0</span> -->
-            <!--     </div> -->
-            <!-- </div> -->
-            <div class="flex-row">
-                <a id="save-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded" download="calibration.txt">Save Calibration</a>
+            <div class="flex-row h-2 p-x-1">
+                <a id="save-calibration" class="w-50" download="calibration.txt">Save Calibration</a>
                 <input id="calibration-input" class="display-none" type="file" />
-                <a id="load-calibration" class="bg-blue fg-light flex-grow flex-row-centered h-2 p-x-1 rounded">Load Calibration</a>
+                <a id="load-calibration" class="w-50">Load Calibration</a>
             </div>
         </div>
     </div>
