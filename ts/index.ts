@@ -51,14 +51,23 @@ import * as view from "./view.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
+
+        render.setView(
+            render.newSkewMatrix(
+                // TODO: Figure this out.
+                // The problem is that we're transforming a plane that is in 0-1 space
+                // into an area defined in pixels. This could be fine, but
+                // I want the origin of the pattern to be 1:1
+                [[1, 1], [0, 1], [0, 0], [1, 0]],
+                myModel.getCornersAsVectors(),
+            )
+        );
+
         switch (myModel.displayMode) {
             case model.DisplayMode.Ruler:
                 mRuler.draw(
                     pRuler,
-                    render.newSkewMatrix(
-                        [[1, 1], [0, 1], [0, 0], [1, 0]],
-                        myModel.getCornersAsVectors()
-                    ),
+                    render.newIdentityMatrix(),
                     [
                         ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
                         ["u_resolution", [myModel.unitsPerQuad.get()]],
@@ -68,13 +77,13 @@ import * as view from "./view.js";
                 break;
 
             case model.DisplayMode.Pattern:
+                const origin = myModel.origin.getVector2();
+                origin[0] /= 100.0;
+                origin[1] /= 100.0;
                 tRuler.bind();
                 mPattern.draw(
                     pPattern,
-                    render.newSkewMatrix(
-                        [[1, 1], [0, 1], [0, 0], [1, 0]],
-                        myModel.getCornersAsVectors()
-                    )
+                    render.newModelMatrix(origin, myModel.scale),
                 );
                 break;
         }

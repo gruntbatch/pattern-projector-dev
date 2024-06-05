@@ -7,11 +7,15 @@ export {
     gl,
 
     newVertex,
+    mulMatrix4,
     newIdentityMatrix,
+    newModelMatrix,
+    newScaleMatrix,
     newSkewMatrix,
     newTranslationMatrix,
     onResize,
     wrapCanvasById,
+    setView,
 
     Buffer,
     Program,
@@ -36,12 +40,35 @@ let currentProgram: WebGLProgram | null = null;
 let currentProjection: Matrix = newIdentityMatrix();
 let currentView: Matrix = newIdentityMatrix();
 
+function mulMatrix4(a: Matrix, b: Matrix): Matrix {
+    let c = new Float32Array(16);
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            let sum = 0;
+            for (let k = 0; k < 4; k++) {
+                sum += a[4 * i + k] * b[4 * k + j];
+            }
+            c[4 * i + j] = sum;
+        }
+    }
+    return c;
+}
+
 function newIdentityMatrix(): Matrix {
     return new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
+    ]);
+}
+
+function newModelMatrix(translation: Vector2, scale: number) {
+    return new Float32Array([
+        scale, 0, 0, 0,
+        0, scale, 0, 0,
+        0, 0, 1, 0,
+        translation[0], translation[1], 0, 1
     ]);
 }
 
@@ -58,6 +85,15 @@ function newOrthographicMatrix(width: number, height: number): Matrix {
         0, 2.0 / (top - bottom), 0, 0,
         0, 0, -2.0 / (far - near), 0,
         -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
+    ]);
+}
+
+function newScaleMatrix(scale: number): Matrix {
+    return new Float32Array([
+        scale, 0, 0, 0,
+        0, scale, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
     ]);
 }
 
