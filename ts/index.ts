@@ -26,6 +26,15 @@ import * as view from "./view.js";
             ["u_width", [4.0]]
         ]
     );
+    const pPattern = new render.Program(
+        "glsl/standard.vert",
+        "glsl/pattern.frag",
+        [
+            ["u_texture", [0]]
+        ]
+    );
+    const tRuler = new render.Texture();
+    tRuler.fromImageUrl("assets/ruler.png");
 
     const myEditor = new view.Editor(myModel, render.canvas);
 
