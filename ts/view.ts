@@ -70,6 +70,16 @@ class Editor {
             }
         }
 
+        const originHandle = new Point(
+            this.model.origin,
+            this.model.precision,
+            document.getElementById("origin-field"),
+            document.getElementById("origin-handle")
+        );
+        this.model.origin.x.reset();
+        this.model.origin.y.reset();
+        originHandle.view();
+
         new IntegerScalar(this.model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
         new IntegerScalar(this.model.unitsPerQuad, 0.1, document.getElementById("units-per-quad-field"));
 

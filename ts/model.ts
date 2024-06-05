@@ -24,9 +24,12 @@ class Model {
     corners: [Point, Point, Point, Point];
 
     displayMode: DisplayMode;
-    
+
     pixelsPerLine: BoundedIntegerScalar;
     unitsPerQuad: BoundedIntegerScalar;
+
+    scale: number;
+    origin: Point;
 
     constructor(offset: number) {
         this.precision = new BoundedScalar(0.001, 1.0, 1.0);
@@ -42,6 +45,9 @@ class Model {
 
         this.pixelsPerLine = new BoundedIntegerScalar(1, 8, 2);
         this.unitsPerQuad = new BoundedIntegerScalar(1, 32, 8);
+
+        this.scale = 1.0;
+        this.origin = new Point();
     }
 
     getCornersAsVectors(): [Vector2, Vector2, Vector2, Vector2] {
