@@ -23,8 +23,8 @@ class Editor {
     initialMousePosition: [number, number];
     initialCornerPosition: [number, number];
 
-    constructor(model: model.Model, canvas: HTMLElement) {
-        this.model = model;
+    constructor(myModel: model.Model, canvas: HTMLElement) {
+        this.model = myModel;
 
         for (let e of document.getElementsByClassName("drawer")) {
             (e.firstElementChild as HTMLElement).onclick = () => {
@@ -42,15 +42,15 @@ class Editor {
         );
         tabview.show(0);
 
-        new Scalar(model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
+        new Scalar(this.model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
         this.handles = [null, null, null, null];
         const editors = ["corner-a-field", "corner-b-field", "corner-c-field", "corner-d-field"];
         const handles = ["corner-a-handle", "corner-b-handle", "corner-c-handle", "corner-d-handle"];
         for (let i = 0; i < 4; i++) {
             this.handles[i] = new Point(
-                model.corners[i],
-                model.precision,
+                this.model.corners[i],
+                this.model.precision,
                 document.getElementById(editors[i]),
                 document.getElementById(handles[i])
             );
@@ -58,14 +58,14 @@ class Editor {
         }
         document.getElementById("reset-all-corners").onclick = () => {
             for (let i = 0; i < 4; i++) {
-                model.corners[i].x.reset();
-                model.corners[i].y.reset();
+                this.model.corners[i].x.reset();
+                this.model.corners[i].y.reset();
                 this.handles[i].view();
             }
         }
 
-        new IntegerScalar(model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
-        new IntegerScalar(model.unitsPerQuad, 0.1, document.getElementById("units-per-quad-field"));
+        new IntegerScalar(this.model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
+        new IntegerScalar(this.model.unitsPerQuad, 0.1, document.getElementById("units-per-quad-field"));
 
         // Global event handlers
         canvas.onwheel = (e) => {
@@ -101,8 +101,8 @@ class Editor {
             ];
 
             const deltaCornerPosition = [
-                deltaMousePosition[0] * model.precision.get(),
-                deltaMousePosition[1] * model.precision.get()
+                deltaMousePosition[0] * this.model.precision.get(),
+                deltaMousePosition[1] * this.model.precision.get()
             ];
 
             const currentCornerPosition = [
