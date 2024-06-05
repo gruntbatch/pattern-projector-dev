@@ -217,7 +217,7 @@ class Buffer {
         return mesh;
     }
 
-    newPlane(size: number, origin: Vector2 = [0, 0], scale: Vector2 = [1, 1]): Mesh {
+    newPlane(origin: Vector2 = [0, 0], scale: Vector2 = [1, 1]): Mesh {
         const vertexCount = 6;
         const vertices = new Array<Vertex>(vertexCount);
 
@@ -230,10 +230,10 @@ class Buffer {
             const minY = origin[1] + (y / resolution) * scale[1];
             const maxY = origin[1] + ((y + 1) / resolution) * scale[1];
 
-            const v0 = newVertex([minX * size, minY * size], [minX, minY]);
-            const v1 = newVertex([minX * size, maxY * size], [minX, maxY]);
-            const v2 = newVertex([maxX * size, minY * size], [maxX, minY]);
-            const v3 = newVertex([maxX * size, maxY * size], [maxX, maxY]);
+            const v0 = newVertex([minX, minY], [minX, minY]);
+            const v1 = newVertex([minX, maxY], [minX, maxY]);
+            const v2 = newVertex([maxX, minY], [maxX, minY]);
+            const v3 = newVertex([maxX, maxY], [maxX, maxY]);
 
             const index = 6 * (x + y * resolution);
 
