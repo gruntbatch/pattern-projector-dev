@@ -34,11 +34,17 @@ class Editor {
 
         const tabview = new Tabview(
             document.getElementById("ruler-tab"),
-            document.getElementById("ruler-contents")
+            document.getElementById("ruler-contents"),
+            () => {
+                this.model.displayMode = model.DisplayMode.Ruler
+            }
         );
         tabview.push(
             document.getElementById("pattern-tab"),
-            document.getElementById("pattern-contents")
+            document.getElementById("pattern-contents"),
+            () => {
+                this.model.displayMode = model.DisplayMode.Pattern
+            }
         );
         tabview.show(0);
 
@@ -264,19 +270,22 @@ class Tabview {
     e: HTMLElement;
     tabs: Array<HTMLElement>;
     contents: Array<HTMLElement>;
+    onSwitches: Array<(() => void) | null>;
 
-    constructor(tab: HTMLElement, contents: HTMLElement) {
+    constructor(tab: HTMLElement, contents: HTMLElement, onSwitch: (() => void) | null = null) {
         this.activeTab = 0;
-        this.tabs = new Array<HTMLElement>;
-        this.contents = new Array<HTMLElement>;
-        this.push(tab, contents);
+        this.tabs = new Array<HTMLElement>();
+        this.contents = new Array<HTMLElement>();
+        this.onSwitches = new Array<(() => void) | null>();
+        this.push(tab, contents, onSwitch);
     }
 
-    push(tab: HTMLElement, contents: HTMLElement) {
+    push(tab: HTMLElement, contents: HTMLElement, onSwitch: (() => void) | null = null) {
         const index = this.tabs.length;
 
         this.tabs.push(tab);
         this.contents.push(contents);
+        this.onSwitches.push(onSwitch);
 
         tab.onclick = (event: MouseEvent) => {
             if (this.activeTab != index) {
@@ -292,6 +301,7 @@ class Tabview {
             if (i == index) {
                 this.tabs[i].classList.add("active");
                 this.contents[i].classList.remove("display-none");
+                this.onSwitches[i]?.();
             } else {
                 this.tabs[i].classList.remove("active");
                 this.contents[i].classList.add("display-none");

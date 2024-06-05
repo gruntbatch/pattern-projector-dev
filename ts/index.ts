@@ -9,7 +9,8 @@ import * as view from "./view.js";
 
     render.wrapCanvasById("gl-canvas");
     const buffer = new render.Buffer();
-    const mPlane = buffer.newPlane(1, [-1, -1], [3, 3]);
+    const mRuler = buffer.newPlane([-1, -1], [3, 3]);
+    const mPattern = buffer.newPlane();
     const pHello = new render.Program(
         "glsl/standard.vert",
         "glsl/solid.frag",
@@ -50,18 +51,34 @@ import * as view from "./view.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
-        mPlane.draw(
-            pRuler,
-            render.newSkewMatrix(
-                [[1, 1], [0, 1], [0, 0], [1, 0]],
-                myModel.getCornersAsVectors()
-            ),
-            [
-                ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
-                ["u_resolution", [myModel.unitsPerQuad.get()]],
-                ["u_width", [myModel.pixelsPerLine.get()]],
-            ]
-        );
+        switch (myModel.displayMode) {
+            case model.DisplayMode.Ruler:
+                mRuler.draw(
+                    pRuler,
+                    render.newSkewMatrix(
+                        [[1, 1], [0, 1], [0, 0], [1, 0]],
+                        myModel.getCornersAsVectors()
+                    ),
+                    [
+                        ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
+                        ["u_resolution", [myModel.unitsPerQuad.get()]],
+                        ["u_width", [myModel.pixelsPerLine.get()]],
+                    ]
+                );
+                break;
+
+            case model.DisplayMode.Pattern:
+                tRuler.bind();
+                mPattern.draw(
+                    pPattern,
+                    render.newSkewMatrix(
+                        [[1, 1], [0, 1], [0, 0], [1, 0]],
+                        myModel.getCornersAsVectors()
+                    )
+                );
+                break;
+        }
+
         requestAnimationFrame(onAnimationFrame);
     }
     onAnimationFrame();

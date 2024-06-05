@@ -1,6 +1,8 @@
 import { Vector2 } from "./render.js";
 
 export {
+    DisplayMode,
+
     Model,
 
     Point,
@@ -11,10 +13,17 @@ export {
     BoundedIntegerScalar,
 };
 
+enum DisplayMode {
+    Ruler,
+    Pattern,
+}
+
 class Model {
     precision: BoundedScalar;
 
     corners: [Point, Point, Point, Point];
+
+    displayMode: DisplayMode;
     
     pixelsPerLine: BoundedIntegerScalar;
     unitsPerQuad: BoundedIntegerScalar;
@@ -28,6 +37,8 @@ class Model {
             new Point(-offset, -offset),
             new Point(offset, -offset)
         ];
+
+        this.displayMode = DisplayMode.Ruler;
 
         this.pixelsPerLine = new BoundedIntegerScalar(1, 8, 2);
         this.unitsPerQuad = new BoundedIntegerScalar(1, 32, 8);
