@@ -2,8 +2,6 @@ import * as math from "./math.js";
 // import * as model from "./model.js";
 
 export {
-    Vector2,
-
     canvas,
     gl,
 
@@ -25,7 +23,6 @@ export {
 
 // type Color = [number, number, number, number];
 type Matrix = Float32Array;
-type Vector2 = [number, number];
 type Vertex = [number, number, number, number];
 type Uniform = [string, Array<number>];
 
@@ -63,12 +60,12 @@ function newIdentityMatrix(): Matrix {
     ]);
 }
 
-function newModelMatrix(translation: Vector2, scale: number) {
+function newModelMatrix(translation: math.Vector2, scale: number) {
     return new Float32Array([
         scale, 0, 0, 0,
         0, scale, 0, 0,
         0, 0, 1, 0,
-        translation[0], translation[1], 0, 1
+        translation.buffer[0], translation.buffer[1], 0, 1
     ]);
 }
 
@@ -97,14 +94,14 @@ function newScaleMatrix(scale: number): Matrix {
     ]);
 }
 
-function newSkewMatrix(originalPoints: Array<Vector2>, transformedPoints: Array<Vector2>): Matrix {
-    const basis = (p: Array<Vector2>): math.Matrix3 => {
+function newSkewMatrix(originalPoints: Array<math.Vector2>, transformedPoints: Array<math.Vector2>): Matrix {
+    const basis = (p: Array<math.Vector2>): math.Matrix3 => {
         const m = new math.Matrix3([
-            p[0][0], p[1][0], p[2][0],
-            p[0][1], p[1][1], p[2][1],
+            p[0].buffer[0], p[1].buffer[0], p[2].buffer[0],
+            p[0].buffer[1], p[1].buffer[1], p[2].buffer[1],
             1, 1, 1
         ]);
-        const v = new math.Vector3([p[3][0], p[3][1], 1]).mul(m.adjugate());
+        const v = new math.Vector3([p[3].buffer[0], p[3].buffer[1], 1]).mul(m.adjugate());
         const n = m.mul(new math.Matrix3([
             v.buffer[0], 0, 0,
             0, v.buffer[1], 0,
@@ -126,7 +123,7 @@ function newSkewMatrix(originalPoints: Array<Vector2>, transformedPoints: Array<
     ]);
 }
 
-function newTranslationMatrix(translation: Vector2): Matrix {
+function newTranslationMatrix(translation: math.Vector2): Matrix {
     return new Float32Array([
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -135,7 +132,7 @@ function newTranslationMatrix(translation: Vector2): Matrix {
     ]);
 }
 
-function newVertex(position: Vector2 = [0, 0], texCoord: Vector2 = [0, 0]): Vertex {
+function newVertex(position: [number, number] = [0, 0], texCoord: [number, number] = [0, 0]): Vertex {
     return [
         position[0], position[1],
         texCoord[0], texCoord[1]
@@ -227,7 +224,7 @@ class Buffer {
         return mesh;
     }
 
-    newPlane(origin: Vector2 = [0, 0], scale: Vector2 = [1, 1]): Mesh {
+    newPlane(origin: [number, number] = [0, 0], scale: [number, number] = [1, 1]): Mesh {
         const vertexCount = 6;
         const vertices = new Array<Vertex>(vertexCount);
 

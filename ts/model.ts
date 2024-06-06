@@ -1,4 +1,4 @@
-import { Vector2 } from "./render.js";
+import { Vector2 } from "./math.js";
 
 export {
     DisplayMode,
@@ -70,7 +70,7 @@ class Point {
     }
 
     getVector2(): Vector2 {
-        return [this.x.get(), this.y.get()];
+        return new Vector2([this.x.get(), this.y.get()]);
     }
 
     distanceTo(other: Point): number {

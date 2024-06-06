@@ -1,3 +1,4 @@
+import { Vector2 } from "./math.js";
 import * as model from "./model.js";
 import * as render from "./render.js";
 import * as view from "./view.js";
@@ -58,7 +59,12 @@ import * as view from "./view.js";
                 // The problem is that we're transforming a plane that is in 0-1 space
                 // into an area defined in pixels. This could be fine, but
                 // I want the origin of the pattern to be 1:1
-                [[1, 1], [0, 1], [0, 0], [1, 0]],
+                [
+                    new Vector2([1, 1]),
+                    new Vector2([0, 1]),
+                    new Vector2([0, 0]),
+                    new Vector2([1, 0])
+                ],
                 myModel.getCornersAsVectors(),
             )
         );

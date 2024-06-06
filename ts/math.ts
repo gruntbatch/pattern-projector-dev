@@ -1,5 +1,6 @@
 export {
     Matrix3,
+    Vector2,
     Vector3,
 };
 
@@ -9,9 +10,8 @@ type Matrix3T = [
     number, number, number
 ];
 
-type Vector3T = [
-    number, number, number
-];
+type Vector2T = [number, number];
+type Vector3T = [number, number, number];
 
 class Buffer {
     buffer: Float32Array;
@@ -57,6 +57,12 @@ class Matrix3 extends Buffer {
         }
 
         return out;
+    }
+}
+
+class Vector2 extends Buffer {
+    constructor(value: Vector2T = [0, 0]) {
+        super(value);
     }
 }
 
