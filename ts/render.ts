@@ -6,12 +6,6 @@ export {
     gl,
 
     newVertex,
-    mulMatrix4,
-    newIdentityMatrix,
-    newModelMatrix,
-    newScaleMatrix,
-    newSkewMatrix,
-    newTranslationMatrix,
     onResize,
     wrapCanvasById,
     setView,
@@ -21,8 +15,6 @@ export {
     Texture,
 };
 
-// type Color = [number, number, number, number];
-type Matrix = Float32Array;
 type Vertex = [number, number, number, number];
 type Uniform = [string, Array<number>];
 
@@ -34,103 +26,8 @@ let gl: WebGLRenderingContext;
 
 let currentBuffer: WebGLBuffer | null = null;
 let currentProgram: WebGLProgram | null = null;
-let currentProjection: Matrix = newIdentityMatrix();
-let currentView: Matrix = newIdentityMatrix();
-
-function mulMatrix4(a: Matrix, b: Matrix): Matrix {
-    let c = new Float32Array(16);
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            let sum = 0;
-            for (let k = 0; k < 4; k++) {
-                sum += a[4 * i + k] * b[4 * k + j];
-            }
-            c[4 * i + j] = sum;
-        }
-    }
-    return c;
-}
-
-function newIdentityMatrix(): Matrix {
-    return new Float32Array([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ]);
-}
-
-function newModelMatrix(translation: math.Vector2, scale: number) {
-    return new Float32Array([
-        scale, 0, 0, 0,
-        0, scale, 0, 0,
-        0, 0, 1, 0,
-        translation.buffer[0], translation.buffer[1], 0, 1
-    ]);
-}
-
-function newOrthographicMatrix(width: number, height: number): Matrix {
-    const left = width / -2;
-    const right = width / 2;
-    const bottom = height / -2;
-    const top = height / 2;
-    const far = -1000;
-    const near = 1000;
-
-    return new Float32Array([
-        2.0 / (right - left), 0, 0, 0,
-        0, 2.0 / (top - bottom), 0, 0,
-        0, 0, -2.0 / (far - near), 0,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(far + near) / (far - near), 1.0
-    ]);
-}
-
-function newScaleMatrix(scale: number): Matrix {
-    return new Float32Array([
-        scale, 0, 0, 0,
-        0, scale, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ]);
-}
-
-function newSkewMatrix(originalPoints: Array<math.Vector2>, transformedPoints: Array<math.Vector2>): Matrix {
-    const basis = (p: Array<math.Vector2>): math.Matrix3 => {
-        const m = new math.Matrix3([
-            p[0].buffer[0], p[1].buffer[0], p[2].buffer[0],
-            p[0].buffer[1], p[1].buffer[1], p[2].buffer[1],
-            1, 1, 1
-        ]);
-        const v = new math.Vector3([p[3].buffer[0], p[3].buffer[1], 1]).mul(m.adjugate());
-        const n = m.mul(new math.Matrix3([
-            v.buffer[0], 0, 0,
-            0, v.buffer[1], 0,
-            0, 0, v.buffer[2]
-        ]));
-        return n;
-    }
-    const s = basis(originalPoints);
-    const d = basis(transformedPoints);
-    const t = d.mul(s.adjugate());
-    for (let i = 0; i < 9; i++) {
-        t.buffer[i] = t.buffer[i] / t.buffer[8];
-    }
-    return new Float32Array([
-        t.buffer[0], t.buffer[3], 0, t.buffer[6],
-        t.buffer[1], t.buffer[4], 0, t.buffer[7],
-        0, 0, 1, 0,
-        t.buffer[2], t.buffer[5], 0, t.buffer[8]
-    ]);
-}
-
-function newTranslationMatrix(translation: math.Vector2): Matrix {
-    return new Float32Array([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        translation[0], translation[1], 0, 1
-    ]);
-}
+let currentProjection: math.Matrix4 = new math.Matrix4();
+let currentView: math.Matrix4 = new math.Matrix4();
 
 function newVertex(position: [number, number] = [0, 0], texCoord: [number, number] = [0, 0]): Vertex {
     return [
@@ -143,14 +40,14 @@ function onResize(width: number, height: number) {
     canvas.width = width;
     canvas.height = height;
     gl.viewport(0, 0, width, height);
-    currentProjection = newOrthographicMatrix(width, height);
+    currentProjection = math.Matrix4.orthographic(width, height);
 }
 
-function setProjection(projection: Matrix) {
+function setProjection(projection: math.Matrix4) {
     currentProjection = projection;
 }
 
-function setView(view: Matrix) {
+function setView(view: math.Matrix4) {
     currentView = view;
 }
 
@@ -262,7 +159,7 @@ class Mesh {
 
     }
 
-    draw(program: Program, model: Matrix, uniforms: Iterable<Uniform> = []) {
+    draw(program: Program, model: math.Matrix4, uniforms: Iterable<Uniform> = []) {
         if (program.bind(model, uniforms) && this.buffer.bind()) {
             gl.drawArrays(this.mode, this.first, this.count);
         }
@@ -309,10 +206,10 @@ class Program {
         }
 
         // Bind the program once in order to initialize uniforms
-        this.bind(newIdentityMatrix(), uniforms);
+        this.bind(new math.Matrix4(), uniforms);
     }
 
-    bind(model: Matrix, uniforms: Iterable<Uniform>) {
+    bind(model: math.Matrix4, uniforms: Iterable<Uniform>) {
         if (!this.program) {
             return false;
         }
@@ -321,9 +218,9 @@ class Program {
             currentProgram = this.program;
             gl.useProgram(this.program);
         }
-        gl.uniformMatrix4fv(this.uLocProjection, false, currentProjection);
-        gl.uniformMatrix4fv(this.uLocView, false, currentView);
-        gl.uniformMatrix4fv(this.uLocModel, false, model);
+        gl.uniformMatrix4fv(this.uLocProjection, false, currentProjection.buffer);
+        gl.uniformMatrix4fv(this.uLocView, false, currentView.buffer);
+        gl.uniformMatrix4fv(this.uLocModel, false, model.buffer);
 
         for (const uniform of uniforms) {
             const name = uniform[0];
