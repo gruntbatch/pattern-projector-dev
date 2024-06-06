@@ -1,4 +1,5 @@
-import * as model from "./model.js";
+import * as math from "./math.js";
+// import * as model from "./model.js";
 
 export {
     Vector2,
@@ -25,7 +26,6 @@ export {
 // type Color = [number, number, number, number];
 type Matrix = Float32Array;
 type Vector2 = [number, number];
-type Vector3 = [number, number, number];
 type Vertex = [number, number, number, number];
 type Uniform = [string, Array<number>];
 
@@ -98,57 +98,31 @@ function newScaleMatrix(scale: number): Matrix {
 }
 
 function newSkewMatrix(originalPoints: Array<Vector2>, transformedPoints: Array<Vector2>): Matrix {
-    const adjugate = (m: Matrix): Matrix => {
-        return new Float32Array([
-            m[4] * m[8] - m[5] * m[7], m[2] * m[7] - m[1] * m[8], m[1] * m[5] - m[2] * m[4],
-            m[5] * m[6] - m[3] * m[8], m[0] * m[8] - m[2] * m[6], m[2] * m[3] - m[0] * m[5],
-            m[3] * m[7] - m[4] * m[6], m[1] * m[6] - m[0] * m[7], m[0] * m[4] - m[1] * m[3]
-        ])
-    }
-    const mulMatrix3 = (a: Matrix, b: Matrix): Matrix => {
-        let c = new Float32Array(9);
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                let sum = 0;
-                for (let k = 0; k < 3; k++) {
-                    sum += a[3 * i + k] * b[3 * k + j];
-                }
-                c[3 * i + j] = sum;
-            }
-        }
-        return c;
-    }
-    const mulVector = (m: Matrix, v: Vector3): Vector3 => {
-        return [
-            m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
-            m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
-            m[6] * v[0] + m[7] * v[1] + m[8] * v[2],
-        ];
-    }
-    const basis = (p: Array<Vector2>): Matrix => {
-        const m = new Float32Array([
+    const basis = (p: Array<Vector2>): math.Matrix3 => {
+        const m = new math.Matrix3([
             p[0][0], p[1][0], p[2][0],
             p[0][1], p[1][1], p[2][1],
             1, 1, 1
         ]);
-        const v = mulVector(adjugate(m), [p[3][0], p[3][1], 1]);
-        return mulMatrix3(m, new Float32Array([
-            v[0], 0, 0,
-            0, v[1], 0,
-            0, 0, v[2]
+        const v = new math.Vector3([p[3][0], p[3][1], 1]).mul(m.adjugate());
+        const n = m.mul(new math.Matrix3([
+            v.buffer[0], 0, 0,
+            0, v.buffer[1], 0,
+            0, 0, v.buffer[2]
         ]));
+        return n;
     }
     const s = basis(originalPoints);
     const d = basis(transformedPoints);
-    const t = mulMatrix3(d, adjugate(s));
+    const t = d.mul(s.adjugate());
     for (let i = 0; i < 9; i++) {
-        t[i] = t[i] / t[8];
+        t.buffer[i] = t.buffer[i] / t.buffer[8];
     }
     return new Float32Array([
-        t[0], t[3], 0, t[6],
-        t[1], t[4], 0, t[7],
+        t.buffer[0], t.buffer[3], 0, t.buffer[6],
+        t.buffer[1], t.buffer[4], 0, t.buffer[7],
         0, 0, 1, 0,
-        t[2], t[5], 0, t[8]
+        t.buffer[2], t.buffer[5], 0, t.buffer[8]
     ]);
 }
 
@@ -273,7 +247,7 @@ class Buffer {
 
             const index = 6 * (x + y * resolution);
 
-            vertices[index    ] = v0;
+            vertices[index] = v0;
             vertices[index + 1] = v1;
             vertices[index + 2] = v2;
 
@@ -357,7 +331,7 @@ class Program {
         for (const uniform of uniforms) {
             const name = uniform[0];
             const value = uniform[1];
-            switch(value.length) {
+            switch (value.length) {
                 case 1:
                     gl.uniform1fv(this.uniformLocations[name], value);
                     break;
