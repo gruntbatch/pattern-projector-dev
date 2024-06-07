@@ -32,21 +32,31 @@ class Editor {
             }
         }
 
-        const tabview = new Tabview(
+        const displayTabview = new Tabview(
             document.getElementById("ruler-tab"),
             document.getElementById("ruler-contents"),
             () => {
                 this.model.displayMode = model.DisplayMode.Ruler
             }
         );
-        tabview.push(
+        displayTabview.push(
             document.getElementById("pattern-tab"),
             document.getElementById("pattern-contents"),
             () => {
                 this.model.displayMode = model.DisplayMode.Pattern
             }
         );
-        tabview.show(0);
+        displayTabview.show(0);
+
+        const calibrationTabview = new Tabview(
+            document.getElementById("keystone-tab"),
+            document.getElementById("keystone-contents")
+        );
+        calibrationTabview.push(
+            document.getElementById("pan-tab"),
+            document.getElementById("pan-contents")
+        );
+        calibrationTabview.show(0);
 
         new Scalar(this.model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
