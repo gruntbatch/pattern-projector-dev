@@ -32,22 +32,22 @@ class Model {
     origin: Point;
 
     constructor(offset: number) {
-        this.precision = new BoundedScalar(0.001, 1.0, 1.0);
+        this.precision = new BoundedScalar(1.0, 0.001, 0.001, 1.0);
 
         this.corners = [
-            new Point(offset, offset),
-            new Point(-offset, offset),
-            new Point(-offset, -offset),
-            new Point(offset, -offset)
+            new Point(offset, offset, this.precision),
+            new Point(-offset, offset, this.precision),
+            new Point(-offset, -offset, this.precision),
+            new Point(offset, -offset, this.precision)
         ];
 
         this.displayMode = DisplayMode.Ruler;
 
-        this.pixelsPerLine = new BoundedIntegerScalar(1, 8, 2);
-        this.unitsPerQuad = new BoundedIntegerScalar(1, 32, 8);
+        this.pixelsPerLine = new BoundedIntegerScalar(2, 0.1, 1, 8);
+        this.unitsPerQuad = new BoundedIntegerScalar(8, 0.1, 2, 32);
 
         this.scale = 1.0;
-        this.origin = new Point();
+        this.origin = new Point(0, 0, this.precision);
     }
 
     getCornersAsVectors(): [Vector2, Vector2, Vector2, Vector2] {
@@ -64,9 +64,9 @@ class Point {
     x: Scalar;
     y: Scalar;
 
-    constructor(x: number = 0, y: number = 0) {
-        this.x = new Scalar(x);
-        this.y = new Scalar(y);
+    constructor(x: number, y: number, scalar: number | Value) {
+        this.x = new Scalar(x, scalar);
+        this.y = new Scalar(y, scalar);
     }
 
     add(x: number, y: number) {
@@ -77,6 +77,11 @@ class Point {
     mul(x: number, y: number) {
         this.x.mul(x);
         this.y.mul(y);
+    }
+
+    reset() {
+        this.x.reset();
+        this.y.reset();
     }
 
     getVector2(): Vector2 {
@@ -90,9 +95,9 @@ class Point {
     }
 }
 
-class Scalar {
-    private defaultValue: number;
-    private value: number;
+class Value {
+    protected defaultValue: number;
+    protected value: number;
 
     constructor(value: number) {
         this.defaultValue = value;
@@ -120,12 +125,43 @@ class Scalar {
     }
 }
 
-class BoundedScalar extends Scalar {
-    private minValue: number;
-    private maxValue: number;
+class Scalar extends Value {
+    protected scalar: Value;
 
-    constructor(minValue: number, maxValue: number, value: number = minValue) {
+    constructor(value: number, scalar: number | Value) {
         super(value);
+
+        // Mr. Yuk does _not_ like this
+        if (typeof(scalar) == "number") {
+            this.scalar = new Value(scalar);
+        } else {
+            this.scalar = scalar;
+        }
+    }
+
+    add(value: number) {
+        super.add(value * this.scalar.get());
+    }
+
+    bypassAdd(value: number) {
+        super.add(value);
+    }
+
+    mul(value: number) {
+        super.mul(value * this.scalar.get());
+    }
+
+    bypassMul(value: number) {
+        super.mul(value);
+    }
+}
+
+class BoundedScalar extends Scalar {
+    protected minValue: number;
+    protected maxValue: number;
+
+    constructor(value: number, scalar: number | Value, minValue: number = value, maxValue: number = value) {
+        super(value, scalar);
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.set(value);
@@ -138,8 +174,8 @@ class BoundedScalar extends Scalar {
 }
 
 class IntegerScalar extends Scalar {
-    constructor(value: number) {
-        super(Math.round(value));
+    constructor(value: number, scalar: number | Value) {
+        super(Math.round(value), scalar);
     }
 
     get(): number {
@@ -148,8 +184,12 @@ class IntegerScalar extends Scalar {
 }
 
 class BoundedIntegerScalar extends BoundedScalar {
-    constructor(minValue: number, maxValue: number, value: number = minValue) {
-        super(Math.round(minValue), Math.round(maxValue), Math.round(value));
+    constructor(value: number, scalar: number | Value, minValue: number = value, maxValue: number = value) {
+        super(Math.round(value), scalar, Math.round(minValue), Math.round(maxValue));
+    }
+
+    add(value: number) {
+        super.add(value);
     }
 
     get(): number {

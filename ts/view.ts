@@ -60,7 +60,7 @@ class Editor {
         calibrationTabview.show(0);
 
         // Scalar controls
-        new Scalar(this.model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
+        new Scalar(this.model.precision, document.getElementById("precision-field"));
 
         this.handles = [null, null, null, null];
         const editors = ["corner-ne-field", "corner-nw-field", "corner-sw-field", "corner-se-field"];
@@ -68,7 +68,6 @@ class Editor {
         for (let i = 0; i < 4; i++) {
             this.handles[i] = new Point(
                 this.model.corners[i],
-                this.model.precision,
                 document.getElementById(editors[i]),
                 document.getElementById(handles[i])
             );
@@ -84,14 +83,13 @@ class Editor {
 
         const originHandle = new Point(
             this.model.origin,
-            this.model.precision,
             document.getElementById("origin-field"),
             document.getElementById("origin-handle")
         );
         originHandle.view();
 
-        new IntegerScalar(this.model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
-        new IntegerScalar(this.model.unitsPerQuad, 0.1, document.getElementById("units-per-quad-field"));
+        new IntegerScalar(this.model.pixelsPerLine, document.getElementById("pixels-per-line-field"));
+        new IntegerScalar(this.model.unitsPerQuad, document.getElementById("units-per-quad-field"));
 
         // Global event handlers
         canvas.onwheel = (e) => {
@@ -166,20 +164,12 @@ class Editor {
 
 class Point {
     value: model.Point;
-    scalar: model.Scalar;
     displayX: HTMLElement;
     displayY: HTMLElement;
     handle: HTMLElement | null;
 
-    constructor(value: model.Point, scalar: number | model.Scalar, e: HTMLElement, handle: HTMLElement | null = null) {
+    constructor(value: model.Point, e: HTMLElement, handle: HTMLElement | null = null) {
         this.value = value;
-
-        // Mr. Yuk does not like this
-        if (typeof(scalar) == "number") {
-            this.scalar = new model.Scalar(scalar);
-        } else {
-            this.scalar = scalar;
-        }
 
         this.displayX = e.querySelector<HTMLElement>("#display-x");
         this.displayY = e.querySelector<HTMLElement>("#display-y");
@@ -196,8 +186,7 @@ class Point {
         }
 
         e.querySelector<HTMLElement>("#reset").onclick = () => {
-            this.value.x.reset();
-            this.value.y.reset();
+            this.value.reset();
             this.view();
         }
 
@@ -218,24 +207,16 @@ class Point {
 
 class Scalar {
     value: model.Scalar;
-    scalar: model.Scalar;
     display: HTMLElement;
 
-    constructor(value: model.Scalar, scalar: number | model.Scalar, e: HTMLElement) {
+    constructor(value: model.Scalar, e: HTMLElement) {
         this.value = value;
-
-        // Mr. Yuk does not like this
-        if (typeof(scalar) == "number") {
-            this.scalar = new model.Scalar(scalar);
-        } else {
-            this.scalar = scalar;
-        }
 
         this.display = e.querySelector<HTMLElement>("#display");
         this.view();
 
         e.onwheel = (e) => {
-            this.value.add(e.deltaY * this.scalar.get());
+            this.value.add(e.deltaY);
             this.view();
         };
 
@@ -247,7 +228,7 @@ class Scalar {
         let decr = e.querySelector<HTMLElement>("#decrement");
         if (decr) {
             decr.onclick = () => {
-                this.incr(-1);
+                this.value.bypassAdd(-1);
                 this.view();
             }
         }
@@ -255,14 +236,10 @@ class Scalar {
         let incr = e.querySelector<HTMLElement>("#increment");
         if (incr) {
             incr.onclick = () => {
-                this.incr(1);
+                this.value.bypassAdd(1);
                 this.view();
             }
         }
-    }
-
-    incr(value: number) {
-        this.value.add(value * this.scalar.get());
     }
 
     view() {
@@ -271,10 +248,6 @@ class Scalar {
 }
 
 class IntegerScalar extends Scalar {
-    incr(value: number) {
-        this.value.add(value);
-    }
-
     view() {
         this.display.innerText = this.value.get().toFixed(0);
     }
