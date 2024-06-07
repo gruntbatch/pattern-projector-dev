@@ -98,12 +98,7 @@ class Editor {
             const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
     
             for (let i = 0; i < 4; i++) {
-                this.model.corners[i].x.set(
-                    this.model.corners[i].x.get() * delta
-                );
-                this.model.corners[i].y.set(
-                    this.model.corners[i].y.get() * delta
-                );
+                this.model.corners[i].mul(delta, delta);
                 this.handles[i].view();
             }
         }
@@ -191,12 +186,12 @@ class Point {
         this.view();
 
         e.querySelector<HTMLElement>("#field-x").onwheel = (e) => {
-            this.value.x.update(e.deltaY * this.scalar.get());
+            this.value.x.add(e.deltaY);
             this.view();
         }
 
         e.querySelector<HTMLElement>("#field-y").onwheel = (e) => {
-            this.value.y.update(e.deltaY * this.scalar.get());
+            this.value.y.add(e.deltaY);
             this.view();
         }
 
@@ -240,7 +235,7 @@ class Scalar {
         this.view();
 
         e.onwheel = (e) => {
-            this.value.update(e.deltaY * this.scalar.get());
+            this.value.add(e.deltaY * this.scalar.get());
             this.view();
         };
 
@@ -267,7 +262,7 @@ class Scalar {
     }
 
     incr(value: number) {
-        this.value.update(value * this.scalar.get());
+        this.value.add(value * this.scalar.get());
     }
 
     view() {
@@ -277,7 +272,7 @@ class Scalar {
 
 class IntegerScalar extends Scalar {
     incr(value: number) {
-        this.value.update(value);
+        this.value.add(value);
     }
 
     view() {

@@ -69,6 +69,16 @@ class Point {
         this.y = new Scalar(y);
     }
 
+    add(x: number, y: number) {
+        this.x.add(x);
+        this.y.add(y);
+    }
+
+    mul(x: number, y: number) {
+        this.x.mul(x);
+        this.y.mul(y);
+    }
+
     getVector2(): Vector2 {
         return new Vector2([this.x.get(), this.y.get()]);
     }
@@ -89,8 +99,16 @@ class Scalar {
         this.value = value;
     }
 
+    add(value: number) {
+        this.set(this.value + value);
+    }
+
     get(): number {
         return this.value;
+    }
+
+    mul(value: number) {
+        this.set(this.value * value);
     }
 
     reset() {
@@ -99,10 +117,6 @@ class Scalar {
 
     set(value: number) {
         this.value = value;
-    }
-
-    update(value: number) {
-        this.set(this.value + value);
     }
 }
 
