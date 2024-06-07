@@ -61,8 +61,8 @@ class Editor {
         new Scalar(this.model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
         this.handles = [null, null, null, null];
-        const editors = ["corner-a-field", "corner-b-field", "corner-c-field", "corner-d-field"];
-        const handles = ["corner-a-handle", "corner-b-handle", "corner-c-handle", "corner-d-handle"];
+        const editors = ["corner-ne-field", "corner-nw-field", "corner-sw-field", "corner-se-field"];
+        const handles = ["corner-ne-handle", "corner-nw-handle", "corner-sw-handle", "corner-se-handle"];
         for (let i = 0; i < 4; i++) {
             this.handles[i] = new Point(
                 this.model.corners[i],
