@@ -26,6 +26,7 @@ class Editor {
     constructor(myModel: model.Model, canvas: HTMLElement) {
         this.model = myModel;
 
+        // Panel controls
         for (let e of document.getElementsByClassName("drawer")) {
             (e.firstElementChild as HTMLElement).onclick = () => {
                 e.classList.toggle("collapsed");
@@ -58,6 +59,7 @@ class Editor {
         );
         calibrationTabview.show(0);
 
+        // Scalar controls
         new Scalar(this.model.precision, SCROLL_SCALAR, document.getElementById("precision-field"));
 
         this.handles = [null, null, null, null];
@@ -86,8 +88,6 @@ class Editor {
             document.getElementById("origin-field"),
             document.getElementById("origin-handle")
         );
-        this.model.origin.x.reset();
-        this.model.origin.y.reset();
         originHandle.view();
 
         new IntegerScalar(this.model.pixelsPerLine, 0.1, document.getElementById("pixels-per-line-field"));
