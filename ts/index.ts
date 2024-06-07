@@ -52,9 +52,7 @@ import * as view from "./view.js";
     window.onresize = onResize;
 
     const onAnimationFrame = () => {
-
-        render.setView(
-            math.Matrix4.skew(
+        const skew = math.Matrix4.skew(
                 // TODO: Figure this out.
                 // The problem is that we're transforming a plane that is in 0-1 space
                 // into an area defined in pixels. This could be fine, but
@@ -67,7 +65,8 @@ import * as view from "./view.js";
                 ],
                 myModel.getCornersAsVectors(),
             )
-        );
+
+        render.setView(skew);
 
         switch (myModel.displayMode) {
             case model.DisplayMode.Ruler:

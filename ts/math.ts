@@ -20,6 +20,8 @@ type Matrix4T = [
 type Vector2T = [number, number];
 type Vector3T = [number, number, number];
 
+type Quad = [Vector2, Vector2, Vector2, Vector2];
+
 class Buffer {
     buffer: Float32Array;
     constructor(value: Array<number>) {
@@ -28,6 +30,29 @@ class Buffer {
 }
 
 class Matrix3 extends Buffer {
+    static skew(originalPoints: Quad, transformedPoints: Quad): Matrix3 {
+        const basis = (p: Array<Vector2>): Matrix3 => {
+            const m = new Matrix3([
+                p[0].buffer[0], p[1].buffer[0], p[2].buffer[0],
+                p[0].buffer[1], p[1].buffer[1], p[2].buffer[1],
+                1, 1, 1
+            ]);
+            const v = new Vector3([p[3].buffer[0], p[3].buffer[1], 1]).mul(m.adjugate());
+            const n = m.mul(new Matrix3([
+                v.buffer[0], 0, 0,
+                0, v.buffer[1], 0,
+                0, 0, v.buffer[2]
+            ]));
+            return n;
+        }
+        const s = basis(originalPoints);
+        const d = basis(transformedPoints);
+        const t = d.mul(s.adjugate());
+        for (let i = 0; i < 9; i++) {
+            t.buffer[i] = t.buffer[i] / t.buffer[8];
+        }
+        return t;
+    }
     constructor(value: Matrix3T = [1, 0, 0, 0, 1, 0, 0, 0, 1]) {
         super(value);
     }
@@ -93,27 +118,8 @@ class Matrix4 extends Buffer {
         ]);
     }
 
-    static skew(originalPoints: Array<Vector2>, transformedPoints: Array<Vector2>): Matrix4 {
-        const basis = (p: Array<Vector2>): Matrix3 => {
-            const m = new Matrix3([
-                p[0].buffer[0], p[1].buffer[0], p[2].buffer[0],
-                p[0].buffer[1], p[1].buffer[1], p[2].buffer[1],
-                1, 1, 1
-            ]);
-            const v = new Vector3([p[3].buffer[0], p[3].buffer[1], 1]).mul(m.adjugate());
-            const n = m.mul(new Matrix3([
-                v.buffer[0], 0, 0,
-                0, v.buffer[1], 0,
-                0, 0, v.buffer[2]
-            ]));
-            return n;
-        }
-        const s = basis(originalPoints);
-        const d = basis(transformedPoints);
-        const t = d.mul(s.adjugate());
-        for (let i = 0; i < 9; i++) {
-            t.buffer[i] = t.buffer[i] / t.buffer[8];
-        }
+    static skew(originalPoints: Quad, transformedPoints: Quad): Matrix4 {
+        const t = Matrix3.skew(originalPoints, transformedPoints);
         return new Matrix4([
             t.buffer[0], t.buffer[3], 0, t.buffer[6],
             t.buffer[1], t.buffer[4], 0, t.buffer[7],
