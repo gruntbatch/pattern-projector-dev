@@ -3,6 +3,7 @@ export {
     Matrix4,
     Vector2,
     Vector3,
+    Vector4,
 };
 
 type Matrix3T = [
@@ -19,6 +20,7 @@ type Matrix4T = [
 
 type Vector2T = [number, number];
 type Vector3T = [number, number, number];
+type Vector4T = [number, number, number, number];
 
 type Quad = [Vector2, Vector2, Vector2, Vector2];
 
@@ -169,6 +171,26 @@ class Vector3 extends Buffer {
             let sum = 0;
             for (let column = 0; column < 3; column += 1) {
                 sum += this.buffer[column] * other.buffer[row * 3 + column];
+            }
+            out.buffer[row] = sum;
+        }
+
+        return out;
+    }
+}
+
+class Vector4 extends Buffer {
+    constructor(value: Vector4T = [0, 0, 0, 0]) {
+        super(value);
+    }
+
+    mul(other: Matrix4): Vector4 {
+        const out = new Vector4();
+
+        for (let row = 0; row < 4; row += 1) {
+            let sum = 0;
+            for (let column = 0; column < 4; column += 1) {
+                sum += this.buffer[column] * other.buffer[row * 4 + column];
             }
             out.buffer[row] = sum;
         }
