@@ -78,23 +78,13 @@ import * as view from "./view.js";
                 break;
 
             case model.DisplayMode.Pattern:
-                const skew = math.Matrix4.skew(
-                    myModel.getCornersAsVectors(),
-                    [
-                        new math.Vector2([1, 1]),
-                        new math.Vector2([0, 1]),
-                        new math.Vector2([0, 0]),
-                        new math.Vector2([1, 0])
-                    ],
-                )
-                let origin2 = myModel.origin.getVector2();
-                let origin4 = new math.Vector4([origin2.buffer[0], origin2.buffer[1], 0, 1]);
-                origin4 = origin4.mul(skew);
-                origin2 = new math.Vector2([origin4.buffer[0], origin4.buffer[1]]);
+                const origin = myModel.origin.getVector2();
+                origin.buffer[0] /= 200;
+                origin.buffer[1] /= 200;
                 tRuler.bind();
                 mPattern.draw(
                     pPattern,
-                    math.Matrix4.model(origin2, myModel.scale),
+                    math.Matrix4.model(origin, myModel.scale),
                 );
                 break;
         }
