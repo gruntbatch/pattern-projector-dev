@@ -53,18 +53,14 @@ import * as view from "./view.js";
 
     const onAnimationFrame = () => {
         const skew = math.Matrix4.skew(
-                // TODO: Figure this out.
-                // The problem is that we're transforming a plane that is in 0-1 space
-                // into an area defined in pixels. This could be fine, but
-                // I want the origin of the pattern to be 1:1
-                [
-                    new math.Vector2([1, 1]),
-                    new math.Vector2([0, 1]),
-                    new math.Vector2([0, 0]),
-                    new math.Vector2([1, 0])
-                ],
-                myModel.getCornersAsVectors(),
-            )
+            [
+                new math.Vector2([1, 1]),
+                new math.Vector2([0, 1]),
+                new math.Vector2([0, 0]),
+                new math.Vector2([1, 0])
+            ],
+            myModel.getCornersAsVectors(),
+        )
 
         render.setView(skew);
 
@@ -82,13 +78,23 @@ import * as view from "./view.js";
                 break;
 
             case model.DisplayMode.Pattern:
-                const origin = myModel.origin.getVector2();
-                origin[0] /= 100.0;
-                origin[1] /= 100.0;
+                const skew = math.Matrix4.skew(
+                    myModel.getCornersAsVectors(),
+                    [
+                        new math.Vector2([1, 1]),
+                        new math.Vector2([0, 1]),
+                        new math.Vector2([0, 0]),
+                        new math.Vector2([1, 0])
+                    ],
+                )
+                let origin2 = myModel.origin.getVector2();
+                let origin4 = new math.Vector4([origin2.buffer[0], origin2.buffer[1], 0, 1]);
+                origin4 = origin4.mul(skew);
+                origin2 = new math.Vector2([origin4.buffer[0], origin4.buffer[1]]);
                 tRuler.bind();
                 mPattern.draw(
                     pPattern,
-                    math.Matrix4.model(origin, myModel.scale),
+                    math.Matrix4.model(origin2, myModel.scale),
                 );
                 break;
         }
