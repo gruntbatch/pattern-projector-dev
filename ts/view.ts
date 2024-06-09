@@ -19,7 +19,7 @@ class Editor {
     model: model.Model;
 
     keystoneHandles: [Handle, Handle, Handle, Handle];
-    panHandle: Handle;
+    panHandle: ScrubHandle;
     activeHandle: Handle;
 
 
@@ -51,7 +51,7 @@ class Editor {
                 this.model.displayMode = model.DisplayMode.Pattern
             }
         );
-        displayTabview.show(0);
+        displayTabview.show(this.model.displayMode);
 
         // Ruler
         new IntegerScalar(this.model.pixelsPerLine, document.getElementById("pixels-per-line-field"));
@@ -62,13 +62,19 @@ class Editor {
         // Calibration panel
         const calibrationTabview = new Tabview(
             document.getElementById("keystone-tab"),
-            document.getElementById("keystone-contents")
+            document.getElementById("keystone-contents"),
+            () => {
+                this.model.calibrationMode = model.CalibrationMode.Keystone;
+            }
         );
         calibrationTabview.push(
             document.getElementById("pan-tab"),
-            document.getElementById("pan-contents")
+            document.getElementById("pan-contents"),
+            () => {
+                this.model.calibrationMode = model.CalibrationMode.PanZoom;
+            }
         );
-        calibrationTabview.show(0);
+        calibrationTabview.show(this.model.calibrationMode);
 
         // Keystone
         this.keystoneHandles = [null, null, null, null];
@@ -91,7 +97,7 @@ class Editor {
         }
 
         // Pan & Zoom
-        this.panHandle = new Handle(
+        this.panHandle = new ScrubHandle(
             this.model.pan,
             document.getElementById("pan-field"),
             document.getElementById("pan-handle")
@@ -105,13 +111,21 @@ class Editor {
             this.onWheel(e);
         }
         canvas.onmousedown = (e) => {
-            this.activeHandle = this.selectNearestHandle(
-                new math.Vector2([
-                    e.pageX - (window.innerWidth / 2.0),
-                    (window.innerHeight / 2.0) - e.pageY
-                ]),
-                this.keystoneHandles
-            );
+            switch (this.model.calibrationMode) {
+                case model.CalibrationMode.Keystone:
+                    this.activeHandle = this.selectNearestHandle(
+                        new math.Vector2([
+                            e.pageX - (window.innerWidth / 2.0),
+                            (window.innerHeight / 2.0) - e.pageY
+                        ]),
+                        this.keystoneHandles
+                    );
+                    break;
+
+                case model.CalibrationMode.PanZoom:
+                    this.activeHandle = this.panHandle;
+                    break;
+            }
             this.activeHandle.onMouseDown(new math.Vector2([e.pageX, e.pageY]));
         }
         window.onmousemove = (e) => {
@@ -175,8 +189,10 @@ class Handle {
     displayY: HTMLElement;
     handle: HTMLElement | null;
 
-    initialMouse: math.Vector2;
-    initialPosition: math.Vector2;
+    initialMousePosition: math.Vector2;
+    deltaMousePosition: math.Vector2;
+
+    initialModelPosition: math.Vector2;
 
     constructor(value: model.Point, e: HTMLElement, handle: HTMLElement | null = null) {
         this.value = value;
@@ -201,18 +217,23 @@ class Handle {
         }
 
         this.handle = handle;
+
+        this.initialMousePosition = new math.Vector2();
+        this.deltaMousePosition = new math.Vector2();
+        this.initialModelPosition = new math.Vector2();
     }
 
     onMouseDown(position: math.Vector2) {
-        this.initialMouse = position;
-        this.initialPosition = this.value.getVector2();
+        this.initialMousePosition = position;
+        this.initialModelPosition = this.value.getVector2();
     }
 
     onMouseMove(position: math.Vector2) {
-        const delta = position.sub(this.initialMouse).scale(this.value.x.scalar.get());
+        this.deltaMousePosition = position.sub(this.initialMousePosition)
+        const delta = this.deltaMousePosition.scale(this.value.x.scalar.get());
         const current = new math.Vector2([
-            this.initialPosition.buffer[0] + delta.buffer[0],
-            this.initialPosition.buffer[1] - delta.buffer[1]
+            this.initialModelPosition.buffer[0] + delta.buffer[0],
+            this.initialModelPosition.buffer[1] - delta.buffer[1]
         ]);
         this.value.x.set(current.buffer[0]);
         this.value.y.set(current.buffer[1]);
@@ -229,6 +250,35 @@ class Handle {
         this.displayX.innerText = x.toFixed(3);
         this.displayY.innerText = y.toFixed(3);
         if (this.handle) {
+            this.handle.style.left = x + (window.innerWidth / 2) - REM_TO_PIXELS + "px";
+            this.handle.style.top = (window.innerHeight / 2) - y - REM_TO_PIXELS + "px"
+        }
+    }
+}
+
+class ScrubHandle extends Handle {
+    baseHandlePosition: math.Vector2;
+
+    constructor(value: model.Point, e: HTMLElement, handle: HTMLElement | null = null) {
+        super(value, e, handle);
+        this.baseHandlePosition = value.getVector2();
+    }
+
+    onMouseUp(position: math.Vector2) {
+        this.deltaMousePosition.buffer[0] = 0;
+        this.deltaMousePosition.buffer[1] = 0;
+        this.view();
+    }
+
+    view() {
+        let x = this.value.x.get();
+        let y = this.value.y.get();
+        this.displayX.innerText = x.toFixed(3);
+        this.displayY.innerText = y.toFixed(3);
+
+        if (this.handle) {
+            x = this.baseHandlePosition.buffer[0] + this.deltaMousePosition.buffer[0];
+            y = this.baseHandlePosition.buffer[1] - this.deltaMousePosition.buffer[1];
             this.handle.style.left = x + (window.innerWidth / 2) - REM_TO_PIXELS + "px";
             this.handle.style.top = (window.innerHeight / 2) - y - REM_TO_PIXELS + "px"
         }

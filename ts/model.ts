@@ -1,6 +1,7 @@
 import { Vector2 } from "./math.js";
 
 export {
+    CalibrationMode,
     DisplayMode,
 
     Model,
@@ -12,6 +13,11 @@ export {
     IntegerScalar,
     BoundedIntegerScalar,
 };
+
+enum CalibrationMode {
+    Keystone,
+    PanZoom,
+}
 
 enum DisplayMode {
     Ruler,
@@ -27,6 +33,8 @@ class Model {
 
     pixelsPerLine: BoundedIntegerScalar;
     unitsPerQuad: BoundedIntegerScalar;
+
+    calibrationMode: CalibrationMode;
 
     pan: Point;
     zoom: Scalar;
@@ -45,6 +53,8 @@ class Model {
 
         this.pixelsPerLine = new BoundedIntegerScalar(2, 0.1, 1, 8);
         this.unitsPerQuad = new BoundedIntegerScalar(8, 0.1, 2, 32);
+
+        this.calibrationMode = CalibrationMode.Keystone;
 
         this.pan = new Point(0, 0, this.precision);
         this.zoom = new Scalar(1.0, this.precision);
