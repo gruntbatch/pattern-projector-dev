@@ -98,13 +98,8 @@ class Editor {
         originHandle.view();
 
         // Global event handlers
-        canvas.onwheel = (e) => {
-            const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-    
-            for (let i = 0; i < 4; i++) {
-                this.model.corners[i].mul(delta, delta);
-                this.handles[i].view();
-            }
+        canvas.onwheel = (e: WheelEvent) => {
+            this.onWheel(e);
         }
         canvas.onmousedown = (e) => {
             this.selectNearestCorner(e.pageX, e.pageY);
@@ -148,6 +143,22 @@ class Editor {
     onResize(width: number, height: number) {
         for (const handle of this.handles) {
             handle.view();
+        }
+    }
+
+    onWheel(e: WheelEvent) {
+        switch (this.model.displayMode) {
+            case model.DisplayMode.Pattern:
+                break;
+
+            case model.DisplayMode.Ruler:
+                const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
+        
+                for (let i = 0; i < 4; i++) {
+                    this.model.corners[i].mul(delta, delta);
+                    this.handles[i].view();
+                }
+                break;
         }
     }
 
