@@ -18,8 +18,9 @@ const REM_TO_PIXELS = parseFloat(getComputedStyle(document.documentElement).font
 class Editor {
     model: model.Model;
 
-    handles: [Point, Point, Point, Point];
-    activeHandle: Point;
+    keystoneHandles: [Handle, Handle, Handle, Handle];
+    zoomHandle: Handle;
+    activeHandle: Handle;
 
 
     constructor(myModel: model.Model, canvas: HTMLElement) {
@@ -70,32 +71,32 @@ class Editor {
         calibrationTabview.show(0);
 
         // Keystone
-        this.handles = [null, null, null, null];
+        this.keystoneHandles = [null, null, null, null];
         const editors = ["corner-ne-field", "corner-nw-field", "corner-sw-field", "corner-se-field"];
         const handles = ["corner-ne-handle", "corner-nw-handle", "corner-sw-handle", "corner-se-handle"];
         for (let i = 0; i < 4; i++) {
-            this.handles[i] = new Point(
+            this.keystoneHandles[i] = new Handle(
                 this.model.corners[i],
                 document.getElementById(editors[i]),
                 document.getElementById(handles[i])
             );
-            this.handles[i].view();
+            this.keystoneHandles[i].view();
         }
         this.activeHandle = null;
         document.getElementById("reset-all-corners").onclick = () => {
             for (let i = 0; i < 4; i++) {
                 this.model.corners[i].reset();
-                this.handles[i].view();
+                this.keystoneHandles[i].view();
             }
         }
 
         // Pan & Zoom
-        const originHandle = new Point(
+        this.zoomHandle = new Handle(
             this.model.pan,
             document.getElementById("pan-field"),
             document.getElementById("pan-handle")
         );
-        originHandle.view();
+        this.zoomHandle.view();
 
         new Scalar(this.model.zoom, document.getElementById("zoom-field"));
 
@@ -109,7 +110,7 @@ class Editor {
                     e.pageX - (window.innerWidth / 2.0),
                     (window.innerHeight / 2.0) - e.pageY
                 ]),
-                this.handles
+                this.keystoneHandles
             );
             this.activeHandle.onMouseDown(new math.Vector2([e.pageX, e.pageY]));
         }
@@ -127,9 +128,10 @@ class Editor {
     }
 
     onResize(width: number, height: number) {
-        for (const handle of this.handles) {
+        for (const handle of this.keystoneHandles) {
             handle.view();
         }
+        this.zoomHandle.view();
     }
 
     onWheel(e: WheelEvent) {
@@ -142,13 +144,13 @@ class Editor {
         
                 for (let i = 0; i < 4; i++) {
                     this.model.corners[i].mul(delta, delta);
-                    this.handles[i].view();
+                    this.keystoneHandles[i].view();
                 }
                 break;
         }
     }
 
-    selectNearestHandle(mouse: math.Vector2, handles: Array<Point>): Point {
+    selectNearestHandle(mouse: math.Vector2, handles: Array<Handle>): Handle {
         let shortestDistance = Infinity;
         let nearestHandle = handles[0];
         for (const handle of handles) {
@@ -163,7 +165,7 @@ class Editor {
     }
 }
 
-class Point {
+class Handle {
     value: model.Point;
     displayX: HTMLElement;
     displayY: HTMLElement;
