@@ -28,8 +28,8 @@ class Model {
     pixelsPerLine: BoundedIntegerScalar;
     unitsPerQuad: BoundedIntegerScalar;
 
-    scale: number;
-    origin: Point;
+    pan: Point;
+    zoom: Scalar;
 
     constructor(offset: number) {
         this.precision = new BoundedScalar(1.0, 0.001, 0.001, 1.0);
@@ -46,8 +46,8 @@ class Model {
         this.pixelsPerLine = new BoundedIntegerScalar(2, 0.1, 1, 8);
         this.unitsPerQuad = new BoundedIntegerScalar(8, 0.1, 2, 32);
 
-        this.scale = 1.0;
-        this.origin = new Point(0, 0, this.precision);
+        this.pan = new Point(0, 0, this.precision);
+        this.zoom = new Scalar(1.0, this.precision);
     }
 
     getCornersAsVectors(): [Vector2, Vector2, Vector2, Vector2] {

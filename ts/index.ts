@@ -78,13 +78,16 @@ import * as view from "./view.js";
                 break;
 
             case model.DisplayMode.Pattern:
-                const origin = myModel.origin.getVector2();
-                origin.buffer[0] /= 200;
-                origin.buffer[1] /= 200;
+                const pan = myModel.pan.getVector2();
+                pan.buffer[0] /= 200;
+                pan.buffer[1] /= 200;
+                
+                const zoom = myModel.zoom.get();
+
                 tRuler.bind();
                 mPattern.draw(
                     pPattern,
-                    math.Matrix4.model(origin, myModel.scale),
+                    math.Matrix4.model(pan, zoom),
                 );
                 break;
         }

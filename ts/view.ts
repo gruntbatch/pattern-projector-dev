@@ -91,11 +91,13 @@ class Editor {
 
         // Pan & Zoom
         const originHandle = new Point(
-            this.model.origin,
-            document.getElementById("origin-field"),
-            document.getElementById("origin-handle")
+            this.model.pan,
+            document.getElementById("pan-field"),
+            document.getElementById("pan-handle")
         );
         originHandle.view();
+
+        new Scalar(this.model.zoom, document.getElementById("zoom-field"));
 
         // Global event handlers
         canvas.onwheel = (e: WheelEvent) => {
