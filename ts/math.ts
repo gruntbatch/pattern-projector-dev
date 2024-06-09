@@ -157,6 +157,33 @@ class Vector2 extends Buffer {
     constructor(value: Vector2T = [0, 0]) {
         super(value);
     }
+
+    add(other: Vector2): Vector2 {
+        return new Vector2([
+            this.buffer[0] + other.buffer[0],
+            this.buffer[1] + other.buffer[1]
+        ]);
+    }
+
+    distanceTo(other: Vector2): number {
+        const x = other.buffer[0] - this.buffer[0];
+        const y = other.buffer[1] - this.buffer[1];
+        return Math.sqrt(x * x + y * y);
+    }
+
+    scale(scalar: number): Vector2 {
+        return new Vector2([
+            this.buffer[0] * scalar,
+            this.buffer[1] * scalar
+        ]);
+    }
+
+    sub(other: Vector2): Vector2 {
+        return new Vector2([
+            this.buffer[0] - other.buffer[0],
+            this.buffer[1] - other.buffer[1]
+        ]);
+    }
 }
 
 class Vector3 extends Buffer {

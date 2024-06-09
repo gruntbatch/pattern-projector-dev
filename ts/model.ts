@@ -126,7 +126,7 @@ class Value {
 }
 
 class Scalar extends Value {
-    protected scalar: Value;
+    scalar: Value;
 
     constructor(value: number, scalar: number | Value) {
         super(value);

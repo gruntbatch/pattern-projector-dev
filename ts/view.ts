@@ -1,3 +1,4 @@
+import * as math from "./math.js";
 import * as model from "./model.js";
 
 export {
@@ -18,10 +19,8 @@ class Editor {
     model: model.Model;
 
     handles: [Point, Point, Point, Point];
+    activeHandle: Point;
 
-    currentHandle: number = -1;
-    initialMousePosition: [number, number];
-    initialCornerPosition: [number, number];
 
     constructor(myModel: model.Model, canvas: HTMLElement) {
         this.model = myModel;
@@ -82,6 +81,7 @@ class Editor {
             );
             this.handles[i].view();
         }
+        this.activeHandle = null;
         document.getElementById("reset-all-corners").onclick = () => {
             for (let i = 0; i < 4; i++) {
                 this.model.corners[i].reset();
@@ -104,41 +104,25 @@ class Editor {
             this.onWheel(e);
         }
         canvas.onmousedown = (e) => {
-            this.selectNearestCorner(e.pageX, e.pageY);
-            this.initialMousePosition = [e.pageX, e.pageY];
-            this.initialCornerPosition = [
-                this.model.corners[this.currentHandle].x.get(),
-                this.model.corners[this.currentHandle].y.get()
-            ];
+            this.activeHandle = this.selectNearestHandle(
+                new math.Vector2([
+                    e.pageX - (window.innerWidth / 2.0),
+                    (window.innerHeight / 2.0) - e.pageY
+                ]),
+                this.handles
+            );
+            this.activeHandle.onMouseDown(new math.Vector2([e.pageX, e.pageY]));
         }
         window.onmousemove = (e) => {
-            if (this.currentHandle < 0) {
+            if (!this.activeHandle) {
                 return;
             }
 
-            const currentMousePosition = [e.pageX, e.pageY];
-            const deltaMousePosition = [
-                currentMousePosition[0] - this.initialMousePosition[0],
-                currentMousePosition[1] - this.initialMousePosition[1]
-            ];
-
-            const deltaCornerPosition = [
-                deltaMousePosition[0] * this.model.precision.get(),
-                deltaMousePosition[1] * this.model.precision.get()
-            ];
-
-            const currentCornerPosition = [
-                this.initialCornerPosition[0] + deltaCornerPosition[0],
-                this.initialCornerPosition[1] - deltaCornerPosition[1]
-            ];
-
-            this.model.corners[this.currentHandle].x.set(currentCornerPosition[0]);
-            this.model.corners[this.currentHandle].y.set(currentCornerPosition[1]);
-
-            this.handles[this.currentHandle].view();
+            this.activeHandle.onMouseMove(new math.Vector2([e.pageX, e.pageY]));
         }
         window.onmouseup = (e) => {
-            this.currentHandle = -1;
+            this.activeHandle.onMouseUp(new math.Vector2([e.pageX, e.pageY]));
+            this.activeHandle = null;
         }
     }
 
@@ -164,20 +148,18 @@ class Editor {
         }
     }
 
-    selectNearestCorner(pageX: number, pageY: number) {
-        pageX = pageX - (window.innerWidth / 2);
-        pageY = (window.innerHeight / 2) - pageY;
-        let best = Infinity;
-        this.currentHandle = -1;
-        this.model.corners.map((corner, i) => {
-            const x = pageX - corner.x.get();
-            const y = pageY - corner.y.get();
-            const distanceSquared = Math.sqrt(x * x + y * y);
-            if (distanceSquared < best) {
-                best = distanceSquared;
-                this.currentHandle = i;
+    selectNearestHandle(mouse: math.Vector2, handles: Array<Point>): Point {
+        let shortestDistance = Infinity;
+        let nearestHandle = handles[0];
+        for (const handle of handles) {
+            const point = handle.value.getVector2();
+            const distance = mouse.distanceTo(point);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                nearestHandle = handle;
             }
-        });
+        }
+        return nearestHandle;
     }
 }
 
@@ -186,6 +168,9 @@ class Point {
     displayX: HTMLElement;
     displayY: HTMLElement;
     handle: HTMLElement | null;
+
+    initialMouse: math.Vector2;
+    initialPosition: math.Vector2;
 
     constructor(value: model.Point, e: HTMLElement, handle: HTMLElement | null = null) {
         this.value = value;
@@ -210,6 +195,26 @@ class Point {
         }
 
         this.handle = handle;
+    }
+
+    onMouseDown(position: math.Vector2) {
+        this.initialMouse = position;
+        this.initialPosition = this.value.getVector2();
+    }
+
+    onMouseMove(position: math.Vector2) {
+        const delta = position.sub(this.initialMouse).scale(this.value.x.scalar.get());
+        const current = new math.Vector2([
+            this.initialPosition.buffer[0] + delta.buffer[0],
+            this.initialPosition.buffer[1] - delta.buffer[1]
+        ]);
+        this.value.x.set(current.buffer[0]);
+        this.value.y.set(current.buffer[1]);
+        this.view();
+    }
+
+    onMouseUp(position: math.Vector2) {
+
     }
 
     view() {
