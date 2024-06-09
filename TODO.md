@@ -55,8 +55,8 @@
   - [ ] Pattern upload
   - [ ] Hide corners when panel is deactivated
   - [ ] Hide pattern pannel when corner pannel is deactivated
-  - [ ] Move origin
-    - [ ] Scrub handle
-    - [ ] Always reset handle to 0, 0
-    - [ ] Move origin
+  - [x] Move origin
+    - [x] Scrub handle
+    - [x] Always reset handle to 0, 0
+    - [x] Move origin
     - [ ] Scale from fake origin
