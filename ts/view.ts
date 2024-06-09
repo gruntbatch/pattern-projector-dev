@@ -122,6 +122,10 @@ class Editor {
             this.activeHandle.onMouseMove(new math.Vector2([e.pageX, e.pageY]));
         }
         window.onmouseup = (e) => {
+            if (!this.activeHandle) {
+                return;
+            }
+
             this.activeHandle.onMouseUp(new math.Vector2([e.pageX, e.pageY]));
             this.activeHandle = null;
         }
