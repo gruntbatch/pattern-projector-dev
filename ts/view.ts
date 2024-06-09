@@ -163,16 +163,22 @@ class Editor {
     }
 
     onWheel(e: WheelEvent) {
-        switch (this.model.displayMode) {
-            case model.DisplayMode.Pattern:
+        switch (this.model.calibrationMode) {
+            case model.CalibrationMode.PanZoom:
+                {
+                    const deltaZoom = (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
+                    this.model.zoom.add(deltaZoom);
+                }
                 break;
 
-            case model.DisplayMode.Ruler:
-                const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-        
-                for (let i = 0; i < 4; i++) {
-                    this.model.corners[i].mul(delta, delta);
-                    this.keystoneHandles[i].view();
+            case model.CalibrationMode.Keystone:
+                {
+                    const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
+            
+                    for (let i = 0; i < 4; i++) {
+                        this.model.corners[i].mul(delta, delta);
+                        this.keystoneHandles[i].view();
+                    }
                 }
                 break;
         }
