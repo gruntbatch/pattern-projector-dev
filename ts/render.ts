@@ -11,6 +11,7 @@ export {
     setView,
 
     Buffer,
+    Mesh,
     Program,
     Texture,
 };

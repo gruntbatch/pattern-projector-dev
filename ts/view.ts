@@ -1,8 +1,10 @@
 import * as math from "./math.js";
 import * as model from "./model.js";
+import * as render from "./render.js";
 
 export {
     Editor,
+    Renderer,
     Scalar,
 };
 
@@ -394,6 +396,88 @@ class Tabview {
                     content.classList.add("display-none");
                 }
             }
+        }
+    }
+}
+
+class Renderer {
+    model: model.Model;
+
+    mRuler: render.Mesh;
+    pRuler: render.Program;
+
+    mPattern: render.Mesh;
+    pPattern: render.Program;
+    tPattern: render.Texture;
+
+    constructor(myModel: model.Model) {
+        this.model = myModel;
+
+        const buffer = new render.Buffer();
+
+        this.mRuler = buffer.newPlane([-1, -1], [3, 3]);
+        this.pRuler = new render.Program(
+            "glsl/standard.vert",
+            "glsl/ruler.frag",
+            [
+                ["u_color", [0, 0, 0, 1]],
+                ["u_background_color", [1, 1, 1, 1]],
+                ["u_distance", [myModel.corners[0].distanceTo(myModel.corners[1])]],
+                ["u_resolution", [myModel.unitsPerQuad.get()]],
+                ["u_width", [4.0]]
+            ]
+        );
+
+        this.mPattern = buffer.newPlane();
+        this.pPattern = new render.Program(
+            "glsl/standard.vert",
+            "glsl/pattern.frag",
+            [
+                ["u_texture", [0]]
+            ]
+        );
+        this.tPattern = new render.Texture();
+        this.tPattern.fromImageUrl("assets/ruler.png");
+    }
+
+    onAnimationFrame() {
+        const skew = math.Matrix4.skew(
+            [
+                new math.Vector2([1, 1]),
+                new math.Vector2([0, 1]),
+                new math.Vector2([0, 0]),
+                new math.Vector2([1, 0])
+            ],
+            this.model.getCornersAsVectors(),
+        );
+        render.setView(skew);
+
+        switch (this.model.displayMode) {
+            case model.DisplayMode.Pattern:
+                const pan = this.model.pan.getVector2();
+                pan.buffer[0] /= 200;
+                pan.buffer[1] /= 200;
+
+                const zoom = this.model.zoom.get();
+
+                this.tPattern.bind();
+                this.mPattern.draw(
+                    this.pPattern,
+                    math.Matrix4.model(pan, zoom),
+                );
+                break;
+
+            case model.DisplayMode.Ruler:
+                this.mRuler.draw(
+                    this.pRuler,
+                    new math.Matrix4(),
+                    [
+                        ["u_distance", [this.model.corners[0].distanceTo(this.model.corners[1])]],
+                        ["u_resolution", [this.model.unitsPerQuad.get()]],
+                        ["u_width", [this.model.pixelsPerLine.get()]],
+                    ]
+                );
+                break;
         }
     }
 }
