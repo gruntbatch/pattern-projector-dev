@@ -53,8 +53,8 @@
   - [ ] Axis-specific ruler dimensions
   - [ ] Antialiasing
   - [ ] Pattern upload
-  - [ ] Hide corners when panel is deactivated
-  - [ ] Hide pattern pannel when corner pannel is deactivated
+  - [x] Hide corners when panel is deactivated
+  - [x] Hide pattern pannel when corner pannel is deactivated
   - [x] Move origin
     - [x] Scrub handle
     - [x] Always reset handle to 0, 0

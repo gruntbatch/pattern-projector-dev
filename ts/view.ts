@@ -39,14 +39,18 @@ class Editor {
         // Display panel
         const displayTabview = new Tabview(
             document.getElementById("ruler-tab"),
-            document.getElementById("ruler-contents"),
+            [
+                document.getElementById("ruler-contents"),
+            ],
             () => {
                 this.model.displayMode = model.DisplayMode.Ruler
             }
         );
         displayTabview.push(
             document.getElementById("pattern-tab"),
-            document.getElementById("pattern-contents"),
+            [
+                document.getElementById("pattern-contents"),
+            ],
             () => {
                 this.model.displayMode = model.DisplayMode.Pattern
             }
@@ -62,14 +66,20 @@ class Editor {
         // Calibration panel
         const calibrationTabview = new Tabview(
             document.getElementById("keystone-tab"),
-            document.getElementById("keystone-contents"),
+            [
+                document.getElementById("keystone-handles"),
+                document.getElementById("keystone-contents"),
+            ],
             () => {
                 this.model.calibrationMode = model.CalibrationMode.Keystone;
             }
         );
         calibrationTabview.push(
             document.getElementById("pan-tab"),
-            document.getElementById("pan-contents"),
+            [
+                document.getElementById("pan-handles"),
+                document.getElementById("pan-contents"),
+            ],
             () => {
                 this.model.calibrationMode = model.CalibrationMode.PanZoom;
             }
@@ -337,18 +347,18 @@ class Tabview {
     activeTab: number;
     e: HTMLElement;
     tabs: Array<HTMLElement>;
-    contents: Array<HTMLElement>;
+    contents: Array<Array<HTMLElement>>;
     onSwitches: Array<(() => void) | null>;
 
-    constructor(tab: HTMLElement, contents: HTMLElement, onSwitch: (() => void) | null = null) {
+    constructor(tab: HTMLElement, contents: Array<HTMLElement>, onSwitch: (() => void) | null = null) {
         this.activeTab = 0;
         this.tabs = new Array<HTMLElement>();
-        this.contents = new Array<HTMLElement>();
+        this.contents = new Array<Array<HTMLElement>>();
         this.onSwitches = new Array<(() => void) | null>();
         this.push(tab, contents, onSwitch);
     }
 
-    push(tab: HTMLElement, contents: HTMLElement, onSwitch: (() => void) | null = null) {
+    push(tab: HTMLElement, contents: Array<HTMLElement>, onSwitch: (() => void) | null = null) {
         const index = this.tabs.length;
 
         this.tabs.push(tab);
@@ -368,11 +378,15 @@ class Tabview {
         for (let i = 0; i < this.tabs.length; i++) {
             if (i == index) {
                 this.tabs[i].classList.add("active");
-                this.contents[i].classList.remove("display-none");
+                for (const content of this.contents[i]) {
+                    content.classList.remove("display-none");
+                }
                 this.onSwitches[i]?.();
             } else {
                 this.tabs[i].classList.remove("active");
-                this.contents[i].classList.add("display-none");
+                for (const content of this.contents[i]) {
+                    content.classList.add("display-none");
+                }
             }
         }
     }
