@@ -19,7 +19,7 @@ class Editor {
     model: model.Model;
 
     keystoneHandles: [Handle, Handle, Handle, Handle];
-    zoomHandle: Handle;
+    panHandle: Handle;
     activeHandle: Handle;
 
 
@@ -91,12 +91,12 @@ class Editor {
         }
 
         // Pan & Zoom
-        this.zoomHandle = new Handle(
+        this.panHandle = new Handle(
             this.model.pan,
             document.getElementById("pan-field"),
             document.getElementById("pan-handle")
         );
-        this.zoomHandle.view();
+        this.panHandle.view();
 
         new Scalar(this.model.zoom, document.getElementById("zoom-field"));
 
@@ -135,7 +135,7 @@ class Editor {
         for (const handle of this.keystoneHandles) {
             handle.view();
         }
-        this.zoomHandle.view();
+        this.panHandle.view();
     }
 
     onWheel(e: WheelEvent) {
