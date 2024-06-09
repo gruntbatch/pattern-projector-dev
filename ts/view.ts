@@ -33,6 +33,10 @@ class Editor {
             }
         }
 
+        // Precision
+        new Scalar(this.model.precision, document.getElementById("precision-field"));
+
+        // Display panel
         const displayTabview = new Tabview(
             document.getElementById("ruler-tab"),
             document.getElementById("ruler-contents"),
@@ -49,6 +53,13 @@ class Editor {
         );
         displayTabview.show(0);
 
+        // Ruler
+        new IntegerScalar(this.model.pixelsPerLine, document.getElementById("pixels-per-line-field"));
+        new IntegerScalar(this.model.unitsPerQuad, document.getElementById("units-per-quad-field"));
+
+        // Pattern
+
+        // Calibration panel
         const calibrationTabview = new Tabview(
             document.getElementById("keystone-tab"),
             document.getElementById("keystone-contents")
@@ -59,9 +70,7 @@ class Editor {
         );
         calibrationTabview.show(0);
 
-        // Scalar controls
-        new Scalar(this.model.precision, document.getElementById("precision-field"));
-
+        // Keystone
         this.handles = [null, null, null, null];
         const editors = ["corner-ne-field", "corner-nw-field", "corner-sw-field", "corner-se-field"];
         const handles = ["corner-ne-handle", "corner-nw-handle", "corner-sw-handle", "corner-se-handle"];
@@ -75,21 +84,18 @@ class Editor {
         }
         document.getElementById("reset-all-corners").onclick = () => {
             for (let i = 0; i < 4; i++) {
-                this.model.corners[i].x.reset();
-                this.model.corners[i].y.reset();
+                this.model.corners[i].reset();
                 this.handles[i].view();
             }
         }
 
+        // Pan & Zoom
         const originHandle = new Point(
             this.model.origin,
             document.getElementById("origin-field"),
             document.getElementById("origin-handle")
         );
         originHandle.view();
-
-        new IntegerScalar(this.model.pixelsPerLine, document.getElementById("pixels-per-line-field"));
-        new IntegerScalar(this.model.unitsPerQuad, document.getElementById("units-per-quad-field"));
 
         // Global event handlers
         canvas.onwheel = (e) => {
