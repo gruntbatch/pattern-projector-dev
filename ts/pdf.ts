@@ -1,7 +1,5 @@
 /// <reference path="pdfjsLib.d.ts" />
-// import * as pdfjsLib from "./pdfjsLib.js";
 import * as math from "./math.js";
-import * as render from "./render.js";
 
 export {
     canvas,
@@ -43,7 +41,6 @@ async function renderPdf(file: File): Promise<[number, number]> {
 
     return [viewport.width, viewport.height];
 }
-
 
 function readFileAsync(file: File): Promise<string | ArrayBuffer> {
     return new Promise<string | ArrayBuffer>((resolve, reject) => {
