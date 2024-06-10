@@ -62,3 +62,7 @@
     - [x] Always reset handle to 0, 0
     - [x] Move origin
     - [ ] Scale from fake origin
+
+Known Bugs:
+- After loading a configuration, switching/collapsing tabs may not behave properly.
+  - Workaround: alternate clicking both tabs until correct behavior is restored.

@@ -38,7 +38,10 @@ class Editor {
         }
 
         // Precision
-        new Scalar(this.model.precision, document.getElementById("precision-field"));
+        const precision = new Scalar(
+            this.model.precision,
+            document.getElementById("precision-field")
+        );
 
         // Display panel
         const displayTabview = new Tabview(
@@ -62,8 +65,14 @@ class Editor {
         displayTabview.show(this.model.displayMode);
 
         // Ruler
-        new IntegerScalar(this.model.pixelsPerLine, document.getElementById("pixels-per-line-field"));
-        new IntegerScalar(this.model.unitsPerQuad, document.getElementById("units-per-quad-field"));
+        const pixelsPerLine = new IntegerScalar(
+            this.model.pixelsPerLine,
+            document.getElementById("pixels-per-line-field")
+        );
+        const unitsPerQuad = new IntegerScalar(
+            this.model.unitsPerQuad,
+            document.getElementById("units-per-quad-field")
+        );
 
         // Pattern
         const patternInput = document.getElementById("pattern-input");
@@ -134,7 +143,7 @@ class Editor {
         );
         this.panHandle.view();
 
-        new Scalar(this.model.zoom, document.getElementById("zoom-field"));
+        const zoomField = new Scalar(this.model.zoom, document.getElementById("zoom-field"));
 
         // Save, Load Configuration
         const saveCalibration = document.getElementById("save-calibration") as HTMLAnchorElement;
@@ -151,6 +160,15 @@ class Editor {
             const data = await readFileAsync(file);
             const str = new TextDecoder().decode(data as ArrayBuffer);
             this.model.deserialize(str);
+            // Update all views
+            precision.view();
+            displayTabview.show(this.model.displayMode);
+            pixelsPerLine.view();
+            unitsPerQuad.view();
+            calibrationTabview.show(this.model.calibrationMode);
+            this.keystoneHandles.forEach((handle) => handle.view());
+            this.panHandle.view();
+            zoomField.view();
         }
         document.getElementById("load-calibration").onclick = () => {
             calibrationInput.click();
