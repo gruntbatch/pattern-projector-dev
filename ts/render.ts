@@ -69,6 +69,20 @@ class Buffer {
     length: number = 0;
     buffer: WebGLBuffer;
 
+    static verticesToFloat32Array(vertices: Array<Vertex>): Float32Array {
+        const array = new Float32Array(vertices.length * VERTEX_ELEMENT_COUNT);
+
+        for (let i = 0; i < vertices.length; i++) {
+            const vertex = vertices[i];
+            const index = i * VERTEX_ELEMENT_COUNT;
+            for (let j = 0; j < VERTEX_ELEMENT_COUNT; j++) {
+                array[index + j] = vertex[j];
+            }
+        }
+
+        return array;
+    }
+
     constructor(capacity = 512) {
         this.capacity = capacity;
 
@@ -103,14 +117,7 @@ class Buffer {
             throw new Error("Too many vertices!");
         }
 
-        let data = new Float32Array(vertices.length * VERTEX_ELEMENT_COUNT);
-        for (let i = 0; i < vertices.length; i++) {
-            const vertex = vertices[i];
-            const index = i * VERTEX_ELEMENT_COUNT;
-            for (let j = 0; j < VERTEX_ELEMENT_COUNT; j++) {
-                data[index + j] = vertex[j];
-            }
-        }
+        let data = Buffer.verticesToFloat32Array(vertices);
 
         if (!this.bind()) {
             throw new Error("Unable to bind buffer for writing!");
