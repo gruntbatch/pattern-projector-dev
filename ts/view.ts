@@ -1,5 +1,6 @@
 import * as math from "./math.js";
 import * as model from "./model.js";
+import * as pdf from "./pdf.js";
 import * as render from "./render.js";
 
 export {
@@ -25,7 +26,7 @@ class Editor {
     activeHandle: Handle;
 
 
-    constructor(myModel: model.Model, canvas: HTMLElement) {
+    constructor(myModel: model.Model, myRenderer: Renderer, canvas: HTMLElement) {
         this.model = myModel;
 
         // Panel controls
@@ -64,6 +65,15 @@ class Editor {
         new IntegerScalar(this.model.unitsPerQuad, document.getElementById("units-per-quad-field"));
 
         // Pattern
+        const patternInput = document.getElementById("pattern-input");
+        patternInput.onchange = async (e: InputEvent) => {
+            let file = (e.target as HTMLInputElement).files[0];
+            await pdf.renderPdf(file);
+            myRenderer.tPattern.fromTexImageSource(pdf.canvas);
+        };
+        document.getElementById("pattern-button").onclick = () => {
+            patternInput.click();
+        };
 
         // Calibration panel
         const calibrationTabview = new Tabview(
@@ -176,7 +186,7 @@ class Editor {
             case model.CalibrationMode.Keystone:
                 {
                     const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-            
+
                     for (let i = 0; i < 4; i++) {
                         this.model.corners[i].mul(delta, delta);
                         this.keystoneHandles[i].view();

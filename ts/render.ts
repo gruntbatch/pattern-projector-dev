@@ -258,11 +258,15 @@ class Texture {
     fromImageUrl(url: string) {
         const image = new Image();
         image.onload = () => {
-            gl.bindTexture(gl.TEXTURE_2D, this.texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            gl.generateMipmap(gl.TEXTURE_2D);
+            this.fromTexImageSource(image);
         }
         image.src = url;
+    }
+
+    fromTexImageSource(canvas: TexImageSource) {
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+        gl.generateMipmap(gl.TEXTURE_2D);
     }
 
     bind() {

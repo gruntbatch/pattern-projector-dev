@@ -1,5 +1,6 @@
 import * as math from "./math.js";
 import * as model from "./model.js";
+import * as pdf from "./pdf.js";
 import * as render from "./render.js";
 import * as view from "./view.js";
 
@@ -8,10 +9,11 @@ import * as view from "./view.js";
         Math.min(window.innerWidth, window.innerHeight) / 8
     );
 
+    pdf.wrapCanvasById("pdf-canvas");
     render.wrapCanvasById("gl-canvas");
 
-    const myEditor = new view.Editor(myModel, render.canvas);
     const myRenderer = new view.Renderer(myModel);
+    const myEditor = new view.Editor(myModel, myRenderer, render.canvas);
 
     const onResize = () => {
         let width = window.innerWidth;

@@ -1,4 +1,6 @@
 export {
+    getNextPowerOfTwo,
+
     Matrix3,
     Matrix4,
     Vector2,
@@ -23,6 +25,14 @@ type Vector3T = [number, number, number];
 type Vector4T = [number, number, number, number];
 
 type Quad = [Vector2, Vector2, Vector2, Vector2];
+
+function getNextPowerOfTwo(value: number) {
+    let power = 1;
+    while (power < value) {
+        power *= 2;
+    }
+    return power;
+}
 
 class Buffer {
     buffer: Float32Array;
