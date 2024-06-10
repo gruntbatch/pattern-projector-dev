@@ -139,6 +139,7 @@ class Editor {
         // Save, Load Configuration
         const saveCalibration = document.getElementById("save-calibration") as HTMLAnchorElement;
         saveCalibration.onclick = () => {
+            saveCalibration.download = `Pattern Projector Calibration - ${Date.now().toString()}.txt`;
             saveCalibration.href = URL.createObjectURL(
                 new Blob([this.model.serialize()], { type: "text/plain" })
             );
