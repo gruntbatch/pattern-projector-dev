@@ -68,8 +68,15 @@ class Editor {
         const patternInput = document.getElementById("pattern-input");
         patternInput.onchange = async (e: InputEvent) => {
             let file = (e.target as HTMLInputElement).files[0];
-            await pdf.renderPdf(file);
+            const [x, y] = await pdf.renderPdf(file);
+            const max = Math.max(x, y);
             myRenderer.tPattern.fromTexImageSource(pdf.canvas);
+            myRenderer.mPattern.renewPlane(
+                [-(x / 2), -(y / 2)],
+                [x, y],
+                [0, 0],
+                [x / max, -(y / max)]
+            );
         };
         document.getElementById("pattern-button").onclick = () => {
             patternInput.click();

@@ -188,6 +188,15 @@ class Mesh {
             gl.drawArrays(this.mode, this.first, this.count);
         }
     }
+
+    renewPlane(positionOrigin: [number, number] = [0, 0], positionScale: [number, number] = [1, 1], texCoordOrigin = positionOrigin, texCoordScale = positionScale) {
+        const vertices = Mesh.plane(positionOrigin, positionScale, texCoordOrigin, texCoordScale);
+        const data = Buffer.verticesToFloat32Array(vertices);
+        if (!this.buffer.bind()) {
+            throw new Error("Unable to bind buffer for bufferSubData!");
+        }
+        gl.bufferSubData(gl.ARRAY_BUFFER, this.first * VERTEX_ELEMENT_COUNT * VERTEX_ELEMENT_SIZE, data);
+    }
 }
 
 class Program {
