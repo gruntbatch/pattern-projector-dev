@@ -122,7 +122,13 @@ class Buffer {
         return mesh;
     }
 
-    newPlane(origin: [number, number] = [0, 0], scale: [number, number] = [1, 1]): Mesh {
+    newPlane(positionOrigin: [number, number] = [0, 0], positionScale: [number, number] = [1, 1], texCoordOrigin = positionOrigin, texCoordScale = positionScale): Mesh {
+        return this.newMesh(Mesh.plane(positionOrigin, positionScale, texCoordOrigin, texCoordScale), gl.TRIANGLES);
+    }
+}
+
+class Mesh {
+    static plane(positionOrigin: [number, number], positionScale: [number, number], texCoordOrigin = positionOrigin, texCoordScale = positionScale): Array<Vertex> {
         const vertexCount = 6;
         const vertices = new Array<Vertex>(vertexCount);
 
@@ -130,15 +136,27 @@ class Buffer {
         let x = 0;
         let y = 0;
         {
-            const minX = origin[0] + (x / resolution) * scale[0];
-            const maxX = origin[0] + ((x + 1) / resolution) * scale[0];
-            const minY = origin[1] + (y / resolution) * scale[1];
-            const maxY = origin[1] + ((y + 1) / resolution) * scale[1];
+            const positionMin = [
+                positionOrigin[0] + (x / resolution) * positionScale[0],
+                positionOrigin[1] + (y / resolution) * positionScale[1],
+            ];
+            const positionMax = [
+                positionOrigin[0] + ((x + 1) / resolution) * positionScale[0],
+                positionOrigin[1] + ((y + 1) / resolution) * positionScale[1],
+            ];
+            const texCoordMin = [
+                texCoordOrigin[0] + (x / resolution) * texCoordScale[0],
+                texCoordOrigin[1] + (y / resolution) * texCoordScale[1],
+            ];
+            const texCoordMax = [
+                texCoordOrigin[0] + ((x + 1) / resolution) * texCoordScale[0],
+                texCoordOrigin[1] + ((y + 1) / resolution) * texCoordScale[1],
+            ];
 
-            const v0 = newVertex([minX, minY], [minX, minY]);
-            const v1 = newVertex([minX, maxY], [minX, maxY]);
-            const v2 = newVertex([maxX, minY], [maxX, minY]);
-            const v3 = newVertex([maxX, maxY], [maxX, maxY]);
+            const v0 = newVertex([positionMin[0], positionMin[1]], [texCoordMin[0], texCoordMin[1]]);
+            const v1 = newVertex([positionMin[0], positionMax[1]], [texCoordMin[0], texCoordMax[1]]);
+            const v2 = newVertex([positionMax[0], positionMin[1]], [texCoordMax[0], texCoordMin[1]]);
+            const v3 = newVertex([positionMax[0], positionMax[1]], [texCoordMax[0], texCoordMax[1]]);
 
             const index = 6 * (x + y * resolution);
 
@@ -151,11 +169,9 @@ class Buffer {
             vertices[index + 5] = v2;
         }
 
-        return this.newMesh(vertices, gl.TRIANGLES);
+        return vertices;
     }
-}
 
-class Mesh {
     constructor(public buffer: Buffer, public mode: number, public first: number, public count: number) {
 
     }
