@@ -117,9 +117,14 @@ class Point {
         this.y.add(y);
     }
 
-    mul(x: number, y: number) {
+    mul(x: number, y: number = x) {
         this.x.mul(x);
         this.y.mul(y);
+    }
+
+    bypassMul(x: number, y: number = x) {
+        this.x.bypassMul(x);
+        this.y.bypassMul(y);
     }
 
     reset() {

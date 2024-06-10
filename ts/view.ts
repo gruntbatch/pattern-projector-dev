@@ -225,16 +225,18 @@ class Editor {
             case model.CalibrationMode.PanZoom:
                 {
                     const deltaZoom = (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-                    this.model.zoom.add(deltaZoom);
+                    this.model.zoom.bypassAdd(deltaZoom);
                 }
                 break;
 
             case model.CalibrationMode.Keystone:
                 {
                     const delta = 1.0 + (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-
+                    // console.log(delta);
+                    // const delta = (e.deltaY
+                    // const delta = e.deltaY * SCROLL_SCALAR;
                     for (let i = 0; i < 4; i++) {
-                        this.model.corners[i].mul(delta, delta);
+                        this.model.corners[i].bypassMul(delta, delta);
                         this.keystoneHandles[i].view();
                     }
                 }
