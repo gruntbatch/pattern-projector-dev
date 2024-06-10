@@ -25,7 +25,7 @@ function wrapCanvasById(id: string) {
     }
 }
 
-async function renderPdf(file: File) {
+async function renderPdf(file: File): Promise<[number, number]> {
     const data = await readFileAsync(file);
     const document = await pdfjsLib.getDocument(data).promise;
     const page = await document.getPage(1);
@@ -40,6 +40,8 @@ async function renderPdf(file: File) {
         canvasContext: context,
         viewport: viewport
     }).promise;
+
+    return [viewport.width, viewport.height];
 }
 
 
