@@ -1,5 +1,6 @@
 /// <reference path="pdfjsLib.d.ts" />
 import * as math from "./math.js";
+import { readFileAsync } from "./std.js";
 
 export {
     canvas,
@@ -40,15 +41,4 @@ async function renderPdf(file: File): Promise<[number, number]> {
     }).promise;
 
     return [viewport.width, viewport.height];
-}
-
-function readFileAsync(file: File): Promise<string | ArrayBuffer> {
-    return new Promise<string | ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            resolve(reader.result);
-        }
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-    });
 }
