@@ -39,6 +39,8 @@
   - [x] Precision
   - [x] Corners
   - [x] Dimensions
+  - [x] Serialize
+  - [x] Deserialize
 - [ ] Update
   - [x] Precision adjustment
   - [x] Gross adjustment (zoom)

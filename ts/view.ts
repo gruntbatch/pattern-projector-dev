@@ -2,6 +2,7 @@ import * as math from "./math.js";
 import * as model from "./model.js";
 import * as pdf from "./pdf.js";
 import * as render from "./render.js";
+import { readFileAsync } from "./std.js";
 
 export {
     Editor,
@@ -134,6 +135,25 @@ class Editor {
         this.panHandle.view();
 
         new Scalar(this.model.zoom, document.getElementById("zoom-field"));
+
+        // Save, Load Configuration
+        const saveCalibration = document.getElementById("save-calibration") as HTMLAnchorElement;
+        saveCalibration.onclick = () => {
+            saveCalibration.href = URL.createObjectURL(
+                new Blob([this.model.serialize()], { type: "text/plain" })
+            );
+        }
+
+        const calibrationInput = document.getElementById("calibration-input");
+        calibrationInput.onchange = async (e: InputEvent) => {
+            const file = (e.target as HTMLInputElement).files[0];
+            const data = await readFileAsync(file);
+            const str = new TextDecoder().decode(data as ArrayBuffer);
+            this.model.deserialize(str);
+        }
+        document.getElementById("load-calibration").onclick = () => {
+            calibrationInput.click();
+        }
 
         // Global event handlers
         canvas.onwheel = (e: WheelEvent) => {

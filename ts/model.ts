@@ -1,4 +1,5 @@
 import { Vector2 } from "./math.js";
+import { compareArrays } from "./std.js";
 
 export {
     CalibrationMode,
@@ -68,6 +69,38 @@ class Model {
             this.corners[3].getVector2(),
         ]
     }
+
+    serialize(): string {
+        return JSON.stringify({
+            version: [0, 0, 1, 0],
+            model: {
+                precision: this.precision.get(),
+                corners: this.corners.map((value) => value.get()),
+                displayMode: this.displayMode,
+                pixelsPerLine: this.pixelsPerLine.get(),
+                unitsPerQuad: this.unitsPerQuad.get(),
+                calibrationMode: this.calibrationMode,
+                pan: this.pan.get(),
+                zoom: this.zoom.get()
+            }
+        });
+    }
+
+    deserialize(str: string) {
+        const json = JSON.parse(str);
+        if (!compareArrays(json.version, [0, 0, 1, 0])) {
+            throw new Error();
+        }
+        const model = json.model;
+        this.precision.set(model.precision);
+        model.corners.forEach((value: [number, number], index: number) => this.corners[index].set(value));
+        this.displayMode = model.displayMode;
+        this.pixelsPerLine.set(model.pixelsPerLine);
+        this.unitsPerQuad.set(model.unitsPerQuad);
+        this.calibrationMode = model.calibrationMode;
+        this.pan.set(model.pan);
+        this.zoom.set(model.zoom);
+    }
 }
 
 class Point {
@@ -94,8 +127,17 @@ class Point {
         this.y.reset();
     }
 
+    set(value: [number, number]) {
+        this.x.set(value[0]);
+        this.y.set(value[1]);
+    }
+
+    get(): [number, number] {
+        return [this.x.get(), this.y.get()]
+    }
+
     getVector2(): Vector2 {
-        return new Vector2([this.x.get(), this.y.get()]);
+        return new Vector2(this.get());
     }
 
     distanceTo(other: Point): number {
