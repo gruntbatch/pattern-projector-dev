@@ -445,7 +445,7 @@ class Renderer {
             ]
         );
 
-        this.mPattern = buffer.newPlane();
+        this.mPattern = buffer.newPlane([-250, -250], [500, 500], [0, 0], [1, 1]);
         this.pPattern = new render.Program(
             "glsl/standard.vert",
             "glsl/pattern.frag",
@@ -475,7 +475,7 @@ class Renderer {
                 pan.buffer[0] /= 200;
                 pan.buffer[1] /= 200;
 
-                const zoom = this.model.zoom.get();
+                const zoom = this.model.zoom.get() / 500;
 
                 this.tPattern.bind();
                 this.mPattern.draw(
