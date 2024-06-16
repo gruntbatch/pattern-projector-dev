@@ -172,7 +172,12 @@ class Editor {
             const file = (e.target as HTMLInputElement).files[0];
             const data = await readFileAsync(file);
             const str = new TextDecoder().decode(data as ArrayBuffer);
-            this.model.deserialize(str);
+            const status = this.model.deserialize(str);
+            if (status == model.DeserializationStatus.SyntaxError) {
+                alert("Syntax Error: The chosen file is either not a valid JSON file, or has become corrupted.");
+            } else if (status == model.DeserializationStatus.VersionError) {
+                alert("Version Error: The configuration was saved with a non-compatible version of Pattern Projector");
+            }
             // Update all views
             precision.view();
             displayTabview.show(this.model.displayMode);
