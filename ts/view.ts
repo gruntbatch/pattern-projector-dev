@@ -29,6 +29,18 @@ class Editor {
     constructor(myModel: model.Model, myRenderer: Renderer, canvas: HTMLElement) {
         this.model = myModel;
 
+        // Menu
+        const menu = document.getElementById("menu");
+        menu.classList.add("left");
+        document.getElementById("swap").onclick = () => {
+            menu.classList.toggle("left");
+            menu.classList.toggle("right");
+        };
+        document.getElementById("hide").onclick = () => {
+            menu.classList.toggle("drawer");
+            menu.classList.toggle("collapsed");
+        }
+
         // Panel controls
         for (let e of document.getElementsByClassName("drawer")) {
             (e.firstElementChild as HTMLElement).onclick = () => {
