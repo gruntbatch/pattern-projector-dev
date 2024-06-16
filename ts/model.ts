@@ -4,6 +4,7 @@ import { compareArrays } from "./std.js";
 export {
     CalibrationMode,
     DisplayMode,
+    DeserializationStatus,
 
     Model,
 
@@ -23,6 +24,12 @@ enum CalibrationMode {
 enum DisplayMode {
     Ruler,
     Pattern,
+}
+
+enum DeserializationStatus {
+    Okay,
+    SyntaxError,
+    VersionError,
 }
 
 class Model {
@@ -72,7 +79,7 @@ class Model {
 
     serialize(): string {
         return JSON.stringify({
-            version: [0, 0, 1, 0],
+            version: [0, 0, 2, 0],
             model: {
                 precision: this.precision.get(),
                 corners: this.corners.map((value) => value.get()),
@@ -86,10 +93,19 @@ class Model {
         });
     }
 
-    deserialize(str: string) {
-        const json = JSON.parse(str);
-        if (!compareArrays(json.version, [0, 0, 1, 0])) {
-            throw new Error();
+    deserialize(str: string): DeserializationStatus {
+        let json;
+        try {
+            json = JSON.parse(str);
+        } catch (e) {
+            if (e instanceof SyntaxError) {
+                return DeserializationStatus.SyntaxError;
+            } else {
+                throw e;
+            }
+        }
+        if (!compareArrays(json.version, [0, 0, 2, 0])) {
+            return DeserializationStatus.VersionError;
         }
         const model = json.model;
         this.precision.set(model.precision);
@@ -100,6 +116,8 @@ class Model {
         this.calibrationMode = model.calibrationMode;
         this.pan.set(model.pan);
         this.zoom.set(model.zoom);
+
+        return DeserializationStatus.Okay;
     }
 }
 
