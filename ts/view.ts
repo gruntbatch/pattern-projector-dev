@@ -524,6 +524,8 @@ class Renderer {
         switch (this.model.displayMode) {
             case model.DisplayMode.Pattern:
                 const pan = this.model.pan.getVector2();
+                pan.buffer[0] += 100;
+                pan.buffer[1] += 100;
                 pan.buffer[0] /= 200;
                 pan.buffer[1] /= 200;
 
