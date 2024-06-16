@@ -26,7 +26,6 @@ class Editor {
     panHandle: ScrubHandle;
     activeHandle: Handle;
 
-
     constructor(myModel: model.Model, myRenderer: Renderer, canvas: HTMLElement) {
         this.model = myModel;
 

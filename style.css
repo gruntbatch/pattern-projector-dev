@@ -57,6 +57,10 @@ h2 {
     color: #f8f9fa;
 }
 
+.fg-light-trans {
+    color: #f8f9faaa;
+}
+
 .flex-centered {
     justify-content: center !important;
 }
