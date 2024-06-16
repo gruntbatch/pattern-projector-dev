@@ -26,6 +26,8 @@ class Editor {
     panHandle: ScrubHandle;
     activeHandle: Handle;
 
+    zoom: Scalar;
+
     constructor(myModel: model.Model, myRenderer: Renderer, canvas: HTMLElement) {
         this.model = myModel;
 
@@ -154,7 +156,7 @@ class Editor {
         );
         this.panHandle.view();
 
-        const zoomField = new Scalar(this.model.zoom, document.getElementById("zoom-field"));
+        this.zoom = new Scalar(this.model.zoom, document.getElementById("zoom-field"));
 
         // Save, Load Configuration
         const saveCalibration = document.getElementById("save-calibration") as HTMLAnchorElement;
@@ -179,7 +181,7 @@ class Editor {
             calibrationTabview.show(this.model.calibrationMode);
             this.keystoneHandles.forEach((handle) => handle.view());
             this.panHandle.view();
-            zoomField.view();
+            this.zoom.view();
         }
         document.getElementById("load-calibration").onclick = () => {
             calibrationInput.click();
@@ -235,8 +237,9 @@ class Editor {
         switch (this.model.calibrationMode) {
             case model.CalibrationMode.PanZoom:
                 {
-                    const deltaZoom = (e.deltaY * this.model.precision.get()) * SCROLL_SCALAR;
-                    this.model.zoom.bypassAdd(deltaZoom);
+                    const deltaZoom = (e.deltaY);
+                    this.model.zoom.add(deltaZoom);
+                    this.zoom.view();
                 }
                 break;
 
@@ -534,7 +537,7 @@ class Renderer {
                 this.tPattern.bind();
                 this.mPattern.draw(
                     this.pPattern,
-                    math.Matrix4.model(pan, zoom),
+                    math.Matrix4.model(pan, zoom * 0.01),
                 );
                 break;
 

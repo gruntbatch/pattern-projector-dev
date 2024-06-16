@@ -58,7 +58,7 @@ class Model {
         this.calibrationMode = CalibrationMode.Keystone;
 
         this.pan = new Point(0, 0, this.precision);
-        this.zoom = new Scalar(1.0, this.precision);
+        this.zoom = new Scalar(100.0, this.precision);
     }
 
     getCornersAsVectors(): [Vector2, Vector2, Vector2, Vector2] {
